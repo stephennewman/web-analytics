@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import ClickPath from './ClickPath';
 
 interface Session {
   id: string;
@@ -149,6 +150,9 @@ export default function SessionFeed({ sessions }: { sessions: Session[] }) {
                   <p className="text-xs text-gray-400">{session.deviceType}</p>
                 </div>
               </div>
+
+              {/* Click Path */}
+              <ClickPath events={session.events} />
 
               {/* Core Metrics */}
               <div className="grid grid-cols-4 gap-3 mb-4 pb-4 border-b">

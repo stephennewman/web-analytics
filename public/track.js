@@ -1,6 +1,13 @@
 (function() {
   'use strict';
   
+  // Prevent double-loading
+  if (window.webAnalyticsLoaded) {
+    console.log('Web Analytics: Already loaded, skipping duplicate');
+    return;
+  }
+  window.webAnalyticsLoaded = true;
+  
   // Get client ID from script tag
   const script = document.currentScript;
   const urlParams = new URL(script.src).searchParams;
