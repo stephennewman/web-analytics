@@ -158,7 +158,7 @@ export default function SessionFeed({ sessions }: { sessions: Session[] }) {
               <div className="grid grid-cols-4 gap-3 mb-4 pb-4 border-b">
                 <div className="text-center">
                   <p className="text-2xl font-bold text-gray-900">{session.pageviews}</p>
-                  <p className="text-xs text-gray-500">Pages</p>
+                  <p className="text-xs text-gray-500">Unique Pages</p>
                 </div>
                 <div className="text-center">
                   <p className="text-2xl font-bold text-gray-900">{session.clicks}</p>

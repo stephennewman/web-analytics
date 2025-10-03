@@ -76,6 +76,9 @@ export default async function DashboardPage() {
     const perfEvent = events.find(e => e.event_type === 'performance');
     const scrollEvents = events.filter(e => e.event_type === 'scroll_depth');
     
+    // Count unique pages visited (not total pageview events)
+    const uniquePages = new Set(pageviews.map((e: any) => e.url)).size;
+    
     // Find first event with device data (some early pageviews may be empty)
     const firstEventWithData = events.slice().reverse().find((e: any) => e.data?.device_type || e.data?.referrer);
     const deviceData = firstEventWithData?.data || {};
@@ -83,7 +86,7 @@ export default async function DashboardPage() {
     return {
       ...session,
       events,
-      pageviews: pageviews.length,
+      pageviews: uniquePages,
       clicks: clicks.length,
       phoneClicks: phoneClicks.length,
       emailClicks: emailClicks.length,
