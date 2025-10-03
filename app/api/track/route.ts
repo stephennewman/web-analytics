@@ -108,9 +108,17 @@ export async function POST(request: NextRequest) {
       sessionUpdate.converted = true;
     }
 
+    // Add location data from first pageview
+    if (event === 'pageview') {
+      if (country) sessionUpdate.country = country;
+      if (city) sessionUpdate.city = city;
+      if (data?.timezone) sessionUpdate.timezone = data.timezone;
+      if (data?.language) sessionUpdate.language = data.language;
+    }
+
     const { error: sessionError } = await supabase
       .from('sessions')
-      .upsert(sessionUpdate, { onConflict: 'session_id' });
+      .upsert(sessionUpdate, { onConflict: 'session_id', ignoreDuplicates: false });
 
     if (sessionError) {
       console.error('Session upsert error:', sessionError);

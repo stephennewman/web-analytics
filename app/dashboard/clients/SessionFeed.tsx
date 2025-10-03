@@ -8,6 +8,10 @@ interface Session {
   converted: boolean;
   created_at: string;
   updated_at: string;
+  country?: string;
+  city?: string;
+  timezone?: string;
+  language?: string;
   pageviews: number;
   clicks: number;
   phoneClicks: number;
@@ -236,17 +240,22 @@ export default function SessionFeed({ sessions }: { sessions: Session[] }) {
                 {session.referrer !== 'direct' && (
                   <div>🔗 From: {session.referrer}</div>
                 )}
+                {/* Location data - prefer session columns, fallback to event data */}
                 {(() => {
                   const firstEvent = session.events[session.events.length - 1];
-                  const geo = firstEvent?.data?._geo;
-                  const timezone = firstEvent?.data?.timezone;
-                  const language = firstEvent?.data?.language;
+                  const eventGeo = firstEvent?.data?._geo;
+                  
+                  // Use session columns first, then fallback to event data
+                  const city = session.city || eventGeo?.city;
+                  const country = session.country || eventGeo?.country;
+                  const timezone = session.timezone || firstEvent?.data?.timezone;
+                  const language = session.language || firstEvent?.data?.language;
                   
                   return (
                     <>
-                      {geo && (geo.city || geo.country) && (
+                      {(city || country) && (
                         <div className="bg-blue-50 px-2 py-1 rounded flex items-center gap-1">
-                          🌍 {geo.city ? `${geo.city}, ` : ''}{geo.region ? `${geo.region}, ` : ''}{geo.country || 'Unknown'}
+                          🌍 {city ? `${city}, ` : ''}{country || 'Unknown'}
                         </div>
                       )}
                       {timezone && (
