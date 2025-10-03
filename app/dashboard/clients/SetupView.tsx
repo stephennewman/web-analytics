@@ -44,8 +44,9 @@ export default function SetupView({
   return (
     <div className="space-y-8">
       {/* Hero Stats */}
-      <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl shadow-lg p-8 text-white mb-8">
-        <h2 className="text-2xl font-bold mb-6">Live Session Feed</h2>
+      <div className="bg-gradient-to-r from-purple-500 via-pink-500 to-rose-500 rounded-xl shadow-lg p-8 text-white mb-8">
+        <h2 className="text-2xl font-bold mb-2">✨ Your Visitor Stories</h2>
+        <p className="text-purple-100 text-sm mb-6">Every click tells a tale of curiosity and engagement!</p>
         <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
           <div>
             <p className="text-blue-100 text-sm">Total Sessions</p>
@@ -64,28 +65,31 @@ export default function SetupView({
             <p className="text-4xl font-bold mt-2 text-green-300">{stats.sessionsWithIntent}</p>
           </div>
           <div>
-            <p className="text-blue-100 text-sm">UX Issues</p>
-            <p className="text-4xl font-bold mt-2 text-yellow-300">{stats.sessionsWithFrustration}</p>
+            <p className="text-blue-100 text-sm">Curious Explorers</p>
+            <p className="text-4xl font-bold mt-2 text-cyan-300">{stats.sessionsWithFrustration}</p>
           </div>
         </div>
       </div>
 
       {/* Session Feed */}
       {sessions.length === 0 ? (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
-          <h3 className="font-bold text-lg mb-4">🚀 Get Started - Add Tracking to Your Site</h3>
-          <p className="text-sm text-gray-700 mb-4">
-            Copy this script and paste it in the <code className="bg-white px-2 py-1 rounded">&lt;head&gt;</code> section of your website:
+        <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg shadow-lg p-8 border border-purple-200">
+          <h3 className="font-bold text-2xl mb-4 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">✨ Your Analytics Adventure Starts Here!</h3>
+          <p className="text-gray-700 mb-4 text-lg">
+            Add this magical tracking script and watch your visitor stories unfold! 🎨
           </p>
-          <div className="bg-white p-4 rounded border border-gray-300 font-mono text-sm break-all mb-4">
+          <div className="bg-white p-4 rounded-lg border-2 border-purple-300 font-mono text-sm break-all mb-4 shadow-sm">
             {trackingScript}
           </div>
           <button
             onClick={copyToClipboard}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
+            className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:shadow-xl font-medium shadow-md transition transform hover:scale-105"
           >
-            {copied ? '✓ Copied!' : 'Copy Script'}
+            {copied ? '✨ Copied!' : '🚀 Copy Tracking Script'}
           </button>
+          <p className="mt-4 text-sm text-gray-600">
+            Every visitor is a story waiting to be told! 💫
+          </p>
         </div>
       ) : (
         <SessionFeed sessions={sessions} />
