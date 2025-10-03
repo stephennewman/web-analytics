@@ -36,6 +36,7 @@ interface Session {
 export default function SessionFeed({ sessions }: { sessions: Session[] }) {
   const [filter, setFilter] = useState<'all' | 'converted' | 'intent' | 'frustrated' | 'errors'>('all');
   const [sortBy, setSortBy] = useState<'recent' | 'time' | 'pageviews'>('recent');
+  const [expandedDebug, setExpandedDebug] = useState<Set<string>>(new Set());
 
   // Filter sessions
   let filteredSessions = sessions;
@@ -283,6 +284,54 @@ export default function SessionFeed({ sessions }: { sessions: Session[] }) {
                   }
                   return null;
                 })()}
+              </div>
+
+              {/* Debug Section - Toggle */}
+              <div className="mt-4 pt-4 border-t">
+                <button
+                  onClick={() => {
+                    const newExpanded = new Set(expandedDebug);
+                    if (newExpanded.has(session.id)) {
+                      newExpanded.delete(session.id);
+                    } else {
+                      newExpanded.add(session.id);
+                    }
+                    setExpandedDebug(newExpanded);
+                  }}
+                  className="text-xs text-gray-500 hover:text-gray-700 font-mono"
+                >
+                  {expandedDebug.has(session.id) ? '▼' : '▶'} Debug Data
+                </button>
+                
+                {expandedDebug.has(session.id) && (
+                  <div className="mt-2 p-3 bg-gray-900 text-green-400 rounded font-mono text-xs overflow-x-auto">
+                    <div className="space-y-2">
+                      <div><strong>Session Columns:</strong></div>
+                      <div className="ml-4">
+                        <div>country: {session.country || 'null'}</div>
+                        <div>city: {session.city || 'null'}</div>
+                        <div>timezone: {session.timezone || 'null'}</div>
+                        <div>language: {session.language || 'null'}</div>
+                      </div>
+                      
+                      <div className="mt-3"><strong>First Event Data:</strong></div>
+                      <div className="ml-4">
+                        {(() => {
+                          const firstEvent = session.events[session.events.length - 1];
+                          if (!firstEvent) return <div>No events</div>;
+                          return (
+                            <>
+                              <div>_geo: {JSON.stringify(firstEvent?.data?._geo || null)}</div>
+                              <div>timezone: {firstEvent?.data?.timezone || 'null'}</div>
+                              <div>language: {firstEvent?.data?.language || 'null'}</div>
+                              <div>utm: {JSON.stringify(firstEvent?.data?.utm || null)}</div>
+                            </>
+                          );
+                        })()}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           ))
