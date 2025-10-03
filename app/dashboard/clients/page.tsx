@@ -57,6 +57,18 @@ export default async function DashboardPage() {
   const formStarts = events?.filter(e => e.event_type === 'form_start').length || 0;
   const formSubmits = events?.filter(e => e.event_type === 'form_submit').length || 0;
   const conversions = events?.filter(e => e.event_type === 'conversion').length || 0;
+  const rageClicks = events?.filter(e => e.event_type === 'rage_click').length || 0;
+  const deadClicks = events?.filter(e => e.event_type === 'dead_click').length || 0;
+  const exits = events?.filter(e => e.event_type === 'exit').length || 0;
+
+  // Calculate average time on page
+  const timeEvents = events?.filter(e => e.event_type === 'time_on_page' || e.event_type === 'exit') || [];
+  const totalTime = timeEvents.reduce((sum, e) => sum + (e.data?.seconds || e.data?.time_spent || 0), 0);
+  const avgTimeOnPage = timeEvents.length > 0 ? Math.round(totalTime / timeEvents.length) : 0;
+
+  // Calculate average scroll depth
+  const scrollEvents = events?.filter(e => e.event_type === 'scroll_depth') || [];
+  const maxScrollDepth = scrollEvents.length > 0 ? Math.max(...scrollEvents.map(e => e.data?.depth || 0)) : 0;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -88,7 +100,12 @@ export default async function DashboardPage() {
             conversions,
             totalSessions,
             convertedSessions,
-            conversionRate
+            conversionRate,
+            rageClicks,
+            deadClicks,
+            exits,
+            avgTimeOnPage,
+            maxScrollDepth
           }}
           recentEvents={events || []}
         />

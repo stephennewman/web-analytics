@@ -27,6 +27,11 @@ interface Stats {
   totalSessions: number;
   convertedSessions: number;
   conversionRate: string;
+  rageClicks: number;
+  deadClicks: number;
+  exits: number;
+  avgTimeOnPage: number;
+  maxScrollDepth: number;
 }
 
 export default function SetupView({ 
@@ -69,7 +74,27 @@ export default function SetupView({
         </div>
       </div>
 
-      {/* Event Breakdown */}
+      {/* Engagement Metrics */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="bg-white rounded-lg shadow p-4">
+          <p className="text-xs text-gray-600">Avg Time on Page</p>
+          <p className="text-2xl font-bold mt-1">{stats.avgTimeOnPage}s</p>
+        </div>
+        <div className="bg-white rounded-lg shadow p-4">
+          <p className="text-xs text-gray-600">Max Scroll Depth</p>
+          <p className="text-2xl font-bold mt-1">{stats.maxScrollDepth}%</p>
+        </div>
+        <div className="bg-white rounded-lg shadow p-4">
+          <p className="text-xs text-gray-600">Conversions</p>
+          <p className="text-2xl font-bold mt-1 text-green-600">{stats.conversions}</p>
+        </div>
+        <div className="bg-white rounded-lg shadow p-4">
+          <p className="text-xs text-gray-600">Exits</p>
+          <p className="text-2xl font-bold mt-1">{stats.exits}</p>
+        </div>
+      </div>
+
+      {/* Interaction Breakdown */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="bg-white rounded-lg shadow p-4">
           <p className="text-xs text-gray-600">Clicks Tracked</p>
@@ -84,10 +109,21 @@ export default function SetupView({
           <p className="text-2xl font-bold mt-1">{stats.formSubmits}</p>
         </div>
         <div className="bg-white rounded-lg shadow p-4">
-          <p className="text-xs text-gray-600">Conversions</p>
-          <p className="text-2xl font-bold mt-1 text-green-600">{stats.conversions}</p>
+          <p className="text-xs text-gray-600">Rage Clicks</p>
+          <p className="text-2xl font-bold mt-1 text-red-600">{stats.rageClicks}</p>
         </div>
       </div>
+
+      {/* Problem Indicators */}
+      {(stats.rageClicks > 0 || stats.deadClicks > 0) && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <p className="text-sm font-medium text-red-800">⚠️ User Frustration Detected</p>
+          <div className="mt-2 space-y-1 text-sm text-red-700">
+            {stats.rageClicks > 0 && <p>• {stats.rageClicks} rage clicks (users clicking frantically)</p>}
+            {stats.deadClicks > 0 && <p>• {stats.deadClicks} dead clicks (clicking non-interactive elements)</p>}
+          </div>
+        </div>
+      )}
 
       {/* Setup Instructions */}
       {stats.totalEvents === 0 && (
@@ -152,7 +188,12 @@ export default function SetupView({
                       click: 'bg-purple-100 text-purple-800',
                       form_start: 'bg-orange-100 text-orange-800',
                       form_submit: 'bg-green-100 text-green-800',
-                      conversion: 'bg-pink-100 text-pink-800'
+                      conversion: 'bg-pink-100 text-pink-800',
+                      rage_click: 'bg-red-100 text-red-800',
+                      dead_click: 'bg-yellow-100 text-yellow-800',
+                      scroll_depth: 'bg-teal-100 text-teal-800',
+                      time_on_page: 'bg-indigo-100 text-indigo-800',
+                      exit: 'bg-gray-100 text-gray-800'
                     };
                     
                     return (

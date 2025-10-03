@@ -57,14 +57,51 @@
     });
   }
 
-  // Track pageview on load
-  track('pageview', window.location.href);
+  // Collect device/referrer data
+  function getDeviceData() {
+    return {
+      screen_width: window.screen.width,
+      screen_height: window.screen.height,
+      viewport_width: window.innerWidth,
+      viewport_height: window.innerHeight,
+      device_type: window.innerWidth < 768 ? 'mobile' : window.innerWidth < 1024 ? 'tablet' : 'desktop',
+      referrer: document.referrer || 'direct',
+      user_agent: navigator.userAgent
+    };
+  }
+
+  // Extract UTM parameters
+  function getUTMParams() {
+    const params = new URLSearchParams(window.location.search);
+    const utmParams = {};
+    ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content'].forEach(function(key) {
+      if (params.get(key)) {
+        utmParams[key] = params.get(key);
+      }
+    });
+    return Object.keys(utmParams).length > 0 ? utmParams : null;
+  }
+
+  // Track initial pageview with device data
+  const deviceData = getDeviceData();
+  const utmParams = getUTMParams();
+  track('pageview', window.location.href, Object.assign({}, deviceData, utmParams ? { utm: utmParams } : {}));
+
+  // Track time on page
+  let pageStartTime = Date.now();
 
   // Track pageview on history changes (SPA support)
   const originalPushState = history.pushState;
   const originalReplaceState = history.replaceState;
   
   history.pushState = function() {
+    // Track time spent on previous page
+    const timeSpent = Math.round((Date.now() - pageStartTime) / 1000);
+    if (timeSpent > 0) {
+      track('time_on_page', window.location.href, { seconds: timeSpent });
+    }
+    pageStartTime = Date.now();
+    
     originalPushState.apply(this, arguments);
     track('pageview', window.location.href);
   };
@@ -78,7 +115,36 @@
     track('pageview', window.location.href);
   });
 
+  // Track scroll depth
+  let maxScroll = 0;
+  let scrollMilestones = [25, 50, 75, 100];
+  let trackedMilestones = [];
+
+  function trackScroll() {
+    const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const scrollPercent = scrollHeight > 0 ? Math.round((window.scrollY / scrollHeight) * 100) : 100;
+    
+    if (scrollPercent > maxScroll) {
+      maxScroll = scrollPercent;
+      
+      scrollMilestones.forEach(function(milestone) {
+        if (scrollPercent >= milestone && trackedMilestones.indexOf(milestone) === -1) {
+          trackedMilestones.push(milestone);
+          track('scroll_depth', window.location.href, { depth: milestone });
+        }
+      });
+    }
+  }
+
+  window.addEventListener('scroll', function() {
+    clearTimeout(window.scrollTimeout);
+    window.scrollTimeout = setTimeout(trackScroll, 150);
+  });
+
   // Track clicks on elements with data-track attribute
+  // Also detect rage clicks and dead clicks
+  let clickTracker = {};
+  
   document.addEventListener('click', function(e) {
     const target = e.target;
     const trackAttr = target.getAttribute('data-track') || target.closest('[data-track]')?.getAttribute('data-track');
@@ -89,7 +155,46 @@
         text: target.textContent?.trim().substring(0, 100) || ''
       });
     }
+    
+    // Rage click detection (3+ clicks in 1 second on same element)
+    const elementPath = getElementPath(target);
+    const now = Date.now();
+    
+    if (!clickTracker[elementPath]) {
+      clickTracker[elementPath] = { count: 1, timestamp: now };
+    } else {
+      if (now - clickTracker[elementPath].timestamp < 1000) {
+        clickTracker[elementPath].count++;
+        if (clickTracker[elementPath].count === 3) {
+          track('rage_click', window.location.href, {
+            element: elementPath,
+            text: target.textContent?.trim().substring(0, 50) || ''
+          });
+        }
+      } else {
+        clickTracker[elementPath] = { count: 1, timestamp: now };
+      }
+    }
+    
+    // Dead click detection (click on non-interactive element)
+    const tagName = target.tagName.toLowerCase();
+    const isInteractive = ['a', 'button', 'input', 'select', 'textarea'].indexOf(tagName) !== -1;
+    const hasClickHandler = target.onclick || target.getAttribute('onclick');
+    const isCursorPointer = window.getComputedStyle(target).cursor === 'pointer';
+    
+    if (!isInteractive && !hasClickHandler && !isCursorPointer && !trackAttr) {
+      track('dead_click', window.location.href, {
+        element: tagName,
+        text: target.textContent?.trim().substring(0, 50) || ''
+      });
+    }
   });
+
+  function getElementPath(element) {
+    if (element.id) return '#' + element.id;
+    if (element.className) return element.tagName.toLowerCase() + '.' + element.className.split(' ')[0];
+    return element.tagName.toLowerCase();
+  }
 
   // Track form submissions
   document.addEventListener('submit', function(e) {
@@ -120,6 +225,15 @@
       }
     }
   }, true);
+
+  // Track exit intent
+  window.addEventListener('beforeunload', function() {
+    const timeSpent = Math.round((Date.now() - pageStartTime) / 1000);
+    track('exit', window.location.href, { 
+      time_spent: timeSpent,
+      scroll_depth: maxScroll 
+    });
+  });
 
   // Expose global tracking function for custom events
   window.webAnalytics = {
