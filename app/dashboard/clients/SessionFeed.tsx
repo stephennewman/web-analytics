@@ -35,7 +35,7 @@ interface Session {
 }
 
 export default function SessionFeed({ sessions }: { sessions: Session[] }) {
-  const [filter, setFilter] = useState<'all' | 'converted' | 'intent' | 'frustrated' | 'errors'>('all');
+  const [filter, setFilter] = useState<'all' | 'converted' | 'intent' | 'issues' | 'errors'>('all');
   const [sortBy, setSortBy] = useState<'recent' | 'time' | 'pageviews'>('recent');
   const [expandedDebug, setExpandedDebug] = useState<Set<string>>(new Set());
 
@@ -43,7 +43,7 @@ export default function SessionFeed({ sessions }: { sessions: Session[] }) {
   let filteredSessions = sessions;
   if (filter === 'converted') filteredSessions = sessions.filter(s => s.converted);
   if (filter === 'intent') filteredSessions = sessions.filter(s => s.hasIntent);
-  if (filter === 'frustrated') filteredSessions = sessions.filter(s => s.hasFrustration);
+  if (filter === 'issues') filteredSessions = sessions.filter(s => s.hasFrustration);
   if (filter === 'errors') filteredSessions = sessions.filter(s => s.hasErrors);
 
   // Sort sessions
@@ -81,12 +81,12 @@ export default function SessionFeed({ sessions }: { sessions: Session[] }) {
             🎯 High Intent ({sessions.filter(s => s.hasIntent).length})
           </button>
           <button
-            onClick={() => setFilter('frustrated')}
+            onClick={() => setFilter('issues')}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
-              filter === 'frustrated' ? 'bg-red-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              filter === 'issues' ? 'bg-yellow-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
-            😡 Frustrated ({sessions.filter(s => s.hasFrustration).length})
+            ⚠️ UX Issues ({sessions.filter(s => s.hasFrustration).length})
           </button>
           <button
             onClick={() => setFilter('errors')}
@@ -125,7 +125,7 @@ export default function SessionFeed({ sessions }: { sessions: Session[] }) {
               className={`bg-white rounded-lg shadow hover:shadow-lg transition p-6 border-l-4 ${
                 session.converted ? 'border-green-500' :
                 session.hasIntent ? 'border-purple-500' :
-                session.hasFrustration ? 'border-red-500' :
+                session.hasFrustration ? 'border-yellow-500' :
                 session.hasErrors ? 'border-orange-500' :
                 'border-gray-300'
               }`}
@@ -139,7 +139,7 @@ export default function SessionFeed({ sessions }: { sessions: Session[] }) {
                     </span>
                     {session.converted && <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-medium">✅ Converted</span>}
                     {session.hasIntent && <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded text-xs font-medium">🎯 High Intent</span>}
-                    {session.hasFrustration && <span className="bg-red-100 text-red-800 px-2 py-1 rounded text-xs font-medium">😡 Frustrated</span>}
+                    {session.hasFrustration && <span className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs font-medium">⚠️ UX Issues</span>}
                     {session.hasErrors && <span className="bg-orange-100 text-orange-800 px-2 py-1 rounded text-xs font-medium">🐛 Errors</span>}
                   </div>
                   <p className="text-sm text-gray-600 truncate">{session.landingPage || 'Unknown page'}</p>
@@ -183,13 +183,13 @@ export default function SessionFeed({ sessions }: { sessions: Session[] }) {
                 </div>
               )}
 
-              {/* Frustration Signals */}
+              {/* UX Issues */}
               {(session.rageClicks > 0 || session.deadClicks > 0 || session.jsErrors > 0) && (
                 <div className="mb-4 pb-4 border-b">
-                  <h4 className="text-xs font-semibold text-red-700 mb-2">🚨 FRUSTRATION DETECTED</h4>
+                  <h4 className="text-xs font-semibold text-yellow-700 mb-2">⚠️ UX ISSUES DETECTED</h4>
                   <div className="flex flex-wrap gap-2">
                     {session.rageClicks > 0 && <span className="bg-red-100 text-red-800 px-3 py-1 rounded-full text-xs font-medium">😡 {session.rageClicks} rage clicks</span>}
-                    {session.deadClicks > 0 && <span className="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-xs font-medium">⚠️ {session.deadClicks} dead clicks</span>}
+                    {session.deadClicks > 0 && <span className="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-xs font-medium">⚠️ {session.deadClicks} non-interactive clicks</span>}
                     {session.jsErrors > 0 && <span className="bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-xs font-medium">🐛 {session.jsErrors} JS errors</span>}
                   </div>
                 </div>

@@ -64,8 +64,8 @@ export default function SetupView({
             <p className="text-4xl font-bold mt-2 text-green-300">{stats.sessionsWithIntent}</p>
           </div>
           <div>
-            <p className="text-blue-100 text-sm">Frustrated</p>
-            <p className="text-4xl font-bold mt-2 text-red-300">{stats.sessionsWithFrustration}</p>
+            <p className="text-blue-100 text-sm">UX Issues</p>
+            <p className="text-4xl font-bold mt-2 text-yellow-300">{stats.sessionsWithFrustration}</p>
           </div>
         </div>
       </div>
