@@ -56,7 +56,16 @@ Unlike Hotjar/FullStory: focus on conversion killers only, AI-suggested fixes, v
 **Task 3.1:** Auto-track clicks (data-track attribute)
 **Task 3.2:** Auto-track forms (starts & submissions)
 **Task 3.3:** Conversion tracking (webAnalytics.conversion())
-- **Dashboard shows:** Pageviews, clicks, form starts/submits, conversions, conversion rate
+**Task 3.4:** Enhanced auto-tracking (zero setup):
+- Scroll depth (25%, 50%, 75%, 100%)
+- Time on page (tracked per page navigation)
+- Rage clicks (3+ clicks in 1 second - frustration indicator)
+- Dead clicks (clicks on non-interactive elements - UX issues)
+- Device data (screen size, viewport, device type)
+- Referrer tracking (traffic source)
+- UTM parameter capture (campaign tracking)
+- Exit intent (time spent + scroll depth on exit)
+- **Dashboard shows:** All metrics + frustration alerts
 - **NEXT:** Phase 4 - Funnels or Phase 6 - Session Replay
 
 ---

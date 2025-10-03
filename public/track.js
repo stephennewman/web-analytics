@@ -141,14 +141,29 @@
     window.scrollTimeout = setTimeout(trackScroll, 150);
   });
 
-  // Track clicks on elements with data-track attribute
+  // Track clicks on ALL interactive elements automatically
   // Also detect rage clicks and dead clicks
   let clickTracker = {};
   
   document.addEventListener('click', function(e) {
     const target = e.target;
-    const trackAttr = target.getAttribute('data-track') || target.closest('[data-track]')?.getAttribute('data-track');
+    const tagName = target.tagName.toLowerCase();
     
+    // Auto-track buttons and links
+    if (tagName === 'button' || tagName === 'a') {
+      const elementId = target.id || target.className || tagName;
+      const linkHref = tagName === 'a' ? target.href : null;
+      
+      track('click', window.location.href, {
+        element: elementId,
+        text: target.textContent?.trim().substring(0, 100) || '',
+        href: linkHref,
+        tag: tagName
+      });
+    }
+    
+    // Also track elements with data-track for custom naming
+    const trackAttr = target.getAttribute('data-track') || target.closest('[data-track]')?.getAttribute('data-track');
     if (trackAttr) {
       track('click', window.location.href, {
         element: trackAttr,
