@@ -239,6 +239,22 @@ export default function SessionFeed({ sessions }: { sessions: Session[] }) {
                     ⚡ Load time: {(session.loadTime / 1000).toFixed(2)}s {session.loadTime > 3000 && '(SLOW!)'}
                   </div>
                 )}
+                {(() => {
+                  const firstEvent = session.events[session.events.length - 1];
+                  const screenWidth = firstEvent?.data?.screen_width;
+                  const screenHeight = firstEvent?.data?.screen_height;
+                  const viewportWidth = firstEvent?.data?.viewport_width;
+                  const viewportHeight = firstEvent?.data?.viewport_height;
+                  
+                  if (screenWidth && screenHeight) {
+                    return (
+                      <div>
+                        📱 Screen: {screenWidth}x{screenHeight} {viewportWidth && viewportHeight && `(viewport: ${viewportWidth}x${viewportHeight})`}
+                      </div>
+                    );
+                  }
+                  return null;
+                })()}
                 {session.referrer !== 'direct' && (
                   <div>🔗 From: {session.referrer}</div>
                 )}
