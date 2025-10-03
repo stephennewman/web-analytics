@@ -118,6 +118,7 @@ export async function POST(request: NextRequest) {
     // Add location data - only if not already set (preserve first pageview data)
     if (!existingSession || !existingSession.country) {
       if (country) sessionUpdate.country = country;
+      if (region) sessionUpdate.region = region;
       if (city) sessionUpdate.city = city;
     }
     if (!existingSession || !existingSession.timezone) {

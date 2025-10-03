@@ -9,6 +9,7 @@ interface Session {
   created_at: string;
   updated_at: string;
   country?: string;
+  region?: string;
   city?: string;
   timezone?: string;
   language?: string;
@@ -248,15 +249,16 @@ export default function SessionFeed({ sessions }: { sessions: Session[] }) {
                   
                   // Use session columns first, then fallback to event data
                   const city = session.city || eventGeo?.city;
+                  const region = session.region || eventGeo?.region;
                   const country = session.country || eventGeo?.country;
                   const timezone = session.timezone || firstEvent?.data?.timezone;
                   const language = session.language || firstEvent?.data?.language;
                   
                   return (
                     <>
-                      {(city || country) && (
+                      {(city || region || country) && (
                         <div className="bg-blue-50 px-2 py-1 rounded flex items-center gap-1">
-                          🌍 {city ? `${city}, ` : ''}{country || 'Unknown'}
+                          🌍 {city ? `${city}, ` : ''}{region ? `${region}, ` : ''}{country || 'Unknown'}
                         </div>
                       )}
                       {timezone && (
@@ -309,6 +311,7 @@ export default function SessionFeed({ sessions }: { sessions: Session[] }) {
                       <div><strong>Session Columns:</strong></div>
                       <div className="ml-4">
                         <div>country: {session.country || 'null'}</div>
+                        <div>region: {session.region || 'null'}</div>
                         <div>city: {session.city || 'null'}</div>
                         <div>timezone: {session.timezone || 'null'}</div>
                         <div>language: {session.language || 'null'}</div>
