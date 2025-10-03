@@ -15,7 +15,8 @@ export async function POST(request: NextRequest) {
                'unknown';
     const country = request.headers.get('x-vercel-ip-country') || null;
     const region = request.headers.get('x-vercel-ip-country-region') || null;
-    const city = request.headers.get('x-vercel-ip-city') || null;
+    const cityRaw = request.headers.get('x-vercel-ip-city') || null;
+    const city = cityRaw ? decodeURIComponent(cityRaw) : null;
     
     console.log('Received tracking request:', { clientId, sessionId, event, url, ip, country, city });
 
