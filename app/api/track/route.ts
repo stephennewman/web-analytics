@@ -9,7 +9,15 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { clientId, sessionId, event, url, data, timestamp } = body;
     
-    console.log('Received tracking request:', { clientId, sessionId, event, url });
+    // Extract IP address and geo headers (Vercel provides these)
+    const ip = request.headers.get('x-forwarded-for')?.split(',')[0] || 
+               request.headers.get('x-real-ip') || 
+               'unknown';
+    const country = request.headers.get('x-vercel-ip-country') || null;
+    const region = request.headers.get('x-vercel-ip-country-region') || null;
+    const city = request.headers.get('x-vercel-ip-city') || null;
+    
+    console.log('Received tracking request:', { clientId, sessionId, event, url, ip, country, city });
 
     // Validate required fields
     if (!clientId || !sessionId || !event || !url) {
@@ -50,6 +58,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Enrich data with server-side geo info
+    const enrichedData = {
+      ...(data || {}),
+      _geo: {
+        ip,
+        country,
+        region,
+        city
+      }
+    };
+
     // Insert event
     const { error: eventError } = await supabase
       .from('events')
@@ -58,7 +77,7 @@ export async function POST(request: NextRequest) {
         session_id: sessionId,
         event_type: event,
         url,
-        data: data || {},
+        data: enrichedData,
         timestamp: timestamp || new Date().toISOString(),
       });
 

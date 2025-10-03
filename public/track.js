@@ -66,7 +66,10 @@
       viewport_height: window.innerHeight,
       device_type: window.innerWidth < 768 ? 'mobile' : window.innerWidth < 1024 ? 'tablet' : 'desktop',
       referrer: document.referrer || 'direct',
-      user_agent: navigator.userAgent
+      user_agent: navigator.userAgent,
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      language: navigator.language || navigator.userLanguage,
+      languages: navigator.languages ? navigator.languages.join(',') : ''
     };
   }
 

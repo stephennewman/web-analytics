@@ -238,6 +238,32 @@ export default function SessionFeed({ sessions }: { sessions: Session[] }) {
                 )}
                 {(() => {
                   const firstEvent = session.events[session.events.length - 1];
+                  const geo = firstEvent?.data?._geo;
+                  const timezone = firstEvent?.data?.timezone;
+                  const language = firstEvent?.data?.language;
+                  
+                  return (
+                    <>
+                      {geo && (geo.city || geo.country) && (
+                        <div className="bg-blue-50 px-2 py-1 rounded flex items-center gap-1">
+                          🌍 {geo.city ? `${geo.city}, ` : ''}{geo.region ? `${geo.region}, ` : ''}{geo.country || 'Unknown'}
+                        </div>
+                      )}
+                      {timezone && (
+                        <div className="text-gray-500">
+                          🕐 {timezone}
+                        </div>
+                      )}
+                      {language && (
+                        <div className="text-gray-500">
+                          🗣️ {language}
+                        </div>
+                      )}
+                    </>
+                  );
+                })()}
+                {(() => {
+                  const firstEvent = session.events[session.events.length - 1];
                   const utm = firstEvent?.data?.utm;
                   if (utm) {
                     return (
