@@ -76,8 +76,9 @@ export default async function DashboardPage() {
     const perfEvent = events.find(e => e.event_type === 'performance');
     const scrollEvents = events.filter(e => e.event_type === 'scroll_depth');
     
-    const firstEvent = events[events.length - 1];
-    const deviceData = firstEvent?.data || {};
+    // Find first event with device data (some early pageviews may be empty)
+    const firstEventWithData = events.slice().reverse().find((e: any) => e.data?.device_type || e.data?.referrer);
+    const deviceData = firstEventWithData?.data || {};
     
     return {
       ...session,
