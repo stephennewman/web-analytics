@@ -146,6 +146,12 @@
   let clickTracker = {};
   
   document.addEventListener('click', function(e) {
+    // Ignore clicks if user is selecting text
+    const selection = window.getSelection();
+    if (selection && selection.toString().length > 0) {
+      return;
+    }
+    
     const target = e.target;
     const tagName = target.tagName.toLowerCase();
     
@@ -192,7 +198,11 @@
     }
     
     // Dead click detection (click on non-interactive element)
-    const tagName = target.tagName.toLowerCase();
+    // Skip if user is just selecting/highlighting text
+    if (selection && selection.toString().length > 0) {
+      return;
+    }
+    
     const isInteractive = ['a', 'button', 'input', 'select', 'textarea'].indexOf(tagName) !== -1;
     const hasClickHandler = target.onclick || target.getAttribute('onclick');
     const isCursorPointer = window.getComputedStyle(target).cursor === 'pointer';
