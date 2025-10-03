@@ -89,4 +89,20 @@ Unlike Hotjar/FullStory: focus on conversion killers only, AI-suggested fixes, v
 - **Features:** Phases 1-3 complete (tracking, auth, conversion analytics)
 - **Status:** Live and functional
 
+### 2025-10-03 - Production Deploy #2 ✅
+- **Advanced Tracking:** Performance metrics, JS errors, conversion intent signals
+- **Features Added:**
+  - Page load time, DOM ready, first paint
+  - JavaScript error tracking
+  - Phone/email/download click detection
+  - Form field timing & keystroke analysis
+  - Copy event tracking (valuable content)
+  - Idle & tab visibility detection
+  - Orientation change tracking
+  - Text selection filtering
+- **Dashboard Enhancements:**
+  - ✅ Conversion intent alerts (phone, email, downloads)
+  - ⚠️ Performance warnings (slow loads, JS errors)
+  - All new event types color-coded
+
 

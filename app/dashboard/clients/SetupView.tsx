@@ -61,62 +61,127 @@ export default function SetupView({
 
   return (
     <div className="space-y-8">
-      {/* Primary Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white rounded-lg shadow p-6">
-          <p className="text-sm text-gray-600">Total Pageviews</p>
-          <p className="text-3xl font-bold mt-2">{stats.pageviews}</p>
-        </div>
-        <div className="bg-white rounded-lg shadow p-6">
-          <p className="text-sm text-gray-600">Unique Sessions</p>
-          <p className="text-3xl font-bold mt-2">{stats.totalSessions}</p>
-        </div>
-        <div className="bg-white rounded-lg shadow p-6">
-          <p className="text-sm text-gray-600">Conversion Rate</p>
-          <p className="text-3xl font-bold mt-2">{stats.conversionRate}%</p>
-          <p className="text-xs text-gray-500 mt-1">
-            {stats.convertedSessions} of {stats.totalSessions} sessions
-          </p>
+      {/* Hero Stats */}
+      <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl shadow-lg p-8 text-white">
+        <h2 className="text-2xl font-bold mb-6">Performance Overview</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div>
+            <p className="text-blue-100 text-sm">Total Pageviews</p>
+            <p className="text-4xl font-bold mt-2">{stats.pageviews}</p>
+          </div>
+          <div>
+            <p className="text-blue-100 text-sm">Unique Sessions</p>
+            <p className="text-4xl font-bold mt-2">{stats.totalSessions}</p>
+          </div>
+          <div>
+            <p className="text-blue-100 text-sm">Conversion Rate</p>
+            <p className="text-4xl font-bold mt-2">{stats.conversionRate}%</p>
+            <p className="text-xs text-blue-200 mt-1">
+              {stats.convertedSessions} of {stats.totalSessions} converted
+            </p>
+          </div>
         </div>
       </div>
 
       {/* Engagement Metrics */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-white rounded-lg shadow p-4">
-          <p className="text-xs text-gray-600">Avg Time on Page</p>
-          <p className="text-2xl font-bold mt-1">{stats.avgTimeOnPage}s</p>
-        </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <p className="text-xs text-gray-600">Max Scroll Depth</p>
-          <p className="text-2xl font-bold mt-1">{stats.maxScrollDepth}%</p>
-        </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <p className="text-xs text-gray-600">Conversions</p>
-          <p className="text-2xl font-bold mt-1 text-green-600">{stats.conversions}</p>
-        </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <p className="text-xs text-gray-600">Exits</p>
-          <p className="text-2xl font-bold mt-1">{stats.exits}</p>
+      <div>
+        <h3 className="text-lg font-bold mb-4">Engagement Metrics</h3>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="bg-white rounded-lg shadow-md p-5 border-l-4 border-blue-500">
+            <p className="text-xs text-gray-500 uppercase tracking-wide">Avg Time</p>
+            <p className="text-3xl font-bold mt-2 text-blue-600">{stats.avgTimeOnPage}s</p>
+          </div>
+          <div className="bg-white rounded-lg shadow-md p-5 border-l-4 border-teal-500">
+            <p className="text-xs text-gray-500 uppercase tracking-wide">Max Scroll</p>
+            <p className="text-3xl font-bold mt-2 text-teal-600">{stats.maxScrollDepth}%</p>
+          </div>
+          <div className="bg-white rounded-lg shadow-md p-5 border-l-4 border-green-500">
+            <p className="text-xs text-gray-500 uppercase tracking-wide">Conversions</p>
+            <p className="text-3xl font-bold mt-2 text-green-600">{stats.conversions}</p>
+          </div>
+          <div className="bg-white rounded-lg shadow-md p-5 border-l-4 border-gray-400">
+            <p className="text-xs text-gray-500 uppercase tracking-wide">Page Load</p>
+            <p className="text-3xl font-bold mt-2 text-gray-600">
+              {stats.avgLoadTime > 0 ? `${(stats.avgLoadTime/1000).toFixed(1)}s` : '-'}
+            </p>
+          </div>
         </div>
       </div>
 
-      {/* Interaction Breakdown */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-white rounded-lg shadow p-4">
-          <p className="text-xs text-gray-600">Clicks Tracked</p>
-          <p className="text-2xl font-bold mt-1">{stats.clicks}</p>
-        </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <p className="text-xs text-gray-600">Form Starts</p>
-          <p className="text-2xl font-bold mt-1">{stats.formStarts}</p>
-        </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <p className="text-xs text-gray-600">Form Submits</p>
-          <p className="text-2xl font-bold mt-1">{stats.formSubmits}</p>
-        </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <p className="text-xs text-gray-600">Rage Clicks</p>
-          <p className="text-2xl font-bold mt-1 text-red-600">{stats.rageClicks}</p>
+      {/* Interaction & Intent Grid */}
+      <div>
+        <h3 className="text-lg font-bold mb-4">User Interactions & Intent</h3>
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+          <div className="bg-white rounded-lg shadow p-4 hover:shadow-lg transition">
+            <div className="flex items-center justify-between">
+              <p className="text-xs text-gray-500">Clicks</p>
+              <span className="text-purple-500">👆</span>
+            </div>
+            <p className="text-2xl font-bold mt-1">{stats.clicks}</p>
+          </div>
+          <div className="bg-white rounded-lg shadow p-4 hover:shadow-lg transition">
+            <div className="flex items-center justify-between">
+              <p className="text-xs text-gray-500">Forms Started</p>
+              <span className="text-orange-500">📝</span>
+            </div>
+            <p className="text-2xl font-bold mt-1">{stats.formStarts}</p>
+          </div>
+          <div className="bg-white rounded-lg shadow p-4 hover:shadow-lg transition">
+            <div className="flex items-center justify-between">
+              <p className="text-xs text-gray-500">Form Submits</p>
+              <span className="text-green-500">✅</span>
+            </div>
+            <p className="text-2xl font-bold mt-1">{stats.formSubmits}</p>
+          </div>
+          <div className="bg-white rounded-lg shadow p-4 hover:shadow-lg transition">
+            <div className="flex items-center justify-between">
+              <p className="text-xs text-gray-500">Phone Clicks</p>
+              <span className="text-green-600">📞</span>
+            </div>
+            <p className="text-2xl font-bold mt-1 text-green-600">{stats.phoneClicks}</p>
+          </div>
+          <div className="bg-white rounded-lg shadow p-4 hover:shadow-lg transition">
+            <div className="flex items-center justify-between">
+              <p className="text-xs text-gray-500">Email Clicks</p>
+              <span className="text-green-600">✉️</span>
+            </div>
+            <p className="text-2xl font-bold mt-1 text-green-600">{stats.emailClicks}</p>
+          </div>
+          <div className="bg-white rounded-lg shadow p-4 hover:shadow-lg transition">
+            <div className="flex items-center justify-between">
+              <p className="text-xs text-gray-500">Downloads</p>
+              <span className="text-purple-600">📥</span>
+            </div>
+            <p className="text-2xl font-bold mt-1">{stats.downloads}</p>
+          </div>
+          <div className="bg-white rounded-lg shadow p-4 hover:shadow-lg transition">
+            <div className="flex items-center justify-between">
+              <p className="text-xs text-gray-500">Text Copies</p>
+              <span className="text-blue-600">📋</span>
+            </div>
+            <p className="text-2xl font-bold mt-1">{stats.copyEvents}</p>
+          </div>
+          <div className="bg-white rounded-lg shadow p-4 hover:shadow-lg transition bg-red-50">
+            <div className="flex items-center justify-between">
+              <p className="text-xs text-red-500">Rage Clicks</p>
+              <span className="text-red-500">😡</span>
+            </div>
+            <p className="text-2xl font-bold mt-1 text-red-600">{stats.rageClicks}</p>
+          </div>
+          <div className="bg-white rounded-lg shadow p-4 hover:shadow-lg transition bg-yellow-50">
+            <div className="flex items-center justify-between">
+              <p className="text-xs text-yellow-700">Dead Clicks</p>
+              <span className="text-yellow-600">⚠️</span>
+            </div>
+            <p className="text-2xl font-bold mt-1 text-yellow-700">{stats.deadClicks}</p>
+          </div>
+          <div className="bg-white rounded-lg shadow p-4 hover:shadow-lg transition bg-orange-50">
+            <div className="flex items-center justify-between">
+              <p className="text-xs text-orange-700">JS Errors</p>
+              <span className="text-orange-600">🐛</span>
+            </div>
+            <p className="text-2xl font-bold mt-1 text-orange-700">{stats.jsErrors}</p>
+          </div>
         </div>
       </div>
 
