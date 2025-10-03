@@ -97,7 +97,13 @@ export async function POST(request: NextRequest) {
     }
 
     // Update or create session
-    // Mark as converted if this is a conversion event
+    // First, check if session exists
+    const { data: existingSession } = await supabase
+      .from('sessions')
+      .select('id, country, city, timezone, language')
+      .eq('session_id', sessionId)
+      .single();
+
     const sessionUpdate: any = {
       client_id: clientId,
       session_id: sessionId,
@@ -108,17 +114,19 @@ export async function POST(request: NextRequest) {
       sessionUpdate.converted = true;
     }
 
-    // Add location data from first pageview
-    if (event === 'pageview') {
+    // Add location data - only if not already set (preserve first pageview data)
+    if (!existingSession || !existingSession.country) {
       if (country) sessionUpdate.country = country;
       if (city) sessionUpdate.city = city;
+    }
+    if (!existingSession || !existingSession.timezone) {
       if (data?.timezone) sessionUpdate.timezone = data.timezone;
       if (data?.language) sessionUpdate.language = data.language;
     }
 
     const { error: sessionError } = await supabase
       .from('sessions')
-      .upsert(sessionUpdate, { onConflict: 'session_id', ignoreDuplicates: false });
+      .upsert(sessionUpdate, { onConflict: 'session_id' });
 
     if (sessionError) {
       console.error('Session upsert error:', sessionError);
