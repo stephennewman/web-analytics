@@ -144,8 +144,8 @@ export default function SessionFeed({ sessions }: { sessions: Session[] }) {
                 </div>
               </div>
 
-              {/* Metrics Grid */}
-              <div className="grid grid-cols-4 md:grid-cols-8 gap-3 mb-4">
+              {/* Core Metrics */}
+              <div className="grid grid-cols-4 gap-3 mb-4 pb-4 border-b">
                 <div className="text-center">
                   <p className="text-2xl font-bold text-gray-900">{session.pageviews}</p>
                   <p className="text-xs text-gray-500">Pages</p>
@@ -162,44 +162,93 @@ export default function SessionFeed({ sessions }: { sessions: Session[] }) {
                   <p className="text-2xl font-bold text-gray-900">{session.scrollDepth}%</p>
                   <p className="text-xs text-gray-500">Scroll</p>
                 </div>
-                {session.phoneClicks > 0 && (
-                  <div className="text-center">
-                    <p className="text-2xl font-bold text-green-600">📞 {session.phoneClicks}</p>
-                    <p className="text-xs text-gray-500">Phone</p>
-                  </div>
-                )}
-                {session.emailClicks > 0 && (
-                  <div className="text-center">
-                    <p className="text-2xl font-bold text-green-600">✉️ {session.emailClicks}</p>
-                    <p className="text-xs text-gray-500">Email</p>
-                  </div>
-                )}
-                {session.formSubmits > 0 && (
-                  <div className="text-center">
-                    <p className="text-2xl font-bold text-green-600">✅ {session.formSubmits}</p>
-                    <p className="text-xs text-gray-500">Forms</p>
-                  </div>
-                )}
-                {session.rageClicks > 0 && (
-                  <div className="text-center">
-                    <p className="text-2xl font-bold text-red-600">😡 {session.rageClicks}</p>
-                    <p className="text-xs text-gray-500">Rage</p>
-                  </div>
-                )}
-                {session.deadClicks > 0 && (
-                  <div className="text-center">
-                    <p className="text-2xl font-bold text-yellow-600">⚠️ {session.deadClicks}</p>
-                    <p className="text-xs text-gray-500">Dead</p>
-                  </div>
-                )}
               </div>
 
-              {/* Referrer */}
-              {session.referrer !== 'direct' && (
-                <div className="text-xs text-gray-500 border-t pt-3">
-                  From: {session.referrer}
+              {/* Conversion Signals */}
+              {(session.phoneClicks > 0 || session.emailClicks > 0 || session.downloads > 0 || session.formSubmits > 0) && (
+                <div className="mb-4 pb-4 border-b">
+                  <h4 className="text-xs font-semibold text-green-700 mb-2">🎯 CONVERSION SIGNALS</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {session.phoneClicks > 0 && <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-medium">📞 {session.phoneClicks} phone clicks</span>}
+                    {session.emailClicks > 0 && <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-medium">✉️ {session.emailClicks} email clicks</span>}
+                    {session.downloads > 0 && <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-medium">📥 {session.downloads} downloads</span>}
+                    {session.formSubmits > 0 && <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-medium">✅ {session.formSubmits} form submits</span>}
+                  </div>
                 </div>
               )}
+
+              {/* Frustration Signals */}
+              {(session.rageClicks > 0 || session.deadClicks > 0 || session.jsErrors > 0) && (
+                <div className="mb-4 pb-4 border-b">
+                  <h4 className="text-xs font-semibold text-red-700 mb-2">🚨 FRUSTRATION DETECTED</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {session.rageClicks > 0 && <span className="bg-red-100 text-red-800 px-3 py-1 rounded-full text-xs font-medium">😡 {session.rageClicks} rage clicks</span>}
+                    {session.deadClicks > 0 && <span className="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-xs font-medium">⚠️ {session.deadClicks} dead clicks</span>}
+                    {session.jsErrors > 0 && <span className="bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-xs font-medium">🐛 {session.jsErrors} JS errors</span>}
+                  </div>
+                </div>
+              )}
+
+              {/* Engagement Details */}
+              <div className="mb-4">
+                <h4 className="text-xs font-semibold text-gray-600 mb-2">📊 ENGAGEMENT</h4>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+                  {session.events.filter(e => e.event_type === 'copy_text').length > 0 && (
+                    <div className="bg-blue-50 px-2 py-1 rounded">
+                      📋 {session.events.filter(e => e.event_type === 'copy_text').length} text copies
+                    </div>
+                  )}
+                  {session.events.filter(e => e.event_type === 'tab_return').length > 0 && (
+                    <div className="bg-indigo-50 px-2 py-1 rounded">
+                      👁️ {session.events.filter(e => e.event_type === 'tab_return').length} tab switches
+                    </div>
+                  )}
+                  {session.events.filter(e => e.event_type === 'idle').length > 0 && (
+                    <div className="bg-gray-50 px-2 py-1 rounded">
+                      💤 {session.events.filter(e => e.event_type === 'idle').length} idle periods
+                    </div>
+                  )}
+                  {session.events.filter(e => e.event_type === 'orientation_change').length > 0 && (
+                    <div className="bg-purple-50 px-2 py-1 rounded">
+                      🔄 {session.events.filter(e => e.event_type === 'orientation_change').length} rotations
+                    </div>
+                  )}
+                  {session.events.filter(e => e.event_type === 'field_correction').length > 0 && (
+                    <div className="bg-yellow-50 px-2 py-1 rounded">
+                      ✏️ {session.events.filter(e => e.event_type === 'field_correction').length} field corrections
+                    </div>
+                  )}
+                  {session.events.filter(e => e.event_type === 'field_time').length > 0 && (
+                    <div className="bg-orange-50 px-2 py-1 rounded">
+                      ⏱️ {session.events.filter(e => e.event_type === 'field_time').length} field interactions
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Technical Details */}
+              <div className="text-xs text-gray-600 space-y-1">
+                {session.loadTime > 0 && (
+                  <div className={`${session.loadTime > 3000 ? 'text-orange-600 font-medium' : ''}`}>
+                    ⚡ Load time: {(session.loadTime / 1000).toFixed(2)}s {session.loadTime > 3000 && '(SLOW!)'}
+                  </div>
+                )}
+                {session.referrer !== 'direct' && (
+                  <div>🔗 From: {session.referrer}</div>
+                )}
+                {(() => {
+                  const firstEvent = session.events[session.events.length - 1];
+                  const utm = firstEvent?.data?.utm;
+                  if (utm) {
+                    return (
+                      <div className="bg-purple-50 px-2 py-1 rounded">
+                        📢 Campaign: {utm.utm_source || ''} / {utm.utm_medium || ''} {utm.utm_campaign && `/ ${utm.utm_campaign}`}
+                      </div>
+                    );
+                  }
+                  return null;
+                })()}
+              </div>
             </div>
           ))
         )}
