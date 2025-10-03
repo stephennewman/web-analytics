@@ -32,6 +32,12 @@ interface Stats {
   exits: number;
   avgTimeOnPage: number;
   maxScrollDepth: number;
+  avgLoadTime: number;
+  phoneClicks: number;
+  emailClicks: number;
+  downloads: number;
+  jsErrors: number;
+  copyEvents: number;
 }
 
 export default function SetupView({ 
@@ -114,6 +120,30 @@ export default function SetupView({
         </div>
       </div>
 
+      {/* Conversion Intent Signals */}
+      {(stats.phoneClicks > 0 || stats.emailClicks > 0 || stats.downloads > 0) && (
+        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+          <p className="text-sm font-medium text-green-800">✅ Conversion Intent Detected</p>
+          <div className="mt-2 space-y-1 text-sm text-green-700">
+            {stats.phoneClicks > 0 && <p>• {stats.phoneClicks} phone clicks (ready to call)</p>}
+            {stats.emailClicks > 0 && <p>• {stats.emailClicks} email clicks (ready to contact)</p>}
+            {stats.downloads > 0 && <p>• {stats.downloads} downloads (high interest)</p>}
+            {stats.copyEvents > 0 && <p>• {stats.copyEvents} text copies (finding value)</p>}
+          </div>
+        </div>
+      )}
+
+      {/* Performance Issues */}
+      {(stats.avgLoadTime > 3000 || stats.jsErrors > 0) && (
+        <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+          <p className="text-sm font-medium text-orange-800">⚠️ Technical Issues</p>
+          <div className="mt-2 space-y-1 text-sm text-orange-700">
+            {stats.avgLoadTime > 3000 && <p>• Slow page load: {Math.round(stats.avgLoadTime/1000)}s (should be &lt;3s)</p>}
+            {stats.jsErrors > 0 && <p>• {stats.jsErrors} JavaScript errors (breaking functionality)</p>}
+          </div>
+        </div>
+      )}
+
       {/* Problem Indicators */}
       {(stats.rageClicks > 0 || stats.deadClicks > 0) && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-4">
@@ -193,7 +223,17 @@ export default function SetupView({
                       dead_click: 'bg-yellow-100 text-yellow-800',
                       scroll_depth: 'bg-teal-100 text-teal-800',
                       time_on_page: 'bg-indigo-100 text-indigo-800',
-                      exit: 'bg-gray-100 text-gray-800'
+                      exit: 'bg-gray-100 text-gray-800',
+                      performance: 'bg-cyan-100 text-cyan-800',
+                      js_error: 'bg-red-200 text-red-900',
+                      phone_click: 'bg-green-200 text-green-900',
+                      email_click: 'bg-green-200 text-green-900',
+                      download_click: 'bg-purple-200 text-purple-900',
+                      copy_text: 'bg-blue-200 text-blue-900',
+                      field_time: 'bg-orange-200 text-orange-900',
+                      field_correction: 'bg-yellow-200 text-yellow-900',
+                      idle: 'bg-gray-200 text-gray-900',
+                      tab_return: 'bg-indigo-200 text-indigo-900'
                     };
                     
                     return (

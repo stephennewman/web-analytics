@@ -70,6 +70,18 @@ export default async function DashboardPage() {
   const scrollEvents = events?.filter(e => e.event_type === 'scroll_depth') || [];
   const maxScrollDepth = scrollEvents.length > 0 ? Math.max(...scrollEvents.map(e => e.data?.depth || 0)) : 0;
 
+  // Performance metrics
+  const perfEvents = events?.filter(e => e.event_type === 'performance') || [];
+  const avgLoadTime = perfEvents.length > 0 ? 
+    Math.round(perfEvents.reduce((sum, e) => sum + (e.data?.load_time || 0), 0) / perfEvents.length) : 0;
+
+  // Conversion intent indicators
+  const phoneClicks = events?.filter(e => e.event_type === 'phone_click').length || 0;
+  const emailClicks = events?.filter(e => e.event_type === 'email_click').length || 0;
+  const downloads = events?.filter(e => e.event_type === 'download_click').length || 0;
+  const jsErrors = events?.filter(e => e.event_type === 'js_error').length || 0;
+  const copyEvents = events?.filter(e => e.event_type === 'copy_text').length || 0;
+
   return (
     <div className="min-h-screen bg-gray-50">
       <nav className="bg-white shadow-sm">
@@ -105,7 +117,13 @@ export default async function DashboardPage() {
             deadClicks,
             exits,
             avgTimeOnPage,
-            maxScrollDepth
+            maxScrollDepth,
+            avgLoadTime,
+            phoneClicks,
+            emailClicks,
+            downloads,
+            jsErrors,
+            copyEvents
           }}
           recentEvents={events || []}
         />
