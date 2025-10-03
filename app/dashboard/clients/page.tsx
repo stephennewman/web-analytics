@@ -34,53 +34,92 @@ export default async function DashboardPage() {
     client = newClient;
   }
 
-  // Get analytics data
-  const { data: events, count: totalEvents } = await supabase
-    .from('events')
-    .select('*', { count: 'exact' })
-    .eq('client_id', client.id)
-    .order('timestamp', { ascending: false })
-    .limit(50);
-
+  // Get sessions with their events
   const { data: sessions } = await supabase
     .from('sessions')
     .select('*')
+    .eq('client_id', client.id)
+    .order('updated_at', { ascending: false })
+    .limit(50);
+
+  // Get all events for these sessions
+  const sessionIds = sessions?.map(s => s.session_id) || [];
+  const { data: allEvents } = await supabase
+    .from('events')
+    .select('*')
+    .eq('client_id', client.id)
+    .in('session_id', sessionIds)
+    .order('timestamp', { ascending: false });
+
+  // Group events by session
+  const sessionEvents: Record<string, any[]> = {};
+  allEvents?.forEach(event => {
+    if (!sessionEvents[event.session_id]) {
+      sessionEvents[event.session_id] = [];
+    }
+    sessionEvents[event.session_id].push(event);
+  });
+
+  // Enrich sessions with their events and calculated metrics
+  const enrichedSessions = sessions?.map(session => {
+    const events = sessionEvents[session.session_id] || [];
+    const pageviews = events.filter(e => e.event_type === 'pageview');
+    const clicks = events.filter(e => e.event_type === 'click');
+    const phoneClicks = events.filter(e => e.event_type === 'phone_click');
+    const emailClicks = events.filter(e => e.event_type === 'email_click');
+    const downloads = events.filter(e => e.event_type === 'download_click');
+    const formSubmits = events.filter(e => e.event_type === 'form_submit');
+    const rageClicks = events.filter(e => e.event_type === 'rage_click');
+    const deadClicks = events.filter(e => e.event_type === 'dead_click');
+    const jsErrors = events.filter(e => e.event_type === 'js_error');
+    const exitEvent = events.find(e => e.event_type === 'exit');
+    const perfEvent = events.find(e => e.event_type === 'performance');
+    const scrollEvents = events.filter(e => e.event_type === 'scroll_depth');
+    
+    const firstEvent = events[events.length - 1];
+    const deviceData = firstEvent?.data || {};
+    
+    return {
+      ...session,
+      events,
+      pageviews: pageviews.length,
+      clicks: clicks.length,
+      phoneClicks: phoneClicks.length,
+      emailClicks: emailClicks.length,
+      downloads: downloads.length,
+      formSubmits: formSubmits.length,
+      rageClicks: rageClicks.length,
+      deadClicks: deadClicks.length,
+      jsErrors: jsErrors.length,
+      timeSpent: exitEvent?.data?.time_spent || 0,
+      scrollDepth: scrollEvents.length > 0 ? Math.max(...scrollEvents.map((e: any) => e.data?.depth || 0)) : 0,
+      loadTime: perfEvent?.data?.load_time || 0,
+      deviceType: deviceData.device_type || 'unknown',
+      referrer: deviceData.referrer || 'direct',
+      landingPage: pageviews[pageviews.length - 1]?.url || '',
+      hasIntent: phoneClicks.length > 0 || emailClicks.length > 0 || downloads.length > 0 || formSubmits.length > 0,
+      hasFrustration: rageClicks.length > 0 || deadClicks.length > 0,
+      hasErrors: jsErrors.length > 0
+    };
+  }) || [];
+
+  // Get summary stats
+  const { count: totalEvents } = await supabase
+    .from('events')
+    .select('*', { count: 'exact', head: true })
     .eq('client_id', client.id);
 
-  const totalSessions = sessions?.length || 0;
-  const convertedSessions = sessions?.filter(s => s.converted).length || 0;
+  const totalSessions = enrichedSessions.length;
+  const convertedSessions = enrichedSessions.filter(s => s.converted).length;
   const conversionRate = totalSessions > 0 ? ((convertedSessions / totalSessions) * 100).toFixed(1) : '0';
 
-  // Get event type counts
-  const pageviews = events?.filter(e => e.event_type === 'pageview').length || 0;
-  const clicks = events?.filter(e => e.event_type === 'click').length || 0;
-  const formStarts = events?.filter(e => e.event_type === 'form_start').length || 0;
-  const formSubmits = events?.filter(e => e.event_type === 'form_submit').length || 0;
-  const conversions = events?.filter(e => e.event_type === 'conversion').length || 0;
-  const rageClicks = events?.filter(e => e.event_type === 'rage_click').length || 0;
-  const deadClicks = events?.filter(e => e.event_type === 'dead_click').length || 0;
-  const exits = events?.filter(e => e.event_type === 'exit').length || 0;
-
-  // Calculate average time on page
-  const timeEvents = events?.filter(e => e.event_type === 'time_on_page' || e.event_type === 'exit') || [];
-  const totalTime = timeEvents.reduce((sum, e) => sum + (e.data?.seconds || e.data?.time_spent || 0), 0);
-  const avgTimeOnPage = timeEvents.length > 0 ? Math.round(totalTime / timeEvents.length) : 0;
-
-  // Calculate average scroll depth
-  const scrollEvents = events?.filter(e => e.event_type === 'scroll_depth') || [];
-  const maxScrollDepth = scrollEvents.length > 0 ? Math.max(...scrollEvents.map(e => e.data?.depth || 0)) : 0;
-
-  // Performance metrics
-  const perfEvents = events?.filter(e => e.event_type === 'performance') || [];
-  const avgLoadTime = perfEvents.length > 0 ? 
-    Math.round(perfEvents.reduce((sum, e) => sum + (e.data?.load_time || 0), 0) / perfEvents.length) : 0;
-
-  // Conversion intent indicators
-  const phoneClicks = events?.filter(e => e.event_type === 'phone_click').length || 0;
-  const emailClicks = events?.filter(e => e.event_type === 'email_click').length || 0;
-  const downloads = events?.filter(e => e.event_type === 'download_click').length || 0;
-  const jsErrors = events?.filter(e => e.event_type === 'js_error').length || 0;
-  const copyEvents = events?.filter(e => e.event_type === 'copy_text').length || 0;
+  // Summary stats
+  const totalPageviews = enrichedSessions.reduce((sum, s) => sum + s.pageviews, 0);
+  const totalClicks = enrichedSessions.reduce((sum, s) => sum + s.clicks, 0);
+  const totalPhoneClicks = enrichedSessions.reduce((sum, s) => sum + s.phoneClicks, 0);
+  const totalEmailClicks = enrichedSessions.reduce((sum, s) => sum + s.emailClicks, 0);
+  const sessionsWithIntent = enrichedSessions.filter(s => s.hasIntent).length;
+  const sessionsWithFrustration = enrichedSessions.filter(s => s.hasFrustration).length;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -103,29 +142,19 @@ export default async function DashboardPage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <SetupView 
           client={client}
+          sessions={enrichedSessions}
           stats={{
-            totalEvents: totalEvents || 0,
-            pageviews,
-            clicks,
-            formStarts,
-            formSubmits,
-            conversions,
             totalSessions,
             convertedSessions,
             conversionRate,
-            rageClicks,
-            deadClicks,
-            exits,
-            avgTimeOnPage,
-            maxScrollDepth,
-            avgLoadTime,
-            phoneClicks,
-            emailClicks,
-            downloads,
-            jsErrors,
-            copyEvents
+            totalPageviews,
+            totalClicks,
+            totalPhoneClicks,
+            totalEmailClicks,
+            sessionsWithIntent,
+            sessionsWithFrustration,
+            totalEvents: totalEvents || 0
           }}
-          recentEvents={events || []}
         />
       </main>
     </div>
