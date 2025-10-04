@@ -155,6 +155,30 @@ Unlike Hotjar/FullStory: focus on conversion killers only, AI-suggested fixes, v
 - ✅ Mobile responsive layouts
 - ✅ Fixed RLS policy for anonymous tracking
 **Deploy method:** Git push to main → Vercel auto-deploy
-**Status:** Deploying...
+**Status:** Live
+
+### 2025-10-04 - Production Deploy #4 ✅
+**Commit:** `40319ef` - Daily digest email feature
+**URL:** https://web-analytics-8sgst7lmz-krezzo.vercel.app
+**Changes:** 7 files changed, 739 insertions(+)
+**New packages:** `resend`, `@react-email/render`
+**New files:**
+- `/api/send-digest/route.ts` - Manual test email endpoint
+- `/api/cron/daily-digest/route.ts` - Automated 8am daily cron
+- `vercel.json` - Cron job configuration
+**Features:**
+- ✅ "Send Test Email" button in dashboard header
+- ✅ Beautiful HTML email template with metrics
+- ✅ Yesterday's data: sessions, conversions, avg time, high-intent signals
+- ✅ Alerts: conversion signals (phone/email/forms) + frustration signals (rage clicks/errors)
+- ✅ Top 5 pages visited with view counts
+- ✅ Email sender: stephen@krezzo.com
+- ✅ Vercel Cron: runs daily at 8am UTC
+**Env vars added:**
+- ✅ `RESEND_API_KEY` (production)
+- ✅ `CRON_SECRET` (production)
+- ⚠️ `SUPABASE_SERVICE_ROLE_KEY` - **TODO: Add for cron job to work**
+**Deploy method:** Git push → Vercel auto-deploy
+**Status:** Live
 
 
