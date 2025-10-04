@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import ClickPath from './ClickPath';
+import ClickAnalysis from './ClickAnalysis';
 
 interface Session {
   id: string;
@@ -154,6 +155,9 @@ export default function SessionFeed({ sessions }: { sessions: Session[] }) {
 
               {/* Click Path */}
               <ClickPath events={session.events} />
+
+              {/* Click Analysis */}
+              <ClickAnalysis events={session.events} />
 
               {/* Core Metrics */}
               <div className="grid grid-cols-5 gap-3 mb-4 pb-4 border-b">
