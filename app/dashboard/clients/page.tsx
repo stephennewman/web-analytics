@@ -79,6 +79,19 @@ export default async function DashboardPage() {
     // Count unique pages visited (not total pageview events)
     const uniquePages = new Set(pageviews.map((e: any) => e.url)).size;
     
+    // Calculate total session time from first to last event
+    let totalTimeSpent = 0;
+    if (events.length > 0) {
+      const sortedEvents = [...events].sort((a, b) => 
+        new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+      );
+      const firstEvent = sortedEvents[0];
+      const lastEvent = sortedEvents[sortedEvents.length - 1];
+      totalTimeSpent = Math.round(
+        (new Date(lastEvent.timestamp).getTime() - new Date(firstEvent.timestamp).getTime()) / 1000
+      );
+    }
+    
     // Find first event with device data (some early pageviews may be empty)
     const firstEventWithData = events.slice().reverse().find((e: any) => e.data?.device_type || e.data?.referrer);
     const deviceData = firstEventWithData?.data || {};
@@ -95,7 +108,7 @@ export default async function DashboardPage() {
       rageClicks: rageClicks.length,
       deadClicks: deadClicks.length,
       jsErrors: jsErrors.length,
-      timeSpent: exitEvent?.data?.time_spent || 0,
+      timeSpent: totalTimeSpent,
       scrollDepth: scrollEvents.length > 0 ? Math.max(...scrollEvents.map((e: any) => e.data?.depth || 0)) : 0,
       loadTime: perfEvent?.data?.load_time || 0,
       deviceType: deviceData.device_type || 'unknown',

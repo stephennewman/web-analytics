@@ -165,7 +165,12 @@ export default function SessionFeed({ sessions }: { sessions: Session[] }) {
                   <p className="text-xs text-gray-500">Clicks</p>
                 </div>
                 <div className="text-center">
-                  <p className="text-2xl font-bold text-gray-900">{session.timeSpent}s</p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {session.timeSpent >= 60 
+                      ? `${Math.floor(session.timeSpent / 60)}m ${session.timeSpent % 60}s`
+                      : `${session.timeSpent}s`
+                    }
+                  </p>
                   <p className="text-xs text-gray-500">Time</p>
                 </div>
                 <div className="text-center">
