@@ -24,6 +24,7 @@ interface Session {
   deadClicks: number;
   jsErrors: number;
   timeSpent: number;
+  activeTime: number;
   scrollDepth: number;
   loadTime: number;
   deviceType: string;
@@ -155,10 +156,10 @@ export default function SessionFeed({ sessions }: { sessions: Session[] }) {
               <ClickPath events={session.events} />
 
               {/* Core Metrics */}
-              <div className="grid grid-cols-4 gap-3 mb-4 pb-4 border-b">
+              <div className="grid grid-cols-5 gap-3 mb-4 pb-4 border-b">
                 <div className="text-center">
                   <p className="text-2xl font-bold text-gray-900">{session.pageviews}</p>
-                  <p className="text-xs text-gray-500">Unique Pages</p>
+                  <p className="text-xs text-gray-500">Pages</p>
                 </div>
                 <div className="text-center">
                   <p className="text-2xl font-bold text-gray-900">{session.clicks}</p>
@@ -167,11 +168,20 @@ export default function SessionFeed({ sessions }: { sessions: Session[] }) {
                 <div className="text-center">
                   <p className="text-2xl font-bold text-gray-900">
                     {session.timeSpent >= 60 
-                      ? `${Math.floor(session.timeSpent / 60)}m ${session.timeSpent % 60}s`
+                      ? `${Math.floor(session.timeSpent / 60)}m`
                       : `${session.timeSpent}s`
                     }
                   </p>
-                  <p className="text-xs text-gray-500">Time</p>
+                  <p className="text-xs text-gray-500">Total Time</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-green-600">
+                    {session.activeTime >= 60 
+                      ? `${Math.floor(session.activeTime / 60)}m`
+                      : `${session.activeTime}s`
+                    }
+                  </p>
+                  <p className="text-xs text-gray-500">Active Time</p>
                 </div>
                 <div className="text-center">
                   <p className="text-2xl font-bold text-gray-900">{session.scrollDepth}%</p>

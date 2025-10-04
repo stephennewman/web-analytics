@@ -81,6 +81,8 @@ export default async function DashboardPage() {
     
     // Calculate total session time from first to last event
     let totalTimeSpent = 0;
+    let activeTime = 0;
+    
     if (events.length > 0) {
       const sortedEvents = [...events].sort((a, b) => 
         new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
@@ -90,6 +92,19 @@ export default async function DashboardPage() {
       totalTimeSpent = Math.round(
         (new Date(lastEvent.timestamp).getTime() - new Date(firstEvent.timestamp).getTime()) / 1000
       );
+      
+      // Calculate active time by excluding idle periods
+      const idleEvents = events.filter(e => e.event_type === 'idle');
+      const tabReturnEvents = events.filter(e => e.event_type === 'tab_return');
+      
+      // Total idle time (60s per idle event)
+      const totalIdleTime = idleEvents.length * 60;
+      
+      // Total time away from tab
+      const totalAwayTime = tabReturnEvents.reduce((sum, e) => sum + (e.data?.away_seconds || 0), 0);
+      
+      // Active time = total time - idle time - away time
+      activeTime = Math.max(0, totalTimeSpent - totalIdleTime - totalAwayTime);
     }
     
     // Find first event with device data (some early pageviews may be empty)
@@ -109,6 +124,7 @@ export default async function DashboardPage() {
       deadClicks: deadClicks.length,
       jsErrors: jsErrors.length,
       timeSpent: totalTimeSpent,
+      activeTime: activeTime,
       scrollDepth: scrollEvents.length > 0 ? Math.max(...scrollEvents.map((e: any) => e.data?.depth || 0)) : 0,
       loadTime: perfEvent?.data?.load_time || 0,
       deviceType: deviceData.device_type || 'unknown',
