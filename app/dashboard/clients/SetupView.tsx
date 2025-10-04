@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import SessionFeed from './SessionFeed';
+import InsightsPanel from './InsightsPanel';
 
 interface Client {
   id: string;
@@ -92,11 +93,11 @@ export default function SetupView({
           </p>
         </div>
       ) : (
-        <SessionFeed sessions={sessions} />
+        <>
+          <InsightsPanel sessions={sessions} />
+          <SessionFeed sessions={sessions} />
+        </>
       )}
-
-
-
     </div>
   );
 }
