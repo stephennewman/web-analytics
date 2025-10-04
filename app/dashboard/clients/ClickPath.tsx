@@ -10,13 +10,24 @@ interface Event {
 
 export default function ClickPath({ events }: { events: Event[] }) {
   // Get only pageview events in chronological order
-  const pageviews = events
+  const allPageviews = events
     .filter(e => e.event_type === 'pageview')
     .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
 
-  if (pageviews.length === 0) {
+  if (allPageviews.length === 0) {
     return null;
   }
+
+  // Remove duplicate consecutive pages (keep first occurrence of each unique URL)
+  const pageviews: Event[] = [];
+  const seenUrls = new Set<string>();
+  
+  allPageviews.forEach(pv => {
+    if (!seenUrls.has(pv.url)) {
+      seenUrls.add(pv.url);
+      pageviews.push(pv);
+    }
+  });
 
   // Extract clean page names
   const getPageName = (url: string) => {
