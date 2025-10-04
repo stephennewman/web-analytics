@@ -49,13 +49,28 @@ export default function NavigationFlow({ sessions }: { sessions: Session[] }) {
   topFlows.sort((a, b) => b.count - a.count);
   const displayFlows = topFlows.slice(0, 8);
 
-  if (displayFlows.length === 0) return null;
+  if (displayFlows.length === 0) {
+    return (
+      <div className="bg-white rounded-lg border border-gray-200 p-6">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+          <span className="text-xl">🗺️</span>
+          Navigation Flow
+        </h3>
+        <p className="text-sm text-gray-500">
+          Not enough navigation data yet. Visit multiple pages to see how users flow through your site.
+        </p>
+      </div>
+    );
+  }
 
   const maxCount = Math.max(...displayFlows.map(f => f.count));
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-6 mb-6 border border-gray-200">
-      <h3 className="text-lg font-bold mb-4 text-gray-800">🗺️ Navigation Flow</h3>
+    <div className="bg-white rounded-lg border border-gray-200 p-6">
+      <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+        <span className="text-xl">🗺️</span>
+        Navigation Flow
+      </h3>
       <p className="text-sm text-gray-600 mb-4">Most common paths visitors take</p>
       
       <div className="space-y-3">

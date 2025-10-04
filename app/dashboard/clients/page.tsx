@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase-server';
 import { redirect } from 'next/navigation';
-import SetupView from './SetupView';
+import ClientWrapper from './ClientWrapper';
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -35,21 +35,30 @@ export default async function DashboardPage() {
   }
 
   // Get sessions with their events
-  const { data: sessions } = await supabase
+  const { data: sessions, error: sessionsError } = await supabase
     .from('sessions')
     .select('*')
     .eq('client_id', client.id)
     .order('updated_at', { ascending: false })
     .limit(50);
 
+  // Debug logging
+  console.log('Client ID:', client.id);
+  console.log('User ID:', user.id);
+  console.log('Sessions query error:', sessionsError);
+  console.log('Sessions found:', sessions?.length || 0);
+
   // Get all events for these sessions
   const sessionIds = sessions?.map(s => s.session_id) || [];
-  const { data: allEvents } = await supabase
+  const { data: allEvents, error: eventsError } = await supabase
     .from('events')
     .select('*')
     .eq('client_id', client.id)
     .in('session_id', sessionIds)
     .order('timestamp', { ascending: false });
+
+  console.log('Events query error:', eventsError);
+  console.log('Events found:', allEvents?.length || 0);
 
   // Group events by session
   const sessionEvents: Record<string, any[]> = {};
@@ -155,42 +164,23 @@ export default async function DashboardPage() {
   const sessionsWithFrustration = enrichedSessions.filter(s => s.hasFrustration).length;
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16 items-center">
-            <h1 className="text-xl font-bold">Web Analytics</h1>
-            <div className="flex items-center gap-4">
-              <span className="text-sm text-gray-600">{user.email}</span>
-              <form action="/api/auth/signout" method="post">
-                <button className="text-sm text-red-600 hover:text-red-700">
-                  Sign out
-                </button>
-              </form>
-            </div>
-          </div>
-        </div>
-      </nav>
-
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <SetupView 
-          client={client}
-          sessions={enrichedSessions}
-          stats={{
-            totalSessions,
-            convertedSessions,
-            conversionRate,
-            totalPageviews,
-            totalClicks,
-            totalPhoneClicks,
-            totalEmailClicks,
-            sessionsWithIntent,
-            sessionsWithFrustration,
-            totalEvents: totalEvents || 0
-          }}
-        />
-      </main>
-    </div>
+    <ClientWrapper
+      email={user.email || ''}
+      client={client}
+      sessions={enrichedSessions}
+      stats={{
+        totalSessions,
+        convertedSessions,
+        conversionRate,
+        totalPageviews,
+        totalClicks,
+        totalPhoneClicks,
+        totalEmailClicks,
+        sessionsWithIntent,
+        sessionsWithFrustration,
+        totalEvents: totalEvents || 0
+      }}
+    />
   );
 }
 

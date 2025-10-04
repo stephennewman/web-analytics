@@ -48,15 +48,30 @@ export default function ExitAnalysis({ sessions }: { sessions: Session[] }) {
   .sort((a, b) => b.count - a.count)
   .slice(0, 6);
 
-  if (exitInsights.length === 0) return null;
+  if (exitInsights.length === 0) {
+    return (
+      <div className="bg-white rounded-lg border border-gray-200 p-6">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+          <span className="text-xl">🚪</span>
+          Exit Page Analysis
+        </h3>
+        <p className="text-sm text-gray-500">
+          Exit analysis will appear here once you have session data.
+        </p>
+      </div>
+    );
+  }
 
   const worstPage = exitInsights.reduce((worst, curr) => 
     curr.bounceRate > worst.bounceRate ? curr : worst
   , exitInsights[0]);
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-6 mb-6 border border-gray-200">
-      <h3 className="text-lg font-bold mb-4 text-gray-800">🚪 Exit Page Analysis</h3>
+    <div className="bg-white rounded-lg border border-gray-200 p-6">
+      <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+        <span className="text-xl">🚪</span>
+        Exit Page Analysis
+      </h3>
       <p className="text-sm text-gray-600 mb-4">Where visitors leave your site</p>
       
       <div className="space-y-3">

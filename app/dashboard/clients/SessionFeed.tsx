@@ -37,10 +37,9 @@ interface Session {
   events: any[];
 }
 
-export default function SessionFeed({ sessions }: { sessions: Session[] }) {
+export default function SessionFeed({ sessions, onSelectSession }: { sessions: Session[], onSelectSession?: (session: Session) => void }) {
   const [filter, setFilter] = useState<'all' | 'converted' | 'intent' | 'issues' | 'errors'>('all');
   const [sortBy, setSortBy] = useState<'recent' | 'time' | 'pageviews'>('recent');
-  const [expandedDebug, setExpandedDebug] = useState<Set<string>>(new Set());
 
   // Filter sessions
   let filteredSessions = sessions;
@@ -56,12 +55,12 @@ export default function SessionFeed({ sessions }: { sessions: Session[] }) {
   return (
     <div className="space-y-6">
       {/* Filters */}
-      <div className="bg-white rounded-lg shadow p-4">
+      <div className="bg-white rounded-lg border border-gray-200 p-4">
         <div className="flex flex-wrap gap-3 items-center">
           <span className="text-sm font-medium text-gray-700">Filter:</span>
           <button
             onClick={() => setFilter('all')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition cursor-pointer ${
               filter === 'all' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
@@ -69,7 +68,7 @@ export default function SessionFeed({ sessions }: { sessions: Session[] }) {
           </button>
           <button
             onClick={() => setFilter('converted')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition cursor-pointer ${
               filter === 'converted' ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
@@ -77,7 +76,7 @@ export default function SessionFeed({ sessions }: { sessions: Session[] }) {
           </button>
           <button
             onClick={() => setFilter('intent')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition cursor-pointer ${
               filter === 'intent' ? 'bg-purple-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
@@ -85,7 +84,7 @@ export default function SessionFeed({ sessions }: { sessions: Session[] }) {
           </button>
           <button
             onClick={() => setFilter('issues')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition cursor-pointer ${
               filter === 'issues' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
@@ -93,7 +92,7 @@ export default function SessionFeed({ sessions }: { sessions: Session[] }) {
           </button>
           <button
             onClick={() => setFilter('errors')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition cursor-pointer ${
               filter === 'errors' ? 'bg-orange-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
@@ -105,7 +104,7 @@ export default function SessionFeed({ sessions }: { sessions: Session[] }) {
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as any)}
-              className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+              className="px-3 py-2 border border-gray-300 rounded-lg text-sm cursor-pointer"
             >
               <option value="recent">Most Recent</option>
               <option value="time">Time Spent</option>
@@ -116,264 +115,74 @@ export default function SessionFeed({ sessions }: { sessions: Session[] }) {
       </div>
 
       {/* Session Feed */}
-      <div className="space-y-4">
+      <div className="space-y-3">
         {filteredSessions.length === 0 ? (
-          <div className="bg-white rounded-lg shadow p-8 text-center text-gray-500">
+          <div className="bg-white rounded-lg border border-gray-200 p-8 text-center text-gray-500">
             No sessions match this filter
           </div>
         ) : (
           filteredSessions.map((session) => (
             <div
               key={session.id}
-              className={`bg-white rounded-lg shadow hover:shadow-lg transition p-6 border-l-4 ${
-                session.converted ? 'border-green-500' :
-                session.hasIntent ? 'border-purple-500' :
-                session.hasFrustration ? 'border-blue-400' :
-                session.hasErrors ? 'border-orange-500' :
-                'border-gray-300'
+              onClick={() => onSelectSession?.(session)}
+              className={`bg-white rounded-lg border border-gray-200 hover:border-purple-300 hover:shadow-md transition p-5 cursor-pointer border-l-4 ${
+                session.converted ? 'border-l-green-500' :
+                session.hasIntent ? 'border-l-purple-500' :
+                session.hasFrustration ? 'border-l-blue-400' :
+                session.hasErrors ? 'border-l-orange-500' :
+                'border-l-gray-300'
               }`}
             >
               {/* Header */}
-              <div className="flex items-start justify-between mb-4">
+              <div className="flex items-start justify-between mb-3">
                 <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
-                    <span className="font-mono text-sm text-gray-500">
-                      {session.session_id.substring(4, 16)}...
-                    </span>
-                    {session.converted && <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-medium">✅ Converted</span>}
-                    {session.hasIntent && <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded text-xs font-medium">🎯 High Intent</span>}
-                    {session.hasFrustration && <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-medium">🔍 Curious</span>}
-                    {session.hasErrors && <span className="bg-orange-100 text-orange-800 px-2 py-1 rounded text-xs font-medium">🐛 Errors</span>}
+                  <div className="flex items-center gap-2 mb-1.5">
+                    {session.converted && <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded text-xs font-medium">✓ Converted</span>}
+                    {session.hasIntent && <span className="bg-purple-100 text-purple-700 px-2 py-0.5 rounded text-xs font-medium">🎯 High Intent</span>}
+                    {session.hasFrustration && <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-medium">🔍 Curious</span>}
+                    {session.hasErrors && <span className="bg-orange-100 text-orange-700 px-2 py-0.5 rounded text-xs font-medium">⚠️ Errors</span>}
                   </div>
-                  <p className="text-sm text-gray-600 truncate">{session.landingPage || 'Unknown page'}</p>
+                  <p className="text-sm text-gray-900 font-medium truncate">{session.landingPage || 'Unknown page'}</p>
+                  <p className="text-xs text-gray-500 mt-1">{session.deviceType} · {new Date(session.updated_at).toLocaleTimeString()}</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-xs text-gray-500">{new Date(session.updated_at).toLocaleString()}</p>
-                  <p className="text-xs text-gray-400">{session.deviceType}</p>
+                  <svg className="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
                 </div>
               </div>
 
-              {/* Click Path */}
-              <ClickPath events={session.events} />
-
-              {/* Click Analysis */}
-              <ClickAnalysis events={session.events} />
-
-              {/* Core Metrics */}
-              <div className="grid grid-cols-5 gap-3 mb-4 pb-4 border-b">
+              {/* Quick Metrics */}
+              <div className="grid grid-cols-5 gap-2">
                 <div className="text-center">
-                  <p className="text-2xl font-bold text-gray-900">{session.pageviews}</p>
+                  <p className="text-lg font-bold text-gray-900">{session.pageviews}</p>
                   <p className="text-xs text-gray-500">Pages</p>
                 </div>
                 <div className="text-center">
-                  <p className="text-2xl font-bold text-gray-900">{session.clicks}</p>
+                  <p className="text-lg font-bold text-gray-900">{session.clicks}</p>
                   <p className="text-xs text-gray-500">Clicks</p>
                 </div>
                 <div className="text-center">
-                  <p className="text-2xl font-bold text-gray-900">
+                  <p className="text-lg font-bold text-gray-900">
                     {session.timeSpent >= 60 
                       ? `${Math.floor(session.timeSpent / 60)}m`
                       : `${session.timeSpent}s`
                     }
                   </p>
-                  <p className="text-xs text-gray-500">Total Time</p>
+                  <p className="text-xs text-gray-500">Time</p>
                 </div>
                 <div className="text-center">
-                  <p className="text-2xl font-bold text-green-600">
-                    {session.activeTime >= 60 
-                      ? `${Math.floor(session.activeTime / 60)}m`
-                      : `${session.activeTime}s`
-                    }
-                  </p>
-                  <p className="text-xs text-gray-500">Active Time</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-2xl font-bold text-gray-900">{session.scrollDepth}%</p>
+                  <p className="text-lg font-bold text-purple-600">{session.scrollDepth}%</p>
                   <p className="text-xs text-gray-500">Scroll</p>
                 </div>
-              </div>
-
-              {/* Conversion Signals */}
-              {(session.phoneClicks > 0 || session.emailClicks > 0 || session.downloads > 0 || session.formSubmits > 0) && (
-                <div className="mb-4 pb-4 border-b">
-                  <h4 className="text-xs font-semibold text-green-700 mb-2">🎯 CONVERSION SIGNALS</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {session.phoneClicks > 0 && <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-medium">📞 {session.phoneClicks} phone clicks</span>}
-                    {session.emailClicks > 0 && <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-medium">✉️ {session.emailClicks} email clicks</span>}
-                    {session.downloads > 0 && <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-medium">📥 {session.downloads} downloads</span>}
-                    {session.formSubmits > 0 && <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-medium">✅ {session.formSubmits} form submits</span>}
-                  </div>
+                <div className="text-center">
+                  {session.phoneClicks > 0 || session.emailClicks > 0 ? (
+                    <p className="text-lg font-bold text-green-600">🎯</p>
+                  ) : (
+                    <p className="text-lg font-bold text-gray-300">—</p>
+                  )}
+                  <p className="text-xs text-gray-500">Intent</p>
                 </div>
-              )}
-
-              {/* Exploratory Behavior */}
-              {(session.rageClicks > 0 || session.deadClicks > 0 || session.jsErrors > 0) && (
-                <div className="mb-4 pb-4 border-b">
-                  <h4 className="text-xs font-semibold text-blue-700 mb-2">🔍 EXPLORATORY BEHAVIOR</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {session.rageClicks > 0 && <span className="bg-red-100 text-red-800 px-3 py-1 rounded-full text-xs font-medium">😡 {session.rageClicks} rage clicks</span>}
-                    {session.deadClicks > 0 && <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-xs font-medium">🔍 {session.deadClicks} curious clicks</span>}
-                    {session.jsErrors > 0 && <span className="bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-xs font-medium">🐛 {session.jsErrors} JS errors</span>}
-                  </div>
-                </div>
-              )}
-
-              {/* Engagement Details */}
-              <div className="mb-4">
-                <h4 className="text-xs font-semibold text-gray-600 mb-2">📊 ENGAGEMENT</h4>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
-                  {session.events.filter(e => e.event_type === 'copy_text').length > 0 && (
-                    <div className="bg-blue-50 px-2 py-1 rounded">
-                      📋 {session.events.filter(e => e.event_type === 'copy_text').length} text copies
-                    </div>
-                  )}
-                  {session.events.filter(e => e.event_type === 'tab_return').length > 0 && (
-                    <div className="bg-indigo-50 px-2 py-1 rounded">
-                      👁️ {session.events.filter(e => e.event_type === 'tab_return').length} tab switches
-                    </div>
-                  )}
-                  {session.events.filter(e => e.event_type === 'idle').length > 0 && (
-                    <div className="bg-gray-50 px-2 py-1 rounded">
-                      💤 {session.events.filter(e => e.event_type === 'idle').length} idle periods
-                    </div>
-                  )}
-                  {session.events.filter(e => e.event_type === 'orientation_change').length > 0 && (
-                    <div className="bg-purple-50 px-2 py-1 rounded">
-                      🔄 {session.events.filter(e => e.event_type === 'orientation_change').length} rotations
-                    </div>
-                  )}
-                  {session.events.filter(e => e.event_type === 'field_correction').length > 0 && (
-                    <div className="bg-yellow-50 px-2 py-1 rounded">
-                      ✏️ {session.events.filter(e => e.event_type === 'field_correction').length} field corrections
-                    </div>
-                  )}
-                  {session.events.filter(e => e.event_type === 'field_time').length > 0 && (
-                    <div className="bg-orange-50 px-2 py-1 rounded">
-                      ⏱️ {session.events.filter(e => e.event_type === 'field_time').length} field interactions
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Technical Details */}
-              <div className="text-xs text-gray-600 space-y-1">
-                {session.loadTime > 0 && (
-                  <div className={`${session.loadTime > 3000 ? 'text-orange-600 font-medium' : ''}`}>
-                    ⚡ Load time: {(session.loadTime / 1000).toFixed(2)}s {session.loadTime > 3000 && '(SLOW!)'}
-                  </div>
-                )}
-                {(() => {
-                  const firstEvent = session.events[session.events.length - 1];
-                  const screenWidth = firstEvent?.data?.screen_width;
-                  const screenHeight = firstEvent?.data?.screen_height;
-                  const viewportWidth = firstEvent?.data?.viewport_width;
-                  const viewportHeight = firstEvent?.data?.viewport_height;
-                  
-                  if (screenWidth && screenHeight) {
-                    return (
-                      <div>
-                        📱 Screen: {screenWidth}x{screenHeight} {viewportWidth && viewportHeight && `(viewport: ${viewportWidth}x${viewportHeight})`}
-                      </div>
-                    );
-                  }
-                  return null;
-                })()}
-                {session.referrer !== 'direct' && (
-                  <div>🔗 From: {session.referrer}</div>
-                )}
-                {/* Location data - prefer session columns, fallback to event data */}
-                {(() => {
-                  const firstEvent = session.events[session.events.length - 1];
-                  const eventGeo = firstEvent?.data?._geo;
-                  
-                  // Use session columns first, then fallback to event data
-                  const city = session.city || eventGeo?.city;
-                  const region = session.region || eventGeo?.region;
-                  const country = session.country || eventGeo?.country;
-                  const timezone = session.timezone || firstEvent?.data?.timezone;
-                  const language = session.language || firstEvent?.data?.language;
-                  
-                  return (
-                    <>
-                      {(city || region || country) && (
-                        <div className="bg-blue-50 px-2 py-1 rounded flex items-center gap-1">
-                          🌍 {city ? `${city}, ` : ''}{region ? `${region}, ` : ''}{country || 'Unknown'}
-                        </div>
-                      )}
-                      {timezone && (
-                        <div className="text-gray-500">
-                          🕐 {timezone}
-                        </div>
-                      )}
-                      {language && (
-                        <div className="text-gray-500">
-                          🗣️ {language}
-                        </div>
-                      )}
-                    </>
-                  );
-                })()}
-                {(() => {
-                  const firstEvent = session.events[session.events.length - 1];
-                  const utm = firstEvent?.data?.utm;
-                  if (utm) {
-                    return (
-                      <div className="bg-purple-50 px-2 py-1 rounded">
-                        📢 Campaign: {utm.utm_source || ''} / {utm.utm_medium || ''} {utm.utm_campaign && `/ ${utm.utm_campaign}`}
-                      </div>
-                    );
-                  }
-                  return null;
-                })()}
-              </div>
-
-              {/* Debug Section - Toggle */}
-              <div className="mt-4 pt-4 border-t">
-                <button
-                  onClick={() => {
-                    const newExpanded = new Set(expandedDebug);
-                    if (newExpanded.has(session.id)) {
-                      newExpanded.delete(session.id);
-                    } else {
-                      newExpanded.add(session.id);
-                    }
-                    setExpandedDebug(newExpanded);
-                  }}
-                  className="text-xs text-gray-500 hover:text-gray-700 font-mono"
-                >
-                  {expandedDebug.has(session.id) ? '▼' : '▶'} Debug Data
-                </button>
-                
-                {expandedDebug.has(session.id) && (
-                  <div className="mt-2 p-3 bg-gray-900 text-green-400 rounded font-mono text-xs overflow-x-auto">
-                    <div className="space-y-2">
-                      <div><strong>Session Columns:</strong></div>
-                      <div className="ml-4">
-                        <div>country: {session.country || 'null'}</div>
-                        <div>region: {session.region || 'null'}</div>
-                        <div>city: {session.city || 'null'}</div>
-                        <div>timezone: {session.timezone || 'null'}</div>
-                        <div>language: {session.language || 'null'}</div>
-                      </div>
-                      
-                      <div className="mt-3"><strong>First Event Data:</strong></div>
-                      <div className="ml-4">
-                        {(() => {
-                          const firstEvent = session.events[session.events.length - 1];
-                          if (!firstEvent) return <div>No events</div>;
-                          return (
-                            <>
-                              <div>_geo: {JSON.stringify(firstEvent?.data?._geo || null)}</div>
-                              <div>timezone: {firstEvent?.data?.timezone || 'null'}</div>
-                              <div>language: {firstEvent?.data?.language || 'null'}</div>
-                              <div>utm: {JSON.stringify(firstEvent?.data?.utm || null)}</div>
-                            </>
-                          );
-                        })()}
-                      </div>
-                    </div>
-                  </div>
-                )}
               </div>
             </div>
           ))

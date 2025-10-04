@@ -15,7 +15,19 @@ interface Session {
 }
 
 export default function InsightsPanel({ sessions }: { sessions: Session[] }) {
-  if (sessions.length === 0) return null;
+  if (sessions.length === 0) {
+    return (
+      <div className="bg-white rounded-lg border border-gray-200 p-6">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+          <span className="text-xl">💡</span>
+          AI Insights
+        </h3>
+        <p className="text-sm text-gray-500">
+          AI insights will appear here once you have visitor data to analyze.
+        </p>
+      </div>
+    );
+  }
 
   // 1. Performance insight
   const avgLoadTime = sessions
@@ -46,102 +58,127 @@ export default function InsightsPanel({ sessions }: { sessions: Session[] }) {
   const slowLoadConverted = sessions.filter(s => s.loadTime > 3000 && s.converted).length;
 
   return (
-    <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg shadow-lg p-6 mb-6 border-2 border-blue-200">
-      <h3 className="text-xl font-bold mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-        💡 AI Insights
+    <div className="bg-white rounded-lg border border-gray-200 p-6">
+      <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+        <span className="text-xl">💡</span>
+        AI Insights
       </h3>
       
-      <div className="space-y-4">
+      <div className="space-y-3">
         {/* Performance Alert */}
         {avgLoadTime > 2000 && (
-          <div className="bg-orange-100 border-l-4 border-orange-500 p-4 rounded">
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-2xl">🐌</span>
-              <h4 className="font-bold text-orange-900">Speed Alert</h4>
+          <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+            <div className="flex items-start gap-3">
+              <div className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                <span className="text-lg">🐌</span>
+              </div>
+              <div className="flex-1">
+                <h4 className="font-semibold text-orange-900 mb-1">Speed Alert</h4>
+                <p className="text-sm text-orange-800 leading-relaxed">
+                  Average load time is <strong>{(avgLoadTime / 1000).toFixed(2)}s</strong>.
+                  {slowSessions > 0 && ` ${slowSessions} sessions saw 3s+ load times.`}
+                  <br />
+                  <span className="text-orange-600 mt-1 inline-block">Every 1s delay = 7% fewer conversions.</span>
+                </p>
+              </div>
             </div>
-            <p className="text-sm text-orange-800">
-              Average load time is <strong>{(avgLoadTime / 1000).toFixed(2)}s</strong>.
-              {slowSessions > 0 && ` ${slowSessions} sessions saw 3s+ load times.`}
-              <br />
-              💡 <strong>Every 1s delay = 7% fewer conversions.</strong>
-            </p>
           </div>
         )}
 
         {/* Bounce Rate Alert */}
         {parseInt(bounceRate) > 40 && (
-          <div className="bg-red-100 border-l-4 border-red-500 p-4 rounded">
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-2xl">🚪</span>
-              <h4 className="font-bold text-red-900">High Bounce Rate</h4>
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+            <div className="flex items-start gap-3">
+              <div className="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                <span className="text-lg">🚪</span>
+              </div>
+              <div className="flex-1">
+                <h4 className="font-semibold text-red-900 mb-1">High Bounce Rate</h4>
+                <p className="text-sm text-red-800 leading-relaxed">
+                  <strong>{bounceRate}%</strong> of visitors leave without scrolling or clicking.
+                  <br />
+                  <span className="text-red-600 mt-1 inline-block">Fix: Improve above-the-fold content, add compelling headlines.</span>
+                </p>
+              </div>
             </div>
-            <p className="text-sm text-red-800">
-              <strong>{bounceRate}%</strong> of visitors leave without scrolling or clicking.
-              <br />
-              💡 <strong>Fix:</strong> Improve above-the-fold content, add compelling headlines.
-            </p>
           </div>
         )}
 
         {/* Almost Converted */}
         {almostConverted > 0 && (
-          <div className="bg-yellow-100 border-l-4 border-yellow-500 p-4 rounded">
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-2xl">🎯</span>
-              <h4 className="font-bold text-yellow-900">So Close!</h4>
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+            <div className="flex items-start gap-3">
+              <div className="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                <span className="text-lg">🎯</span>
+              </div>
+              <div className="flex-1">
+                <h4 className="font-semibold text-yellow-900 mb-1">So Close!</h4>
+                <p className="text-sm text-yellow-800 leading-relaxed">
+                  <strong>{almostConverted} visitors</strong> showed high intent (clicked phone/email/forms) but didn't convert.
+                  <br />
+                  <span className="text-yellow-700 mt-1 inline-block">Fix: Add urgency, social proof, or remove friction in your forms.</span>
+                </p>
+              </div>
             </div>
-            <p className="text-sm text-yellow-800">
-              <strong>{almostConverted} visitors</strong> showed high intent (clicked phone/email/forms) but didn't convert.
-              <br />
-              💡 <strong>Fix:</strong> Add urgency, social proof, or remove friction in your forms.
-            </p>
           </div>
         )}
 
         {/* Returning Visitors */}
         {returningVisitors > 0 && (
-          <div className="bg-green-100 border-l-4 border-green-500 p-4 rounded">
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-2xl">🔁</span>
-              <h4 className="font-bold text-green-900">Returning Interest</h4>
+          <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+            <div className="flex items-start gap-3">
+              <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                <span className="text-lg">🔁</span>
+              </div>
+              <div className="flex-1">
+                <h4 className="font-semibold text-green-900 mb-1">Returning Interest</h4>
+                <p className="text-sm text-green-800 leading-relaxed">
+                  <strong>{returningVisitors} visitors</strong> came back to your tab after browsing elsewhere.
+                  <br />
+                  <span className="text-green-700 mt-1 inline-block">This is high-intent behavior - they're comparing options!</span>
+                </p>
+              </div>
             </div>
-            <p className="text-sm text-green-800">
-              <strong>{returningVisitors} visitors</strong> came back to your tab after browsing elsewhere.
-              <br />
-              💡 This is <strong>high-intent behavior</strong> - they're comparing options!
-            </p>
           </div>
         )}
 
         {/* Deep Engagement */}
         {deepEngagement > 0 && (
-          <div className="bg-purple-100 border-l-4 border-purple-500 p-4 rounded">
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-2xl">📚</span>
-              <h4 className="font-bold text-purple-900">Deep Readers</h4>
+          <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+            <div className="flex items-start gap-3">
+              <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                <span className="text-lg">📚</span>
+              </div>
+              <div className="flex-1">
+                <h4 className="font-semibold text-purple-900 mb-1">Deep Readers</h4>
+                <p className="text-sm text-purple-800 leading-relaxed">
+                  <strong>{deepEngagement} visitors</strong> scrolled to 100% on multiple pages.
+                  <br />
+                  <span className="text-purple-700 mt-1 inline-block">They're highly engaged - perfect for retargeting!</span>
+                </p>
+              </div>
             </div>
-            <p className="text-sm text-purple-800">
-              <strong>{deepEngagement} visitors</strong> scrolled to 100% on multiple pages.
-              <br />
-              💡 They're <strong>highly engaged</strong> - perfect for retargeting!
-            </p>
           </div>
         )}
 
         {/* Performance vs Conversion */}
         {(fastLoadConverted > 0 || slowLoadConverted > 0) && (
-          <div className="bg-blue-100 border-l-4 border-blue-500 p-4 rounded">
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-2xl">⚡</span>
-              <h4 className="font-bold text-blue-900">Speed = Money</h4>
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div className="flex items-start gap-3">
+              <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                <span className="text-lg">⚡</span>
+              </div>
+              <div className="flex-1">
+                <h4 className="font-semibold text-blue-900 mb-1">Speed = Money</h4>
+                <p className="text-sm text-blue-800 leading-relaxed">
+                  Fast loading pages (&lt;2s): <strong>{fastLoadConverted} conversions</strong>
+                  <br />
+                  Slow loading pages (&gt;3s): <strong>{slowLoadConverted} conversions</strong>
+                  <br />
+                  <span className="text-blue-700 mt-1 inline-block">Optimize images, use a CDN, minimize JavaScript.</span>
+                </p>
+              </div>
             </div>
-            <p className="text-sm text-blue-800">
-              Fast loading pages (&lt;2s): <strong>{fastLoadConverted} conversions</strong>
-              <br />
-              Slow loading pages (&gt;3s): <strong>{slowLoadConverted} conversions</strong>
-              <br />
-              💡 <strong>Optimize images, use a CDN, minimize JavaScript.</strong>
-            </p>
           </div>
         )}
       </div>

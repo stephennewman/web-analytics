@@ -77,15 +77,30 @@ export default function ScrollEngagement({ sessions }: { sessions: Session[] }) 
     avgScroll: stats.total > 0 ? Math.round(stats.avgScroll / stats.total) : 0,
   })).filter(i => i.total > 0);
 
-  if (insights.length === 0) return null;
+  if (insights.length === 0) {
+    return (
+      <div className="bg-white rounded-lg border border-gray-200 p-6">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+          <span className="text-xl">📖</span>
+          Scroll Engagement Patterns
+        </h3>
+        <p className="text-sm text-gray-500">
+          Scroll patterns will appear here once visitors interact with your pages.
+        </p>
+      </div>
+    );
+  }
 
   const bestPattern = insights.reduce((best, curr) => 
     curr.conversionRate > best.conversionRate ? curr : best
   , insights[0]);
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-6 mb-6 border border-gray-200">
-      <h3 className="text-lg font-bold mb-4 text-gray-800">📖 Scroll Engagement Patterns</h3>
+    <div className="bg-white rounded-lg border border-gray-200 p-6">
+      <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+        <span className="text-xl">📖</span>
+        Scroll Engagement Patterns
+      </h3>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
         {insights.map(insight => {

@@ -6,7 +6,19 @@ interface Session {
 }
 
 export default function TimeOfDayHeatmap({ sessions }: { sessions: Session[] }) {
-  if (sessions.length === 0) return null;
+  if (sessions.length === 0) {
+    return (
+      <div className="bg-white rounded-lg border border-gray-200 p-6">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+          <span className="text-xl">⏰</span>
+          Time-of-Day Patterns
+        </h3>
+        <p className="text-sm text-gray-500">
+          Time patterns will appear here once you have visitor data.
+        </p>
+      </div>
+    );
+  }
 
   // Analyze sessions by hour
   const hourlyData: Record<number, { total: number; converted: number }> = {};
@@ -56,8 +68,11 @@ export default function TimeOfDayHeatmap({ sessions }: { sessions: Session[] }) 
   const nightConvRate = nightStats.total > 0 ? (nightStats.converted / nightStats.total) * 100 : 0;
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-6 mb-6 border border-gray-200">
-      <h3 className="text-lg font-bold mb-4 text-gray-800">⏰ Time-of-Day Patterns</h3>
+    <div className="bg-white rounded-lg border border-gray-200 p-6">
+      <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+        <span className="text-xl">⏰</span>
+        Time-of-Day Patterns
+      </h3>
       
       {/* Day vs Night */}
       <div className="grid grid-cols-2 gap-4 mb-6">

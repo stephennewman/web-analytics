@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Analytics Test Page</title>
+  
+  <!-- YOUR TRACKING SCRIPT -->
+  <script src="http://localhost:3000/track.js?id=21ab0e04-d89e-450a-b5d4-ffd6330dcaeb"></script>
+  
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+      line-height: 1.6;
+    }
+    button, a {
+      display: inline-block;
+      padding: 12px 24px;
+      margin: 10px 5px;
+      background: #6366f1;
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    button:hover, a:hover {
+      background: #4f46e5;
+    }
+    .content {
+      margin-top: 30px;
+      height: 2000px;
+      background: linear-gradient(to bottom, #f0f9ff, #dbeafe, #bfdbfe);
+      padding: 20px;
+      border-radius: 12px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🧪 Analytics Test Page</h1>
+  <p>This page will generate test analytics data. Try these actions:</p>
+  
+  <div>
+    <a href="tel:555-1234">📞 Call Us</a>
+    <a href="mailto:test@example.com">✉️ Email Us</a>
+    <button onclick="webAnalytics.conversion()">✅ Convert!</button>
+    <button onclick="alert('Test click!')">🔘 Regular Click</button>
+  </div>
+  
+  <div class="content">
+    <h2>Scroll down to generate scroll events!</h2>
+    <p>Keep scrolling... 25% tracked...</p>
+    <div style="margin-top: 400px;">
+      <p>50% scroll depth...</p>
+    </div>
+    <div style="margin-top: 400px;">
+      <p>75% scroll depth...</p>
+    </div>
+    <div style="margin-top: 400px;">
+      <p>100% scroll depth! 🎉</p>
+    </div>
+  </div>
+
+  <script>
+    // Generate some automated activity
+    setTimeout(() => {
+      console.log('📊 Analytics tracking is active!');
+      console.log('Try clicking the buttons and scrolling down.');
+    }, 1000);
+
+    // Simulate some engagement
+    setTimeout(() => {
+      window.scrollTo({ top: 300, behavior: 'smooth' });
+    }, 2000);
+  </script>
+</body>
+</html>
+

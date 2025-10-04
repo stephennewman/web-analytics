@@ -12,7 +12,19 @@ interface Session {
 }
 
 export default function DeviceLocationInsights({ sessions }: { sessions: Session[] }) {
-  if (sessions.length === 0) return null;
+  if (sessions.length === 0) {
+    return (
+      <div className="bg-white rounded-lg border border-gray-200 p-6">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+          <span className="text-xl">📱</span>
+          Device & Location Intel
+        </h3>
+        <p className="text-sm text-gray-500">
+          No device data yet. Session data will appear here once you start tracking visitors.
+        </p>
+      </div>
+    );
+  }
 
   // Device performance
   const deviceStats: Record<string, { total: number; converted: number; avgTime: number; avgPages: number }> = {};
@@ -69,8 +81,11 @@ export default function DeviceLocationInsights({ sessions }: { sessions: Session
   const bestLocation = locationInsights.length > 0 ? locationInsights[0] : null;
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-6 mb-6 border border-gray-200">
-      <h3 className="text-lg font-bold mb-4 text-gray-800">📱 Device & Location Intel</h3>
+    <div className="bg-white rounded-lg border border-gray-200 p-6">
+      <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+        <span className="text-xl">📱</span>
+        Device & Location Intel
+      </h3>
       
       {/* Device Breakdown */}
       <div className="mb-6">

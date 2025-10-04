@@ -10,7 +10,19 @@ export default function BestPath({ sessions }: { sessions: Session[] }) {
   const convertedSessions = sessions.filter(s => s.converted);
   const nonConvertedSessions = sessions.filter(s => !s.converted);
 
-  if (convertedSessions.length === 0) return null;
+  if (convertedSessions.length === 0) {
+    return (
+      <div className="bg-white rounded-lg border border-gray-200 p-6">
+        <h3 className="text-lg font-semibold text-gray-900 mb-2 flex items-center gap-2">
+          <span className="text-xl">🏆</span>
+          Winning Formula
+        </h3>
+        <p className="text-sm text-gray-500">
+          No conversions yet. Once you track conversions, we'll show you which pages drive the most success.
+        </p>
+      </div>
+    );
+  }
 
   // Analyze converted sessions for common patterns
   const convertedPaths = convertedSessions.map(s => {
@@ -62,8 +74,11 @@ export default function BestPath({ sessions }: { sessions: Session[] }) {
   const avgPathLength = convertedPaths.reduce((sum, p) => sum + p.length, 0) / convertedPaths.length;
 
   return (
-    <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg shadow-lg p-6 mb-6 border-2 border-green-200">
-      <h3 className="text-lg font-bold mb-2 text-green-800">🏆 Winning Formula</h3>
+    <div className="bg-white rounded-lg border border-gray-200 p-6">
+      <h3 className="text-lg font-semibold text-gray-900 mb-2 flex items-center gap-2">
+        <span className="text-xl">🏆</span>
+        Winning Formula
+      </h3>
       <p className="text-sm text-green-700 mb-4">
         Converted visitors view <strong>{avgPathLength.toFixed(1)} pages</strong> on average
       </p>
