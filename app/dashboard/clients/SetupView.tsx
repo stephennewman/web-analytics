@@ -3,6 +3,12 @@
 import { useState } from 'react';
 import SessionFeed from './SessionFeed';
 import InsightsPanel from './InsightsPanel';
+import NavigationFlow from './NavigationFlow';
+import BestPath from './BestPath';
+import DeviceLocationInsights from './DeviceLocationInsights';
+import TimeOfDayHeatmap from './TimeOfDayHeatmap';
+import ExitAnalysis from './ExitAnalysis';
+import ScrollEngagement from './ScrollEngagement';
 
 interface Client {
   id: string;
@@ -95,6 +101,18 @@ export default function SetupView({
       ) : (
         <>
           <InsightsPanel sessions={sessions} />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <BestPath sessions={sessions} />
+            <NavigationFlow sessions={sessions} />
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <DeviceLocationInsights sessions={sessions} />
+            <TimeOfDayHeatmap sessions={sessions} />
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <ScrollEngagement sessions={sessions} />
+            <ExitAnalysis sessions={sessions} />
+          </div>
           <SessionFeed sessions={sessions} />
         </>
       )}
