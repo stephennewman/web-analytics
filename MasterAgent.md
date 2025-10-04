@@ -117,11 +117,14 @@ Unlike Hotjar/FullStory: focus on conversion killers only, AI-suggested fixes, v
 ### 2025-10-04 - Dashboard Redesign: Modern SaaS UI ✅
 **Major UI/UX overhaul inspired by Hotjar/FullStory:**
 - **Two-panel layout:** 
-  - Left sidebar (15-20%): Logo, navigation (Dashboard/Visitors/Insights/Settings), user profile
+  - Left sidebar (15-20%): Logo, navigation (Dashboard/Live/Visitors/Insights), user profile
   - Main area (80-85%): Scrollable content with sticky header
-- **Sticky header:** Title, user email, sign out button
-- **Quick stats bar:** 5-card grid showing Sessions/Pageviews/Conversion/High Intent/Curious Explorers
-- **Filter/Sort system:** Dropdown filters (All/Converted/High Intent/Curious/Errors) + Sort by (Recent/Longest/Most Clicks)
+- **Sticky header:** View title (Dashboard/Live/Visitors/Insights)
+- **Working navigation system:**
+  - Dashboard: Quick stats bar (5 metrics) + AI insights overview
+  - Live: Real-time visitors (5min window) with current page, location, device
+  - Visitors: Full session feed with filters/sort, clickable for details
+  - Insights: Analytics widgets (navigation flow, scroll, exits, time-of-day, device intel)
 - **Modern card-based sections:**
   - AI Insights: Stacked cards with icon badges and actionable tips
   - Winning Formula: Conversion-driving pages analysis
@@ -130,10 +133,28 @@ Unlike Hotjar/FullStory: focus on conversion killers only, AI-suggested fixes, v
   - Time-of-Day Patterns: Hourly heatmap + day/night breakdown
   - Scroll Engagement: Reader/Scanner/Bouncer patterns
   - Exit Page Analysis: Bounce rate and scroll depth per page
-  - Visitor Sessions: Simplified clickable cards
 - **Session detail slide-over panel:** Right-side overlay showing full session details, journey path, click activity, engagement metrics, debug data
 - **Design system:** Clean whites/grays, purple accent, subtle borders, consistent padding, rounded cards, hover states
 - **Mobile responsive:** Grid layouts adapt to single-column on mobile, tap targets 44px+, readable fonts
-- **Build successful:** 11 routes compiled, 124 kB shared JS
+- **Bug fixes:** RLS policy for tracking script, all cursor pointers added, empty states for all widgets
+- **Build successful:** 11 routes compiled, 125 kB shared JS
+
+### 2025-10-04 - Production Deploy #3 ✅
+**Commit:** `0fba135` - Modern dashboard redesign
+**Changes:** 18 files changed, 1074 insertions(+), 421 deletions(-)
+**New files:**
+- `ClientWrapper.tsx` - View state management
+- `Sidebar.tsx` - Navigation component
+- `SessionDetailPanel.tsx` - Session detail slide-over
+- `AUTH_DEBUG.md`, `DEBUG_INSTRUCTIONS.md` - Debug documentation
+**Features:**
+- ✅ 4-view navigation system (Dashboard/Live/Visitors/Insights)
+- ✅ Live visitor tracking with real-time updates
+- ✅ Session detail panels with full journey data
+- ✅ Modern card-based UI with clean design
+- ✅ Mobile responsive layouts
+- ✅ Fixed RLS policy for anonymous tracking
+**Deploy method:** Git push to main → Vercel auto-deploy
+**Status:** Deploying...
 
 
