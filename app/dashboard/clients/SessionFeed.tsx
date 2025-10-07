@@ -35,6 +35,8 @@ interface Session {
   hasFrustration: boolean;
   hasErrors: boolean;
   events: any[];
+  siteName?: string;
+  siteDomain?: string;
 }
 
 export default function SessionFeed({ sessions, onSelectSession }: { sessions: Session[], onSelectSession?: (session: Session) => void }) {
@@ -141,6 +143,11 @@ export default function SessionFeed({ sessions, onSelectSession }: { sessions: S
                     {session.hasIntent && <span className="bg-purple-100 text-purple-700 px-2 py-0.5 rounded text-xs font-medium">🎯 High Intent</span>}
                     {session.hasFrustration && <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-medium">🔍 Curious</span>}
                     {session.hasErrors && <span className="bg-orange-100 text-orange-700 px-2 py-0.5 rounded text-xs font-medium">⚠️ Errors</span>}
+                    {session.siteName && (
+                      <span className="bg-gray-100 text-gray-700 px-2 py-0.5 rounded text-xs font-medium">
+                        {session.siteName} {session.siteDomain && `(${session.siteDomain})`}
+                      </span>
+                    )}
                   </div>
                   <p className="text-sm text-gray-900 font-medium truncate">{session.landingPage || 'Unknown page'}</p>
                   <p className="text-xs text-gray-500 mt-1">{session.deviceType} · {new Date(session.updated_at).toLocaleTimeString()}</p>

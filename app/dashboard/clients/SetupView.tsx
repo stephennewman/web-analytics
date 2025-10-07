@@ -61,40 +61,62 @@ export default function SetupView({
   // Render different views based on activeView
   const renderView = () => {
     if (sessions.length === 0) {
-      return (
-        <div className="bg-white rounded-lg border border-gray-200 p-8">
-          <div className="max-w-2xl mx-auto text-center">
-            <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-3xl">📊</span>
-            </div>
-            <h3 className="text-xl font-bold text-gray-900 mb-2">Get Started with Analytics</h3>
-            <p className="text-gray-600 mb-6">
-              Install this tracking script on your website to start collecting visitor insights.
-            </p>
-            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 font-mono text-sm break-all mb-4">
-              {trackingScript}
-            </div>
-            <button
-              onClick={copyToClipboard}
-              className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:shadow-lg font-medium transition-all cursor-pointer"
-            >
-              {copied ? '✓ Copied!' : 'Copy Tracking Script'}
-            </button>
-            <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-              <p className="text-sm text-blue-800">
-                <strong>💡 Pro Tip:</strong> To test immediately, create an HTML file with this script and visit it in your browser. Refresh this page to see your data!
-              </p>
-            </div>
-            <details className="mt-4 text-left">
-              <summary className="text-sm text-gray-600 cursor-pointer">Debug Info</summary>
-              <div className="mt-2 p-3 bg-gray-100 rounded text-xs font-mono">
-                <div>Client ID: {client.id}</div>
-                <div className="mt-1">User ID: Check browser console</div>
+      // Show different message for ALL view vs single site
+      if (client.id === 'all') {
+        return (
+          <div className="bg-white rounded-lg border border-gray-200 p-8">
+            <div className="max-w-2xl mx-auto text-center">
+              <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-3xl">🌐</span>
               </div>
-            </details>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">All Sites View</h3>
+              <p className="text-gray-600 mb-6">
+                This view shows data from all your sites combined. Switch to a specific site to see its tracking script.
+              </p>
+              <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                <p className="text-sm text-blue-800">
+                  <strong>💡 Pro Tip:</strong> Use the site switcher above to view individual sites and get their tracking scripts.
+                </p>
+              </div>
+            </div>
           </div>
-        </div>
-      );
+        );
+      } else {
+        return (
+          <div className="bg-white rounded-lg border border-gray-200 p-8">
+            <div className="max-w-2xl mx-auto text-center">
+              <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-3xl">📊</span>
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Get Started with Analytics</h3>
+              <p className="text-gray-600 mb-6">
+                Install this tracking script on your website to start collecting visitor insights.
+              </p>
+              <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 font-mono text-sm break-all mb-4">
+                {trackingScript}
+              </div>
+              <button
+                onClick={copyToClipboard}
+                className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:shadow-lg font-medium transition-all cursor-pointer"
+              >
+                {copied ? '✓ Copied!' : 'Copy Tracking Script'}
+              </button>
+              <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                <p className="text-sm text-blue-800">
+                  <strong>💡 Pro Tip:</strong> To test immediately, create an HTML file with this script and visit it in your browser. Refresh this page to see your data!
+                </p>
+              </div>
+              <details className="mt-4 text-left">
+                <summary className="text-sm text-gray-600 cursor-pointer">Debug Info</summary>
+                <div className="mt-2 p-3 bg-gray-100 rounded text-xs font-mono">
+                  <div>Client ID: {client.id}</div>
+                  <div className="mt-1">User ID: Check browser console</div>
+                </div>
+              </details>
+            </div>
+          </div>
+        );
+      }
     }
 
     switch (activeView) {

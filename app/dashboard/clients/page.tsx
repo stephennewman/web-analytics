@@ -22,6 +22,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
 
   // Create default client if none exist
   let client;
+  let isAllSites = false;
   if (!clients || clients.length === 0) {
     const { data: newClient } = await supabase
       .from('clients')
@@ -36,7 +37,10 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
   } else {
     // Use selected site or first client as default
     const selectedClientId = searchParams.site;
-    if (selectedClientId) {
+    if (selectedClientId === 'all') {
+      isAllSites = true;
+      client = { id: 'all', name: 'All Sites', domain: '' }; // Virtual client for ALL view
+    } else if (selectedClientId) {
       client = clients.find(c => c.id === selectedClientId) || clients[0];
     } else {
       client = clients[0];
@@ -44,12 +48,21 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
   }
 
   // Get sessions with their events
-  const { data: sessions, error: sessionsError } = await supabase
+  let sessionsQuery = supabase
     .from('sessions')
     .select('*')
-    .eq('client_id', client.id)
     .order('updated_at', { ascending: false })
     .limit(50);
+
+  if (isAllSites) {
+    // Get sessions from all user's clients
+    const clientIds = clients?.map(c => c.id) || [];
+    sessionsQuery = sessionsQuery.in('client_id', clientIds);
+  } else {
+    sessionsQuery = sessionsQuery.eq('client_id', client.id);
+  }
+
+  const { data: sessions, error: sessionsError } = await sessionsQuery;
 
   // Debug logging
   console.log('Client ID:', client.id);
@@ -59,12 +72,21 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
 
   // Get all events for these sessions
   const sessionIds = sessions?.map(s => s.session_id) || [];
-  const { data: allEvents, error: eventsError } = await supabase
+  let eventsQuery = supabase
     .from('events')
     .select('*')
-    .eq('client_id', client.id)
     .in('session_id', sessionIds)
     .order('timestamp', { ascending: false });
+
+  if (isAllSites) {
+    // Get events from all user's clients
+    const clientIds = clients?.map(c => c.id) || [];
+    eventsQuery = eventsQuery.in('client_id', clientIds);
+  } else {
+    eventsQuery = eventsQuery.eq('client_id', client.id);
+  }
+
+  const { data: allEvents, error: eventsError } = await eventsQuery;
 
   console.log('Events query error:', eventsError);
   console.log('Events found:', allEvents?.length || 0);
@@ -93,6 +115,9 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
     const exitEvent = events.find(e => e.event_type === 'exit');
     const perfEvent = events.find(e => e.event_type === 'performance');
     const scrollEvents = events.filter(e => e.event_type === 'scroll_depth');
+    
+    // Add site information for ALL view
+    const siteInfo = isAllSites ? clients?.find(c => c.id === session.client_id) : null;
     
     // Count unique pages visited (not total pageview events)
     const uniquePages = new Set(pageviews.map((e: any) => e.url)).size;
@@ -150,15 +175,26 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
       landingPage: pageviews[pageviews.length - 1]?.url || '',
       hasIntent: phoneClicks.length > 0 || emailClicks.length > 0 || downloads.length > 0 || formSubmits.length > 0,
       hasFrustration: rageClicks.length > 0 || deadClicks.length > 0,
-      hasErrors: jsErrors.length > 0
+      hasErrors: jsErrors.length > 0,
+      // Add site info for ALL view
+      siteName: siteInfo?.name || 'Unknown Site',
+      siteDomain: siteInfo?.domain || ''
     };
   }) || [];
 
   // Get summary stats
-  const { count: totalEvents } = await supabase
+  let eventsCountQuery = supabase
     .from('events')
-    .select('*', { count: 'exact', head: true })
-    .eq('client_id', client.id);
+    .select('*', { count: 'exact', head: true });
+
+  if (isAllSites) {
+    const clientIds = clients?.map(c => c.id) || [];
+    eventsCountQuery = eventsCountQuery.in('client_id', clientIds);
+  } else {
+    eventsCountQuery = eventsCountQuery.eq('client_id', client.id);
+  }
+
+  const { count: totalEvents } = await eventsCountQuery;
 
   const totalSessions = enrichedSessions.length;
   const convertedSessions = enrichedSessions.filter(s => s.converted).length;

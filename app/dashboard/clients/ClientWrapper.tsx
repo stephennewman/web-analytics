@@ -62,19 +62,26 @@ export default function ClientWrapper({ email, client, clients, sessions, stats 
               <h1 className="text-xl font-semibold text-gray-900 capitalize">{activeView}</h1>
               
               {/* Site Switcher */}
-              {clients.length > 1 && (
+              {clients.length > 0 && (
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-gray-500">Site:</span>
                   <select 
                     value={client.id}
                     onChange={(e) => {
-                      const selectedClient = clients.find(c => c.id === e.target.value);
-                      if (selectedClient) {
-                        window.location.href = `/dashboard/clients?site=${selectedClient.id}`;
+                      if (e.target.value === 'all') {
+                        window.location.href = `/dashboard/clients?site=all`;
+                      } else {
+                        const selectedClient = clients.find(c => c.id === e.target.value);
+                        if (selectedClient) {
+                          window.location.href = `/dashboard/clients?site=${selectedClient.id}`;
+                        }
                       }
                     }}
                     className="px-3 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                   >
+                    {clients.length > 1 && (
+                      <option value="all">🌐 All Sites</option>
+                    )}
                     {clients.map((c) => (
                       <option key={c.id} value={c.id}>
                         {c.name} {c.domain && `(${c.domain})`}
