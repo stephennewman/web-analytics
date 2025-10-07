@@ -3,18 +3,21 @@
 import { useState } from 'react';
 import Sidebar from './Sidebar';
 import SetupView from './SetupView';
+import AddSiteForm from './AddSiteForm';
 
 interface ClientWrapperProps {
   email: string;
   client: any;
+  clients: any[];
   sessions: any[];
   stats: any;
 }
 
-export default function ClientWrapper({ email, client, sessions, stats }: ClientWrapperProps) {
+export default function ClientWrapper({ email, client, clients, sessions, stats }: ClientWrapperProps) {
   const [activeView, setActiveView] = useState('dashboard');
   const [sendingEmail, setSendingEmail] = useState(false);
   const [emailStatus, setEmailStatus] = useState<string>('');
+  const [showAddSiteForm, setShowAddSiteForm] = useState(false);
 
   const handleSendTestEmail = async () => {
     setSendingEmail(true);
@@ -38,6 +41,11 @@ export default function ClientWrapper({ email, client, sessions, stats }: Client
     }
   };
 
+  const handleSiteAdded = (newSite: any) => {
+    // Refresh the page to show the new site
+    window.location.reload();
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Sidebar */}
@@ -50,11 +58,43 @@ export default function ClientWrapper({ email, client, sessions, stats }: Client
         {/* Sticky Header */}
         <header className="sticky top-0 z-10 bg-white border-b border-gray-200 h-16 flex items-center px-6">
           <div className="flex items-center justify-between w-full">
-            <h1 className="text-xl font-semibold text-gray-900 capitalize">{activeView}</h1>
+            <div className="flex items-center gap-4">
+              <h1 className="text-xl font-semibold text-gray-900 capitalize">{activeView}</h1>
+              
+              {/* Site Switcher */}
+              {clients.length > 1 && (
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-500">Site:</span>
+                  <select 
+                    value={client.id}
+                    onChange={(e) => {
+                      const selectedClient = clients.find(c => c.id === e.target.value);
+                      if (selectedClient) {
+                        window.location.href = `/dashboard/clients?site=${selectedClient.id}`;
+                      }
+                    }}
+                    className="px-3 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  >
+                    {clients.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.name} {c.domain && `(${c.domain})`}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+            </div>
+            
             <div className="flex items-center gap-3">
               {emailStatus && (
                 <span className="text-sm text-gray-600">{emailStatus}</span>
               )}
+              <button
+                onClick={() => setShowAddSiteForm(true)}
+                className="px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors"
+              >
+                + Add Site
+              </button>
               <button
                 onClick={handleSendTestEmail}
                 disabled={sendingEmail}
@@ -77,6 +117,14 @@ export default function ClientWrapper({ email, client, sessions, stats }: Client
           />
         </main>
       </div>
+
+      {/* Add Site Form Modal */}
+      {showAddSiteForm && (
+        <AddSiteForm
+          onSiteAdded={handleSiteAdded}
+          onClose={() => setShowAddSiteForm(false)}
+        />
+      )}
     </div>
   );
 }

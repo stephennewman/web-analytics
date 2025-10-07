@@ -181,4 +181,22 @@ Unlike Hotjar/FullStory: focus on conversion killers only, AI-suggested fixes, v
 **Deploy method:** Git push → Vercel auto-deploy
 **Status:** Live
 
+### 2025-10-04 - Multi-Site Support ✅
+**Commit:** Multi-site tracking implementation
+**Changes:** 4 files changed, 150+ insertions
+**New files:**
+- `AddSiteForm.tsx` - Modal form for adding new sites
+- `/api/clients/route.ts` - API endpoint for site management
+**Features:**
+- ✅ Site switcher dropdown in dashboard header (shows when 2+ sites)
+- ✅ "Add Site" button with modal form (name + domain)
+- ✅ URL-based site switching (`?site=client-id`)
+- ✅ Each site gets unique tracking script with different `client_id`
+- ✅ Data separation: sessions/events filtered by `client_id`
+- ✅ Same dashboard, different data per site
+- ✅ One login, multiple sites
+**Database:** Uses existing `clients` table (1 user → many clients)
+**Build:** ✅ Successful (14 routes compiled)
+**Status:** Ready for testing
+
 

@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase-server';
 import { redirect } from 'next/navigation';
 import ClientWrapper from './ClientWrapper';
 
-export default async function DashboardPage() {
+export default async function DashboardPage({ searchParams }: { searchParams: { site?: string } }) {
   const supabase = await createClient();
   
   const {
@@ -13,15 +13,16 @@ export default async function DashboardPage() {
     redirect('/login');
   }
 
-  // Get or create user's client
-  let { data: client } = await supabase
+  // Get all user's clients
+  const { data: clients } = await supabase
     .from('clients')
     .select('*')
     .eq('user_id', user.id)
-    .single();
+    .order('created_at', { ascending: true });
 
-  // Create client if doesn't exist (for existing users before trigger)
-  if (!client) {
+  // Create default client if none exist
+  let client;
+  if (!clients || clients.length === 0) {
     const { data: newClient } = await supabase
       .from('clients')
       .insert({
@@ -32,6 +33,14 @@ export default async function DashboardPage() {
       .select()
       .single();
     client = newClient;
+  } else {
+    // Use selected site or first client as default
+    const selectedClientId = searchParams.site;
+    if (selectedClientId) {
+      client = clients.find(c => c.id === selectedClientId) || clients[0];
+    } else {
+      client = clients[0];
+    }
   }
 
   // Get sessions with their events
@@ -167,6 +176,7 @@ export default async function DashboardPage() {
     <ClientWrapper
       email={user.email || ''}
       client={client}
+      clients={clients || []}
       sessions={enrichedSessions}
       stats={{
         totalSessions,
