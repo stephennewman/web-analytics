@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase-server';
 import { redirect } from 'next/navigation';
 import ClientWrapper from './ClientWrapper';
 
-export default async function DashboardPage({ searchParams }: { searchParams: { site?: string } }) {
+export default async function DashboardPage({ searchParams }: { searchParams: Promise<{ site?: string; view?: string }> }) {
   const supabase = await createClient();
   
   const {
@@ -36,7 +36,8 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
     client = newClient;
   } else {
     // Use selected site or first client as default
-    const selectedClientId = searchParams.site;
+    const resolvedSearchParams = await searchParams;
+    const selectedClientId = resolvedSearchParams.site;
     if (selectedClientId === 'all') {
       isAllSites = true;
       client = { id: 'all', name: 'All Sites', domain: '' }; // Virtual client for ALL view
@@ -46,6 +47,9 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
       client = clients[0];
     }
   }
+
+  // Get the resolved search params for view
+  const resolvedSearchParams = await searchParams;
 
   // Get sessions with their events
   let sessionsQuery = supabase
@@ -154,6 +158,9 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
     const firstEventWithData = events.slice().reverse().find((e: any) => e.data?.device_type || e.data?.referrer);
     const deviceData = firstEventWithData?.data || {};
     
+    // Extract IP address from _geo data
+    const ipAddress = firstEventWithData?.data?._geo?.ip || 'unknown';
+    
     return {
       ...session,
       events,
@@ -173,6 +180,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
       deviceType: deviceData.device_type || 'unknown',
       referrer: deviceData.referrer || 'direct',
       landingPage: pageviews[pageviews.length - 1]?.url || '',
+      ipAddress: ipAddress,
       hasIntent: phoneClicks.length > 0 || emailClicks.length > 0 || downloads.length > 0 || formSubmits.length > 0,
       hasFrustration: rageClicks.length > 0 || deadClicks.length > 0,
       hasErrors: jsErrors.length > 0,
@@ -181,6 +189,35 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
       siteDomain: siteInfo?.domain || ''
     };
   }) || [];
+
+  // Apply URL filtering to sessions based on client settings
+  const filteredSessions = enrichedSessions.filter(session => {
+    // Get the client's URL filters
+    const clientData = isAllSites ? clients?.find(c => c.id === session.client_id) : client;
+    const urlFilters = clientData?.url_filters || { enabled: true, patterns: ["localhost", "127.0.0.1", "0.0.0.0", "test.", "staging.", "dev."] };
+    
+    if (!urlFilters.enabled || !urlFilters.patterns) return true;
+    
+    // Check if any event URL or referrer matches filter patterns
+    const shouldFilter = session.events?.some((event: any) => {
+      return urlFilters.patterns.some((pattern: string) => {
+        return (event.url && event.url.includes(pattern)) || 
+               (event.data?.referrer && event.data.referrer.includes(pattern));
+      });
+    });
+    
+    if (shouldFilter) {
+      console.log('Filtered out session:', {
+        sessionId: session.session_id,
+        landingPage: session.landingPage,
+        patterns: urlFilters.patterns
+      });
+    }
+    
+    return !shouldFilter; // Keep sessions that don't match filter patterns
+  });
+
+  console.log(`URL Filtering: ${enrichedSessions.length} total sessions, ${filteredSessions.length} after filtering`);
 
   // Get summary stats
   let eventsCountQuery = supabase
@@ -196,24 +233,28 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
 
   const { count: totalEvents } = await eventsCountQuery;
 
-  const totalSessions = enrichedSessions.length;
-  const convertedSessions = enrichedSessions.filter(s => s.converted).length;
+  const totalSessions = filteredSessions.length;
+  const convertedSessions = filteredSessions.filter(s => s.converted).length;
   const conversionRate = totalSessions > 0 ? ((convertedSessions / totalSessions) * 100).toFixed(1) : '0';
 
   // Summary stats
-  const totalPageviews = enrichedSessions.reduce((sum, s) => sum + s.pageviews, 0);
-  const totalClicks = enrichedSessions.reduce((sum, s) => sum + s.clicks, 0);
-  const totalPhoneClicks = enrichedSessions.reduce((sum, s) => sum + s.phoneClicks, 0);
-  const totalEmailClicks = enrichedSessions.reduce((sum, s) => sum + s.emailClicks, 0);
-  const sessionsWithIntent = enrichedSessions.filter(s => s.hasIntent).length;
-  const sessionsWithFrustration = enrichedSessions.filter(s => s.hasFrustration).length;
+  const totalPageviews = filteredSessions.reduce((sum, s) => sum + s.pageviews, 0);
+  const totalClicks = filteredSessions.reduce((sum, s) => sum + s.clicks, 0);
+  const totalPhoneClicks = filteredSessions.reduce((sum, s) => sum + s.phoneClicks, 0);
+  const totalEmailClicks = filteredSessions.reduce((sum, s) => sum + s.emailClicks, 0);
+  const sessionsWithIntent = filteredSessions.filter(s => s.hasIntent).length;
+  const sessionsWithFrustration = filteredSessions.filter(s => s.hasFrustration).length;
+
+  // Get the initial view from URL params
+  const initialView = resolvedSearchParams.view || 'dashboard';
 
   return (
     <ClientWrapper
       email={user.email || ''}
       client={client}
       clients={clients || []}
-      sessions={enrichedSessions}
+      sessions={filteredSessions}
+      initialView={initialView}
       stats={{
         totalSessions,
         convertedSessions,

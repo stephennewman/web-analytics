@@ -197,7 +197,26 @@ Unlike Hotjar/FullStory: focus on conversion killers only, AI-suggested fixes, v
 - ✅ One login, multiple sites
 **Database:** Uses existing `clients` table (1 user → many clients)
 **Build:** ✅ Successful (14 routes compiled)
-**Deploy:** ✅ Live at https://web-analytics-5o4yhtjbw-krezzo.vercel.app
+**Deploy:** ✅ Live at https://web-analytics-l1oy27yu5-krezzo.vercel.app
 **Status:** Production ready
+
+### 2025-10-04 - Macro ALL View ✅
+**Commit:** `2066c3a` - Add macro ALL view for aggregated multi-site data
+**Changes:** 5 files changed, 117 insertions(+), 44 deletions(-)
+**Features:**
+- ✅ **"🌐 All Sites" option** in site switcher dropdown
+- ✅ **Aggregated data** from all user's sites in one view
+- ✅ **Site labels** on session cards showing which site each session belongs to
+- ✅ **URL parameter** `?site=all` for direct access to ALL view
+- ✅ **Smart empty state** - different message for ALL view vs single site
+- ✅ **Complete data separation** - sessions/events filtered by all client IDs
+- ✅ **Same dashboard experience** - all insights work with aggregated data
+**Use cases:**
+- Agency overview across all client sites
+- Portfolio performance analysis
+- Cross-site conversion patterns
+- Unified reporting dashboard
+**Build:** ✅ Successful (14 routes compiled, 39s build time)
+**Deploy:** ✅ Live at https://web-analytics-l1oy27yu5-krezzo.vercel.app
 
 

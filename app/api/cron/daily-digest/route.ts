@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Resend } from 'resend';
 import { createClient } from '@supabase/supabase-js';
+import { SlackService } from '@/lib/slack-service';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -19,7 +20,7 @@ export async function GET(request: NextRequest) {
     // Get all users with clients
     const { data: clients } = await supabase
       .from('clients')
-      .select('id, user_id');
+      .select('id, user_id, name');
 
     if (!clients || clients.length === 0) {
       return NextResponse.json({ message: 'No clients to process' });
@@ -33,6 +34,14 @@ export async function GET(request: NextRequest) {
         const { data: { user } } = await supabase.auth.admin.getUserById(client.user_id);
         
         if (!user?.email) continue;
+
+        // Get user's Slack integration
+        const { data: slackIntegration } = await supabase
+          .from('user_slack_integrations')
+          .select('*')
+          .eq('user_id', client.user_id)
+          .eq('is_active', true)
+          .single();
 
         // Get yesterday's date range
         const yesterday = new Date();
@@ -200,11 +209,45 @@ export async function GET(request: NextRequest) {
           html: emailHtml,
         });
 
+        let emailResult = { success: false, error: null as string | null };
         if (error) {
-          results.push({ email: user.email, error: error.message });
+          emailResult = { success: false, error: error.message };
         } else {
-          results.push({ email: user.email, success: true, emailId: data?.id });
+          emailResult = { success: true, error: null };
         }
+
+        // Send Slack notification if integration exists and daily digest is enabled
+        let slackResult = { success: false, error: null as string | null };
+        if (slackIntegration && slackIntegration.alert_preferences?.daily_digest) {
+          try {
+            const slackService = new SlackService(slackIntegration.bot_token);
+            const slackMessage = SlackService.formatDailyDigest(client.name || 'Unknown Site', {
+              totalSessions,
+              conversions,
+              phoneClicks,
+              emailClicks,
+              formSubmits,
+              rageClicks,
+              jsErrors,
+              avgTime,
+              topPages
+            });
+
+            const slackSuccess = await slackService.sendMessage(slackIntegration.channel_id, slackMessage);
+            slackResult = { success: slackSuccess, error: slackSuccess ? null : 'Failed to send Slack message' };
+          } catch (slackError) {
+            slackResult = { 
+              success: false, 
+              error: slackError instanceof Error ? slackError.message : 'Unknown Slack error' 
+            };
+          }
+        }
+
+        results.push({ 
+          email: user.email, 
+          emailResult,
+          slackResult
+        });
 
       } catch (error) {
         results.push({ 

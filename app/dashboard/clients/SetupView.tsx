@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import SessionFeed from './SessionFeed';
+import VisitorsTable from './VisitorsTable';
 import InsightsPanel from './InsightsPanel';
 import NavigationFlow from './NavigationFlow';
 import BestPath from './BestPath';
@@ -10,6 +11,7 @@ import TimeOfDayHeatmap from './TimeOfDayHeatmap';
 import ExitAnalysis from './ExitAnalysis';
 import ScrollEngagement from './ScrollEngagement';
 import SessionDetailPanel from './SessionDetailPanel';
+import SlackSettings from './SlackSettings';
 
 interface Client {
   id: string;
@@ -245,7 +247,7 @@ export default function SetupView({
 
       case 'visitors':
         return (
-          <SessionFeed sessions={sessions} onSelectSession={setSelectedSession} />
+          <VisitorsTable sessions={sessions} onSelectSession={setSelectedSession} />
         );
 
       case 'insights':
@@ -266,6 +268,13 @@ export default function SetupView({
               <ExitAnalysis sessions={sessions} />
             </div>
           </>
+        );
+
+      case 'settings':
+        return (
+          <div className="max-w-2xl">
+            <SlackSettings />
+          </div>
         );
 
       default:
