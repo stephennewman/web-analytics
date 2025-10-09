@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef, useCallback } from 'react';
 
 interface Session {
   id: string;
@@ -51,6 +51,52 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
   const [searchTerm, setSearchTerm] = useState('');
   const [expandedFilter, setExpandedFilter] = useState<string | null>(null);
+  
+  // Column widths (resizable)
+  const [columnWidths, setColumnWidths] = useState<Record<string, number>>({
+    time: 150,
+    device: 120,
+    location: 180,
+    ipAddress: 140,
+    referrer: 200,
+    landingPage: 200,
+    pages: 90,
+    clicks: 90,
+    timeSpent: 120,
+    status: 140,
+    actions: 120
+  });
+  
+  const resizingColumn = useRef<string | null>(null);
+  const startX = useRef<number>(0);
+  const startWidth = useRef<number>(0);
+  
+  // Column resize handlers
+  const handleResizeStart = useCallback((e: React.MouseEvent, column: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    resizingColumn.current = column;
+    startX.current = e.clientX;
+    startWidth.current = columnWidths[column];
+    document.addEventListener('mousemove', handleResizeMove as any);
+    document.addEventListener('mouseup', handleResizeEnd);
+  }, [columnWidths]);
+  
+  const handleResizeMove = useCallback((e: MouseEvent) => {
+    if (!resizingColumn.current) return;
+    const diff = e.clientX - startX.current;
+    const newWidth = Math.max(60, startWidth.current + diff);
+    setColumnWidths(prev => ({
+      ...prev,
+      [resizingColumn.current!]: newWidth
+    }));
+  }, []);
+  
+  const handleResizeEnd = useCallback(() => {
+    resizingColumn.current = null;
+    document.removeEventListener('mousemove', handleResizeMove as any);
+    document.removeEventListener('mouseup', handleResizeEnd);
+  }, [handleResizeMove]);
   
   // Column filters
   const [filters, setFilters] = useState({
@@ -357,6 +403,7 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
               <th 
                 className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 relative"
                 onClick={() => handleSort('time')}
+                style={{ width: columnWidths.time, minWidth: columnWidths.time, maxWidth: columnWidths.time }}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-1">
@@ -379,6 +426,10 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
                     </span>
                   </button>
                 </div>
+                <div
+                  className="absolute top-0 right-0 bottom-0 w-1 cursor-col-resize hover:bg-purple-300 bg-gray-300"
+                  onMouseDown={(e) => handleResizeStart(e, 'time')}
+                />
                 {expandedFilter === 'time' && (
                   <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-md shadow-lg z-10 p-3 mt-1">
                     <div className="space-y-3">
@@ -448,6 +499,7 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
               <th 
                 className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 relative"
                 onClick={() => handleSort('device')}
+                style={{ width: columnWidths.device, minWidth: columnWidths.device, maxWidth: columnWidths.device }}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-1">
@@ -470,6 +522,10 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
                     </span>
                   </button>
                 </div>
+                <div
+                  className="absolute top-0 right-0 bottom-0 w-1 cursor-col-resize hover:bg-purple-300 bg-gray-300"
+                  onMouseDown={(e) => handleResizeStart(e, 'device')}
+                />
                 {expandedFilter === 'device' && (
                   <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-md shadow-lg z-10 p-3 mt-1">
                     <div className="space-y-3">
@@ -540,6 +596,7 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
               <th 
                 className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 relative"
                 onClick={() => handleSort('location')}
+                style={{ width: columnWidths.location, minWidth: columnWidths.location, maxWidth: columnWidths.location }}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-1">
@@ -562,6 +619,10 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
                     </span>
                   </button>
                 </div>
+                <div
+                  className="absolute top-0 right-0 bottom-0 w-1 cursor-col-resize hover:bg-purple-300 bg-gray-300"
+                  onMouseDown={(e) => handleResizeStart(e, 'location')}
+                />
                 {expandedFilter === 'location' && (
                   <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-md shadow-lg z-10 p-3 mt-1">
                     <div className="space-y-3">
@@ -632,6 +693,7 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
               <th 
                 className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 relative"
                 onClick={() => handleSort('ipAddress')}
+                style={{ width: columnWidths.ipAddress, minWidth: columnWidths.ipAddress, maxWidth: columnWidths.ipAddress }}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-1">
@@ -654,6 +716,10 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
                     </span>
                   </button>
                 </div>
+                <div
+                  className="absolute top-0 right-0 bottom-0 w-1 cursor-col-resize hover:bg-purple-300 bg-gray-300"
+                  onMouseDown={(e) => handleResizeStart(e, 'ipAddress')}
+                />
                 {expandedFilter === 'ipAddress' && (
                   <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-md shadow-lg z-10 p-3 mt-1">
                     <div className="space-y-3">
@@ -712,6 +778,7 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
               <th 
                 className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 relative"
                 onClick={() => handleSort('referrer')}
+                style={{ width: columnWidths.referrer, minWidth: columnWidths.referrer, maxWidth: columnWidths.referrer }}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-1">
@@ -734,6 +801,10 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
                     </span>
                   </button>
                 </div>
+                <div
+                  className="absolute top-0 right-0 bottom-0 w-1 cursor-col-resize hover:bg-purple-300 bg-gray-300"
+                  onMouseDown={(e) => handleResizeStart(e, 'referrer')}
+                />
                 {expandedFilter === 'referrer' && (
                   <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-md shadow-lg z-10 p-3 mt-1">
                     <div className="space-y-3">
@@ -789,7 +860,10 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
                   </div>
                 )}
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider relative">
+              <th 
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider relative"
+                style={{ width: columnWidths.landingPage, minWidth: columnWidths.landingPage, maxWidth: columnWidths.landingPage }}
+              >
                 <div className="flex items-center justify-between">
                   <span>Landing Page</span>
                   <button
@@ -804,6 +878,10 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
                     </span>
                   </button>
                 </div>
+                <div
+                  className="absolute top-0 right-0 bottom-0 w-1 cursor-col-resize hover:bg-purple-300 bg-gray-300"
+                  onMouseDown={(e) => handleResizeStart(e, 'landingPage')}
+                />
                 {expandedFilter === 'landingPage' && (
                   <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-md shadow-lg z-10 p-3 mt-1">
                     <div className="space-y-3">
@@ -862,6 +940,7 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
               <th 
                 className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 relative"
                 onClick={() => handleSort('pages')}
+                style={{ width: columnWidths.pages, minWidth: columnWidths.pages, maxWidth: columnWidths.pages }}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-1">
@@ -884,6 +963,10 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
                     </span>
                   </button>
                 </div>
+                <div
+                  className="absolute top-0 right-0 bottom-0 w-1 cursor-col-resize hover:bg-purple-300 bg-gray-300"
+                  onMouseDown={(e) => handleResizeStart(e, 'pages')}
+                />
                 {expandedFilter === 'pages' && (
                   <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-md shadow-lg z-10 p-3 mt-1">
                     <div className="space-y-3">
@@ -957,6 +1040,7 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
               <th 
                 className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 relative"
                 onClick={() => handleSort('clicks')}
+                style={{ width: columnWidths.clicks, minWidth: columnWidths.clicks, maxWidth: columnWidths.clicks }}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-1">
@@ -979,6 +1063,10 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
                     </span>
                   </button>
                 </div>
+                <div
+                  className="absolute top-0 right-0 bottom-0 w-1 cursor-col-resize hover:bg-purple-300 bg-gray-300"
+                  onMouseDown={(e) => handleResizeStart(e, 'clicks')}
+                />
                 {expandedFilter === 'clicks' && (
                   <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-md shadow-lg z-10 p-3 mt-1">
                     <div className="space-y-3">
@@ -1052,6 +1140,7 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
               <th 
                 className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 relative"
                 onClick={() => handleSort('timeSpent')}
+                style={{ width: columnWidths.timeSpent, minWidth: columnWidths.timeSpent, maxWidth: columnWidths.timeSpent }}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-1">
@@ -1074,6 +1163,10 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
                     </span>
                   </button>
                 </div>
+                <div
+                  className="absolute top-0 right-0 bottom-0 w-1 cursor-col-resize hover:bg-purple-300 bg-gray-300"
+                  onMouseDown={(e) => handleResizeStart(e, 'timeSpent')}
+                />
                 {expandedFilter === 'timeSpent' && (
                   <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-md shadow-lg z-10 p-3 mt-1">
                     <div className="space-y-3">
@@ -1147,6 +1240,7 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
               <th 
                 className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 relative"
                 onClick={() => handleSort('status')}
+                style={{ width: columnWidths.status, minWidth: columnWidths.status, maxWidth: columnWidths.status }}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-1">
@@ -1169,6 +1263,10 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
                     </span>
                   </button>
                 </div>
+                <div
+                  className="absolute top-0 right-0 bottom-0 w-1 cursor-col-resize hover:bg-purple-300 bg-gray-300"
+                  onMouseDown={(e) => handleResizeStart(e, 'status')}
+                />
                 {expandedFilter === 'status' && (
                   <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-md shadow-lg z-10 p-3 mt-1">
                     <div className="space-y-3">
@@ -1236,8 +1334,15 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
                   </div>
                 )}
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th 
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider relative"
+                style={{ width: columnWidths.actions, minWidth: columnWidths.actions, maxWidth: columnWidths.actions }}
+              >
                 Actions
+                <div
+                  className="absolute top-0 right-0 bottom-0 w-1 cursor-col-resize hover:bg-purple-300 bg-gray-300"
+                  onMouseDown={(e) => handleResizeStart(e, 'actions')}
+                />
               </th>
             </tr>
           </thead>
@@ -1248,7 +1353,7 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
                 className="hover:bg-gray-50 cursor-pointer"
                 onClick={() => onSelectSession?.(session)}
               >
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900" style={{ width: columnWidths.time, minWidth: columnWidths.time, maxWidth: columnWidths.time }}>
                   <div className="flex flex-col">
                     <span className="font-medium">
                       {new Date(session.updated_at).toLocaleDateString()}
@@ -1258,7 +1363,7 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
                     </span>
                   </div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900" style={{ width: columnWidths.device, minWidth: columnWidths.device, maxWidth: columnWidths.device }}>
                   <div className="flex items-center gap-2">
                     <span className="text-lg">
                       {session.deviceType === 'mobile' ? '📱' : session.deviceType === 'tablet' ? '📱' : '💻'}
@@ -1266,7 +1371,7 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
                     <span className="capitalize">{session.deviceType}</span>
                   </div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900" style={{ width: columnWidths.location, minWidth: columnWidths.location, maxWidth: columnWidths.location }}>
                   <div className="flex flex-col">
                     <span className="font-medium">
                       {session.city || 'Unknown'}, {session.country || 'Unknown'}
@@ -1276,12 +1381,12 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
                     )}
                   </div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900" style={{ width: columnWidths.ipAddress, minWidth: columnWidths.ipAddress, maxWidth: columnWidths.ipAddress }}>
                   <span className="font-mono text-xs bg-gray-100 px-2 py-1 rounded">
                     {session.ipAddress}
                   </span>
                 </td>
-                <td className="px-6 py-4 text-sm text-gray-900 max-w-xs">
+                <td className="px-6 py-4 text-sm text-gray-900" style={{ width: columnWidths.referrer, minWidth: columnWidths.referrer, maxWidth: columnWidths.referrer }}>
                   <div className="truncate" title={session.referrer}>
                     {session.referrer === 'direct' ? (
                       <span className="text-gray-500 italic">Direct</span>
@@ -1292,24 +1397,24 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
                     )}
                   </div>
                 </td>
-                <td className="px-6 py-4 text-sm text-gray-900 max-w-xs">
+                <td className="px-6 py-4 text-sm text-gray-900" style={{ width: columnWidths.landingPage, minWidth: columnWidths.landingPage, maxWidth: columnWidths.landingPage }}>
                   <div className="truncate" title={session.landingPage}>
                     {session.landingPage || 'Unknown page'}
                   </div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900" style={{ width: columnWidths.pages, minWidth: columnWidths.pages, maxWidth: columnWidths.pages }}>
                   {session.pageviews}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900" style={{ width: columnWidths.clicks, minWidth: columnWidths.clicks, maxWidth: columnWidths.clicks }}>
                   {session.clicks}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900" style={{ width: columnWidths.timeSpent, minWidth: columnWidths.timeSpent, maxWidth: columnWidths.timeSpent }}>
                   {formatTime(session.timeSpent)}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+                <td className="px-6 py-4 whitespace-nowrap" style={{ width: columnWidths.status, minWidth: columnWidths.status, maxWidth: columnWidths.status }}>
                   {getStatusBadge(session)}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500" style={{ width: columnWidths.actions, minWidth: columnWidths.actions, maxWidth: columnWidths.actions }}>
                   <button className="text-purple-600 hover:text-purple-900">
                     View Details
                   </button>
