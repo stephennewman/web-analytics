@@ -1,36 +1,80 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🐱 Catlicks
 
-## Getting Started
+**Conversion-focused analytics for marketers.**
 
-First, run the development server:
+Catlicks shows you why visitors don't convert and what to fix—not just what happened.
+
+## What Makes Catlicks Different
+
+- **Conversion killers only** - Focus on what stops conversions, not vanity metrics
+- **Actionable insights** - Get AI-suggested fixes, not arbitrary data
+- **Multi-site tracking** - Manage multiple client sites from one dashboard
+- **Real-time monitoring** - See live visitors and track behavior as it happens
+- **Frustration detection** - Rage clicks, dead clicks, JS errors, and exit intent
+
+## Features
+
+✅ Embeddable tracking script (<3KB)  
+✅ Session replay with full journey paths  
+✅ Click & form tracking (auto-detected)  
+✅ Conversion intent signals (phone, email, downloads)  
+✅ Device & location intelligence  
+✅ Time-of-day heatmaps  
+✅ Exit page analysis  
+✅ Scroll engagement patterns  
+✅ Multi-site management  
+✅ Resizable data tables with advanced filtering
+
+## Quick Start
+
+### 1. Install Dependencies
+
+```bash
+npm install
+```
+
+### 2. Set Up Environment Variables
+
+Create `.env.local`:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+```
+
+### 3. Run Development Server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 4. Add Tracking Script to Your Site
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```html
+<script src="https://your-domain.vercel.app/track.js"></script>
+<script>
+  webAnalytics.init('YOUR_CLIENT_ID');
+</script>
+```
 
-## Learn More
+## Tech Stack
 
-To learn more about Next.js, take a look at the following resources:
+- **Frontend:** Next.js 15 + Tailwind CSS
+- **Backend:** Next.js API routes
+- **Database:** Supabase (Postgres + Auth)
+- **Hosting:** Vercel
+- **Tracking:** Vanilla JavaScript
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Deployment
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+npm run build
+git push origin main  # Auto-deploys to Vercel
+```
 
-## Deploy on Vercel
+## License
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Proprietary - All rights reserved
