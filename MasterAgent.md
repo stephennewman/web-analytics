@@ -252,4 +252,19 @@ Unlike Hotjar/FullStory: focus on conversion killers only, AI-suggested fixes, v
 **Build:** ✅ Successful (22 routes compiled, 40s build time)
 **Status:** Live and ready
 
+### 2025-10-09 - Production Deploy #6 ✅
+**Commit:** `cd632a1` - Add column resizing to visitors table
+**URL:** https://web-analytics-4tpxf13yv-krezzo.vercel.app
+**Changes:** 1 file changed, 119 insertions(+), 14 deletions(-)
+**Features:**
+- ✅ Resizable table columns with drag handles
+- ✅ All 11 columns (Time, Device, Location, IP, Referrer, Landing Page, Pages, Clicks, Time Spent, Status, Actions)
+- ✅ Visual resize handles on right edge of each column header
+- ✅ Smooth drag-to-resize with mouse
+- ✅ Minimum width constraint (60px) prevents columns from becoming too narrow
+- ✅ Column widths persist during session
+- ✅ Purple hover state on resize handles
+**Build:** ✅ Successful (22 routes compiled, 40s build time)
+**Status:** Live and ready
+
 
