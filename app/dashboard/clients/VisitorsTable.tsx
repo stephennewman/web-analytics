@@ -370,7 +370,7 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
                 placeholder="Search sessions..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
               />
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <span className="text-gray-400">☰</span>
@@ -409,7 +409,7 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
                   <div className="flex items-center gap-1">
                     Time
                     {sortField === 'time' && (
-                      <span className="text-purple-600">
+                      <span className="text-yellow-600">
                         {sortDirection === 'asc' ? '↑' : '↓'}
                       </span>
                     )}
@@ -421,13 +421,13 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
                     }}
                     className="p-1 hover:bg-gray-200 rounded"
                   >
-                    <span className={`text-xs ${filters.time.start || filters.time.end ? (filters.time.mode === 'exclude' ? 'text-red-600' : 'text-purple-600') : 'text-gray-400'}`}>
+                    <span className={`text-xs ${filters.time.start || filters.time.end ? (filters.time.mode === 'exclude' ? 'text-red-600' : 'text-yellow-600') : 'text-gray-400'}`}>
                       ☰
                     </span>
                   </button>
                 </div>
                 <div
-                  className="absolute top-0 right-0 bottom-0 w-1 cursor-col-resize hover:bg-purple-300 bg-gray-300"
+                  className="absolute top-0 right-0 bottom-0 w-1 cursor-col-resize hover:bg-yellow-300 bg-gray-300"
                   onMouseDown={(e) => handleResizeStart(e, 'time')}
                 />
                 {expandedFilter === 'time' && (
@@ -441,7 +441,7 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
                             onClick={() => updateFilter('time', { ...filters.time, mode: 'include' })}
                             className={`px-2 py-1 text-xs rounded ${
                               filters.time.mode === 'include' 
-                                ? 'bg-white text-purple-600 shadow-sm' 
+                                ? 'bg-white text-yellow-600 shadow-sm' 
                                 : 'text-gray-600 hover:text-gray-800'
                             }`}
                           >
@@ -466,7 +466,7 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
                           type="datetime-local"
                           value={filters.time.start}
                           onChange={(e) => updateFilter('time', { ...filters.time, start: e.target.value })}
-                          className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-purple-500"
+                          className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-yellow-500"
                         />
                       </div>
                       <div>
@@ -475,7 +475,7 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
                           type="datetime-local"
                           value={filters.time.end}
                           onChange={(e) => updateFilter('time', { ...filters.time, end: e.target.value })}
-                          className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-purple-500"
+                          className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-yellow-500"
                         />
                       </div>
                       <div className="flex justify-between">
@@ -487,7 +487,7 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
                         </button>
                         <button
                           onClick={() => setExpandedFilter(null)}
-                          className="text-xs text-purple-600 hover:text-purple-700"
+                          className="text-xs text-yellow-600 hover:text-yellow-700"
                         >
                           Done
                         </button>
@@ -505,7 +505,7 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
                   <div className="flex items-center gap-1">
                     Device
                     {sortField === 'device' && (
-                      <span className="text-purple-600">
+                      <span className="text-yellow-600">
                         {sortDirection === 'asc' ? '↑' : '↓'}
                       </span>
                     )}
@@ -517,13 +517,13 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
                     }}
                     className="p-1 hover:bg-gray-200 rounded"
                   >
-                    <span className={`text-xs ${filters.device.values.length > 0 ? (filters.device.mode === 'exclude' ? 'text-red-600' : 'text-purple-600') : 'text-gray-400'}`}>
+                    <span className={`text-xs ${filters.device.values.length > 0 ? (filters.device.mode === 'exclude' ? 'text-red-600' : 'text-yellow-600') : 'text-gray-400'}`}>
                       ☰
                     </span>
                   </button>
                 </div>
                 <div
-                  className="absolute top-0 right-0 bottom-0 w-1 cursor-col-resize hover:bg-purple-300 bg-gray-300"
+                  className="absolute top-0 right-0 bottom-0 w-1 cursor-col-resize hover:bg-yellow-300 bg-gray-300"
                   onMouseDown={(e) => handleResizeStart(e, 'device')}
                 />
                 {expandedFilter === 'device' && (
@@ -537,7 +537,7 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
                             onClick={() => updateFilter('device', { ...filters.device, mode: 'include' })}
                             className={`px-2 py-1 text-xs rounded ${
                               filters.device.mode === 'include' 
-                                ? 'bg-white text-purple-600 shadow-sm' 
+                                ? 'bg-white text-yellow-600 shadow-sm' 
                                 : 'text-gray-600 hover:text-gray-800'
                             }`}
                           >
@@ -569,7 +569,7 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
                                   updateFilter('device', { ...filters.device, values: filters.device.values.filter(d => d !== device) });
                                 }
                               }}
-                              className="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                              className="rounded border-gray-300 text-yellow-600 focus:ring-yellow-500"
                             />
                             <span>{device}</span>
                           </label>
@@ -584,7 +584,7 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
                         </button>
                         <button
                           onClick={() => setExpandedFilter(null)}
-                          className="text-xs text-purple-600 hover:text-purple-700"
+                          className="text-xs text-yellow-600 hover:text-yellow-700"
                         >
                           Done
                         </button>
@@ -602,7 +602,7 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
                   <div className="flex items-center gap-1">
                     Location
                     {sortField === 'location' && (
-                      <span className="text-purple-600">
+                      <span className="text-yellow-600">
                         {sortDirection === 'asc' ? '↑' : '↓'}
                       </span>
                     )}
@@ -614,13 +614,13 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
                     }}
                     className="p-1 hover:bg-gray-200 rounded"
                   >
-                    <span className={`text-xs ${filters.location.values.length > 0 ? (filters.location.mode === 'exclude' ? 'text-red-600' : 'text-purple-600') : 'text-gray-400'}`}>
+                    <span className={`text-xs ${filters.location.values.length > 0 ? (filters.location.mode === 'exclude' ? 'text-red-600' : 'text-yellow-600') : 'text-gray-400'}`}>
                       ☰
                     </span>
                   </button>
                 </div>
                 <div
-                  className="absolute top-0 right-0 bottom-0 w-1 cursor-col-resize hover:bg-purple-300 bg-gray-300"
+                  className="absolute top-0 right-0 bottom-0 w-1 cursor-col-resize hover:bg-yellow-300 bg-gray-300"
                   onMouseDown={(e) => handleResizeStart(e, 'location')}
                 />
                 {expandedFilter === 'location' && (
@@ -634,7 +634,7 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
                             onClick={() => updateFilter('location', { ...filters.location, mode: 'include' })}
                             className={`px-2 py-1 text-xs rounded ${
                               filters.location.mode === 'include' 
-                                ? 'bg-white text-purple-600 shadow-sm' 
+                                ? 'bg-white text-yellow-600 shadow-sm' 
                                 : 'text-gray-600 hover:text-gray-800'
                             }`}
                           >
@@ -666,7 +666,7 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
                                   updateFilter('location', { ...filters.location, values: filters.location.values.filter(l => l !== location) });
                                 }
                               }}
-                              className="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                              className="rounded border-gray-300 text-yellow-600 focus:ring-yellow-500"
                             />
                             <span>{location}</span>
                           </label>
@@ -681,7 +681,7 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
                         </button>
                         <button
                           onClick={() => setExpandedFilter(null)}
-                          className="text-xs text-purple-600 hover:text-purple-700"
+                          className="text-xs text-yellow-600 hover:text-yellow-700"
                         >
                           Done
                         </button>
@@ -699,7 +699,7 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
                   <div className="flex items-center gap-1">
                     IP Address
                     {sortField === 'ipAddress' && (
-                      <span className="text-purple-600">
+                      <span className="text-yellow-600">
                         {sortDirection === 'asc' ? '↑' : '↓'}
                       </span>
                     )}
@@ -711,13 +711,13 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
                     }}
                     className="p-1 hover:bg-gray-200 rounded"
                   >
-                    <span className={`text-xs ${filters.ipAddress.value ? (filters.ipAddress.mode === 'exclude' ? 'text-red-600' : 'text-purple-600') : 'text-gray-400'}`}>
+                    <span className={`text-xs ${filters.ipAddress.value ? (filters.ipAddress.mode === 'exclude' ? 'text-red-600' : 'text-yellow-600') : 'text-gray-400'}`}>
                       ☰
                     </span>
                   </button>
                 </div>
                 <div
-                  className="absolute top-0 right-0 bottom-0 w-1 cursor-col-resize hover:bg-purple-300 bg-gray-300"
+                  className="absolute top-0 right-0 bottom-0 w-1 cursor-col-resize hover:bg-yellow-300 bg-gray-300"
                   onMouseDown={(e) => handleResizeStart(e, 'ipAddress')}
                 />
                 {expandedFilter === 'ipAddress' && (
@@ -731,7 +731,7 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
                             onClick={() => updateFilter('ipAddress', { ...filters.ipAddress, mode: 'include' })}
                             className={`px-2 py-1 text-xs rounded ${
                               filters.ipAddress.mode === 'include' 
-                                ? 'bg-white text-purple-600 shadow-sm' 
+                                ? 'bg-white text-yellow-600 shadow-sm' 
                                 : 'text-gray-600 hover:text-gray-800'
                             }`}
                           >
@@ -755,7 +755,7 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
                         placeholder="Filter by IP address..."
                         value={filters.ipAddress.value}
                         onChange={(e) => updateFilter('ipAddress', { ...filters.ipAddress, value: e.target.value })}
-                        className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-purple-500"
+                        className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-yellow-500"
                       />
                       <div className="flex justify-between">
                         <button
@@ -766,7 +766,7 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
                         </button>
                         <button
                           onClick={() => setExpandedFilter(null)}
-                          className="text-xs text-purple-600 hover:text-purple-700"
+                          className="text-xs text-yellow-600 hover:text-yellow-700"
                         >
                           Done
                         </button>
@@ -784,7 +784,7 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
                   <div className="flex items-center gap-1">
                     Referrer
                     {sortField === 'referrer' && (
-                      <span className="text-purple-600">
+                      <span className="text-yellow-600">
                         {sortDirection === 'asc' ? '↑' : '↓'}
                       </span>
                     )}
@@ -796,13 +796,13 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
                     }}
                     className="p-1 hover:bg-gray-200 rounded"
                   >
-                    <span className={`text-xs ${filters.referrer.value ? (filters.referrer.mode === 'exclude' ? 'text-red-600' : 'text-purple-600') : 'text-gray-400'}`}>
+                    <span className={`text-xs ${filters.referrer.value ? (filters.referrer.mode === 'exclude' ? 'text-red-600' : 'text-yellow-600') : 'text-gray-400'}`}>
                       ☰
                     </span>
                   </button>
                 </div>
                 <div
-                  className="absolute top-0 right-0 bottom-0 w-1 cursor-col-resize hover:bg-purple-300 bg-gray-300"
+                  className="absolute top-0 right-0 bottom-0 w-1 cursor-col-resize hover:bg-yellow-300 bg-gray-300"
                   onMouseDown={(e) => handleResizeStart(e, 'referrer')}
                 />
                 {expandedFilter === 'referrer' && (
@@ -816,7 +816,7 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
                             onClick={() => updateFilter('referrer', { ...filters.referrer, mode: 'include' })}
                             className={`px-2 py-1 text-xs rounded ${
                               filters.referrer.mode === 'include' 
-                                ? 'bg-white text-purple-600 shadow-sm' 
+                                ? 'bg-white text-yellow-600 shadow-sm' 
                                 : 'text-gray-600 hover:text-gray-800'
                             }`}
                           >
@@ -840,7 +840,7 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
                         placeholder="Filter by referrer..."
                         value={filters.referrer.value}
                         onChange={(e) => updateFilter('referrer', { ...filters.referrer, value: e.target.value })}
-                        className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-purple-500"
+                        className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-yellow-500"
                       />
                       <div className="flex justify-between">
                         <button
@@ -851,7 +851,7 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
                         </button>
                         <button
                           onClick={() => setExpandedFilter(null)}
-                          className="text-xs text-purple-600 hover:text-purple-700"
+                          className="text-xs text-yellow-600 hover:text-yellow-700"
                         >
                           Done
                         </button>
@@ -873,13 +873,13 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
                     }}
                     className="p-1 hover:bg-gray-200 rounded"
                   >
-                    <span className={`text-xs ${filters.landingPage.value ? (filters.landingPage.mode === 'exclude' ? 'text-red-600' : 'text-purple-600') : 'text-gray-400'}`}>
+                    <span className={`text-xs ${filters.landingPage.value ? (filters.landingPage.mode === 'exclude' ? 'text-red-600' : 'text-yellow-600') : 'text-gray-400'}`}>
                       ☰
                     </span>
                   </button>
                 </div>
                 <div
-                  className="absolute top-0 right-0 bottom-0 w-1 cursor-col-resize hover:bg-purple-300 bg-gray-300"
+                  className="absolute top-0 right-0 bottom-0 w-1 cursor-col-resize hover:bg-yellow-300 bg-gray-300"
                   onMouseDown={(e) => handleResizeStart(e, 'landingPage')}
                 />
                 {expandedFilter === 'landingPage' && (
@@ -893,7 +893,7 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
                             onClick={() => updateFilter('landingPage', { ...filters.landingPage, mode: 'include' })}
                             className={`px-2 py-1 text-xs rounded ${
                               filters.landingPage.mode === 'include' 
-                                ? 'bg-white text-purple-600 shadow-sm' 
+                                ? 'bg-white text-yellow-600 shadow-sm' 
                                 : 'text-gray-600 hover:text-gray-800'
                             }`}
                           >
@@ -917,7 +917,7 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
                         placeholder="Filter by landing page..."
                         value={filters.landingPage.value}
                         onChange={(e) => updateFilter('landingPage', { ...filters.landingPage, value: e.target.value })}
-                        className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-purple-500"
+                        className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-yellow-500"
                       />
                       <div className="flex justify-between">
                         <button
@@ -928,7 +928,7 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
                         </button>
                         <button
                           onClick={() => setExpandedFilter(null)}
-                          className="text-xs text-purple-600 hover:text-purple-700"
+                          className="text-xs text-yellow-600 hover:text-yellow-700"
                         >
                           Done
                         </button>
@@ -946,7 +946,7 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
                   <div className="flex items-center gap-1">
                     Pages
                     {sortField === 'pages' && (
-                      <span className="text-purple-600">
+                      <span className="text-yellow-600">
                         {sortDirection === 'asc' ? '↑' : '↓'}
                       </span>
                     )}
@@ -958,13 +958,13 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
                     }}
                     className="p-1 hover:bg-gray-200 rounded"
                   >
-                    <span className={`text-xs ${filters.pages.min || filters.pages.max ? (filters.pages.mode === 'exclude' ? 'text-red-600' : 'text-purple-600') : 'text-gray-400'}`}>
+                    <span className={`text-xs ${filters.pages.min || filters.pages.max ? (filters.pages.mode === 'exclude' ? 'text-red-600' : 'text-yellow-600') : 'text-gray-400'}`}>
                       ☰
                     </span>
                   </button>
                 </div>
                 <div
-                  className="absolute top-0 right-0 bottom-0 w-1 cursor-col-resize hover:bg-purple-300 bg-gray-300"
+                  className="absolute top-0 right-0 bottom-0 w-1 cursor-col-resize hover:bg-yellow-300 bg-gray-300"
                   onMouseDown={(e) => handleResizeStart(e, 'pages')}
                 />
                 {expandedFilter === 'pages' && (
@@ -978,7 +978,7 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
                             onClick={() => updateFilter('pages', { ...filters.pages, mode: 'include' })}
                             className={`px-2 py-1 text-xs rounded ${
                               filters.pages.mode === 'include' 
-                                ? 'bg-white text-purple-600 shadow-sm' 
+                                ? 'bg-white text-yellow-600 shadow-sm' 
                                 : 'text-gray-600 hover:text-gray-800'
                             }`}
                           >
@@ -1005,7 +1005,7 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
                             placeholder="Min pages"
                             value={filters.pages.min}
                             onChange={(e) => updateFilter('pages', { ...filters.pages, min: e.target.value })}
-                            className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-purple-500"
+                            className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-yellow-500"
                           />
                         </div>
                         <div>
@@ -1015,7 +1015,7 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
                             placeholder="Max pages"
                             value={filters.pages.max}
                             onChange={(e) => updateFilter('pages', { ...filters.pages, max: e.target.value })}
-                            className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-purple-500"
+                            className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-yellow-500"
                           />
                         </div>
                       </div>
@@ -1028,7 +1028,7 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
                         </button>
                         <button
                           onClick={() => setExpandedFilter(null)}
-                          className="text-xs text-purple-600 hover:text-purple-700"
+                          className="text-xs text-yellow-600 hover:text-yellow-700"
                         >
                           Done
                         </button>
@@ -1046,7 +1046,7 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
                   <div className="flex items-center gap-1">
                     Clicks
                     {sortField === 'clicks' && (
-                      <span className="text-purple-600">
+                      <span className="text-yellow-600">
                         {sortDirection === 'asc' ? '↑' : '↓'}
                       </span>
                     )}
@@ -1058,13 +1058,13 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
                     }}
                     className="p-1 hover:bg-gray-200 rounded"
                   >
-                    <span className={`text-xs ${filters.clicks.min || filters.clicks.max ? (filters.clicks.mode === 'exclude' ? 'text-red-600' : 'text-purple-600') : 'text-gray-400'}`}>
+                    <span className={`text-xs ${filters.clicks.min || filters.clicks.max ? (filters.clicks.mode === 'exclude' ? 'text-red-600' : 'text-yellow-600') : 'text-gray-400'}`}>
                       ☰
                     </span>
                   </button>
                 </div>
                 <div
-                  className="absolute top-0 right-0 bottom-0 w-1 cursor-col-resize hover:bg-purple-300 bg-gray-300"
+                  className="absolute top-0 right-0 bottom-0 w-1 cursor-col-resize hover:bg-yellow-300 bg-gray-300"
                   onMouseDown={(e) => handleResizeStart(e, 'clicks')}
                 />
                 {expandedFilter === 'clicks' && (
@@ -1078,7 +1078,7 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
                             onClick={() => updateFilter('clicks', { ...filters.clicks, mode: 'include' })}
                             className={`px-2 py-1 text-xs rounded ${
                               filters.clicks.mode === 'include' 
-                                ? 'bg-white text-purple-600 shadow-sm' 
+                                ? 'bg-white text-yellow-600 shadow-sm' 
                                 : 'text-gray-600 hover:text-gray-800'
                             }`}
                           >
@@ -1105,7 +1105,7 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
                             placeholder="Min clicks"
                             value={filters.clicks.min}
                             onChange={(e) => updateFilter('clicks', { ...filters.clicks, min: e.target.value })}
-                            className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-purple-500"
+                            className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-yellow-500"
                           />
                         </div>
                         <div>
@@ -1115,7 +1115,7 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
                             placeholder="Max clicks"
                             value={filters.clicks.max}
                             onChange={(e) => updateFilter('clicks', { ...filters.clicks, max: e.target.value })}
-                            className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-purple-500"
+                            className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-yellow-500"
                           />
                         </div>
                       </div>
@@ -1128,7 +1128,7 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
                         </button>
                         <button
                           onClick={() => setExpandedFilter(null)}
-                          className="text-xs text-purple-600 hover:text-purple-700"
+                          className="text-xs text-yellow-600 hover:text-yellow-700"
                         >
                           Done
                         </button>
@@ -1146,7 +1146,7 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
                   <div className="flex items-center gap-1">
                     Time Spent
                     {sortField === 'timeSpent' && (
-                      <span className="text-purple-600">
+                      <span className="text-yellow-600">
                         {sortDirection === 'asc' ? '↑' : '↓'}
                       </span>
                     )}
@@ -1158,13 +1158,13 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
                     }}
                     className="p-1 hover:bg-gray-200 rounded"
                   >
-                    <span className={`text-xs ${filters.timeSpent.min || filters.timeSpent.max ? (filters.timeSpent.mode === 'exclude' ? 'text-red-600' : 'text-purple-600') : 'text-gray-400'}`}>
+                    <span className={`text-xs ${filters.timeSpent.min || filters.timeSpent.max ? (filters.timeSpent.mode === 'exclude' ? 'text-red-600' : 'text-yellow-600') : 'text-gray-400'}`}>
                       ☰
                     </span>
                   </button>
                 </div>
                 <div
-                  className="absolute top-0 right-0 bottom-0 w-1 cursor-col-resize hover:bg-purple-300 bg-gray-300"
+                  className="absolute top-0 right-0 bottom-0 w-1 cursor-col-resize hover:bg-yellow-300 bg-gray-300"
                   onMouseDown={(e) => handleResizeStart(e, 'timeSpent')}
                 />
                 {expandedFilter === 'timeSpent' && (
@@ -1178,7 +1178,7 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
                             onClick={() => updateFilter('timeSpent', { ...filters.timeSpent, mode: 'include' })}
                             className={`px-2 py-1 text-xs rounded ${
                               filters.timeSpent.mode === 'include' 
-                                ? 'bg-white text-purple-600 shadow-sm' 
+                                ? 'bg-white text-yellow-600 shadow-sm' 
                                 : 'text-gray-600 hover:text-gray-800'
                             }`}
                           >
@@ -1205,7 +1205,7 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
                             placeholder="Min seconds"
                             value={filters.timeSpent.min}
                             onChange={(e) => updateFilter('timeSpent', { ...filters.timeSpent, min: e.target.value })}
-                            className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-purple-500"
+                            className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-yellow-500"
                           />
                         </div>
                         <div>
@@ -1215,7 +1215,7 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
                             placeholder="Max seconds"
                             value={filters.timeSpent.max}
                             onChange={(e) => updateFilter('timeSpent', { ...filters.timeSpent, max: e.target.value })}
-                            className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-purple-500"
+                            className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-yellow-500"
                           />
                         </div>
                       </div>
@@ -1228,7 +1228,7 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
                         </button>
                         <button
                           onClick={() => setExpandedFilter(null)}
-                          className="text-xs text-purple-600 hover:text-purple-700"
+                          className="text-xs text-yellow-600 hover:text-yellow-700"
                         >
                           Done
                         </button>
@@ -1246,7 +1246,7 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
                   <div className="flex items-center gap-1">
                     Status
                     {sortField === 'status' && (
-                      <span className="text-purple-600">
+                      <span className="text-yellow-600">
                         {sortDirection === 'asc' ? '↑' : '↓'}
                       </span>
                     )}
@@ -1258,13 +1258,13 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
                     }}
                     className="p-1 hover:bg-gray-200 rounded"
                   >
-                    <span className={`text-xs ${filters.status.values.length > 0 ? (filters.status.mode === 'exclude' ? 'text-red-600' : 'text-purple-600') : 'text-gray-400'}`}>
+                    <span className={`text-xs ${filters.status.values.length > 0 ? (filters.status.mode === 'exclude' ? 'text-red-600' : 'text-yellow-600') : 'text-gray-400'}`}>
                       ☰
                     </span>
                   </button>
                 </div>
                 <div
-                  className="absolute top-0 right-0 bottom-0 w-1 cursor-col-resize hover:bg-purple-300 bg-gray-300"
+                  className="absolute top-0 right-0 bottom-0 w-1 cursor-col-resize hover:bg-yellow-300 bg-gray-300"
                   onMouseDown={(e) => handleResizeStart(e, 'status')}
                 />
                 {expandedFilter === 'status' && (
@@ -1278,7 +1278,7 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
                             onClick={() => updateFilter('status', { ...filters.status, mode: 'include' })}
                             className={`px-2 py-1 text-xs rounded ${
                               filters.status.mode === 'include' 
-                                ? 'bg-white text-purple-600 shadow-sm' 
+                                ? 'bg-white text-yellow-600 shadow-sm' 
                                 : 'text-gray-600 hover:text-gray-800'
                             }`}
                           >
@@ -1310,7 +1310,7 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
                                   updateFilter('status', { ...filters.status, values: filters.status.values.filter(s => s !== status) });
                                 }
                               }}
-                              className="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                              className="rounded border-gray-300 text-yellow-600 focus:ring-yellow-500"
                             />
                             <span className="capitalize">{status}</span>
                           </label>
@@ -1325,7 +1325,7 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
                         </button>
                         <button
                           onClick={() => setExpandedFilter(null)}
-                          className="text-xs text-purple-600 hover:text-purple-700"
+                          className="text-xs text-yellow-600 hover:text-yellow-700"
                         >
                           Done
                         </button>
@@ -1340,7 +1340,7 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
               >
                 Actions
                 <div
-                  className="absolute top-0 right-0 bottom-0 w-1 cursor-col-resize hover:bg-purple-300 bg-gray-300"
+                  className="absolute top-0 right-0 bottom-0 w-1 cursor-col-resize hover:bg-yellow-300 bg-gray-300"
                   onMouseDown={(e) => handleResizeStart(e, 'actions')}
                 />
               </th>
@@ -1415,7 +1415,7 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
                   {getStatusBadge(session)}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500" style={{ width: columnWidths.actions, minWidth: columnWidths.actions, maxWidth: columnWidths.actions }}>
-                  <button className="text-purple-600 hover:text-purple-900">
+                  <button className="text-yellow-600 hover:text-purple-900">
                     View Details
                   </button>
                 </td>

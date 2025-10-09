@@ -44,9 +44,12 @@ export default function Sidebar({ email, activeView, onViewChange, clientId }: S
     <aside className="fixed left-0 top-0 h-full w-64 bg-white border-r border-gray-200 flex flex-col z-20">
       {/* Logo */}
       <div className="h-16 flex items-center px-6 border-b border-gray-200">
-        <h1 className="text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-          Catlicks
-        </h1>
+        <div className="flex items-center gap-2">
+          <span className="text-2xl">🐝</span>
+          <h1 className="text-xl font-bold bg-gradient-to-r from-yellow-500 to-amber-600 bg-clip-text text-transparent">
+            Trackerbee
+          </h1>
+        </div>
       </div>
 
       {/* Navigation */}
@@ -55,7 +58,7 @@ export default function Sidebar({ email, activeView, onViewChange, clientId }: S
           onClick={() => onViewChange('dashboard')}
           className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
             activeView === 'dashboard'
-              ? 'bg-purple-50 text-purple-700'
+              ? 'bg-yellow-50 text-yellow-900 border border-yellow-200'
               : 'text-gray-700 hover:bg-gray-50'
           }`}
         >
@@ -66,7 +69,7 @@ export default function Sidebar({ email, activeView, onViewChange, clientId }: S
           onClick={() => onViewChange('live')}
           className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
             activeView === 'live'
-              ? 'bg-purple-50 text-purple-700'
+              ? 'bg-yellow-50 text-yellow-900 border border-yellow-200'
               : 'text-gray-700 hover:bg-gray-50'
           }`}
         >
@@ -89,7 +92,7 @@ export default function Sidebar({ email, activeView, onViewChange, clientId }: S
           onClick={() => onViewChange('visitors')}
           className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
             activeView === 'visitors'
-              ? 'bg-purple-50 text-purple-700'
+              ? 'bg-yellow-50 text-yellow-900 border border-yellow-200'
               : 'text-gray-700 hover:bg-gray-50'
           }`}
         >
@@ -100,7 +103,7 @@ export default function Sidebar({ email, activeView, onViewChange, clientId }: S
           onClick={() => onViewChange('insights')}
           className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
             activeView === 'insights'
-              ? 'bg-purple-50 text-purple-700'
+              ? 'bg-yellow-50 text-yellow-900 border border-yellow-200'
               : 'text-gray-700 hover:bg-gray-50'
           }`}
         >
@@ -111,7 +114,7 @@ export default function Sidebar({ email, activeView, onViewChange, clientId }: S
           onClick={() => onViewChange('settings')}
           className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
             activeView === 'settings'
-              ? 'bg-purple-50 text-purple-700'
+              ? 'bg-yellow-50 text-yellow-900 border border-yellow-200'
               : 'text-gray-700 hover:bg-gray-50'
           }`}
         >
@@ -123,7 +126,7 @@ export default function Sidebar({ email, activeView, onViewChange, clientId }: S
       {/* User info */}
       <div className="p-4 border-t border-gray-200">
         <div className="flex items-center gap-3 mb-3">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white text-sm font-medium">
+          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-yellow-400 to-amber-500 flex items-center justify-center text-black text-sm font-medium">
             {email[0].toUpperCase()}
           </div>
           <div className="flex-1 min-w-0">

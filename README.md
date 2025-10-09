@@ -1,10 +1,10 @@
-# 🐱 Catlicks
+# 🐝 Trackerbee
 
-**Conversion-focused analytics for marketers.**
+**Buzz through your conversion problems.**
 
-Catlicks shows you why visitors don't convert and what to fix—not just what happened.
+Trackerbee shows you why visitors don't convert and what to fix—not just what happened.
 
-## What Makes Catlicks Different
+## What Makes Trackerbee Different
 
 - **Conversion killers only** - Focus on what stops conversions, not vanity metrics
 - **Actionable insights** - Get AI-suggested fixes, not arbitrary data
@@ -59,6 +59,14 @@ Open [http://localhost:3000](http://localhost:3000)
   webAnalytics.init('YOUR_CLIENT_ID');
 </script>
 ```
+
+## Design System
+
+🐝 **Bee Theme:**
+- Primary: Yellow (#EAB308) & Amber (#F59E0B)
+- Accent: Black (#000000)
+- Neutral: Gray scales
+- Active states: Yellow-50 background with yellow-900 text
 
 ## Tech Stack
 

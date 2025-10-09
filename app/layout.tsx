@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Catlicks - Conversion Analytics",
-  description: "See why visitors don't convert and what to fix. Conversion-focused analytics for marketers.",
+  title: "Trackerbee 🐝 - Conversion Analytics",
+  description: "Buzz through your conversion problems. See why visitors don't convert and what to fix.",
 };
 
 export default function RootLayout({
