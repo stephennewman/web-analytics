@@ -50,9 +50,21 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
   const [sortField, setSortField] = useState<SortField>('time');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
   const [searchTerm, setSearchTerm] = useState('');
-  const [deviceFilter, setDeviceFilter] = useState<string>('all');
-  const [locationFilter, setLocationFilter] = useState<string>('all');
-  const [intentFilter, setIntentFilter] = useState<string>('all');
+  const [expandedFilter, setExpandedFilter] = useState<string | null>(null);
+  
+  // Column filters
+  const [filters, setFilters] = useState({
+    time: { start: '', end: '', mode: 'include' as 'include' | 'exclude' },
+    device: { values: [] as string[], mode: 'include' as 'include' | 'exclude' },
+    location: { values: [] as string[], mode: 'include' as 'include' | 'exclude' },
+    ipAddress: { value: '', mode: 'include' as 'include' | 'exclude' },
+    referrer: { value: '', mode: 'include' as 'include' | 'exclude' },
+    landingPage: { value: '', mode: 'include' as 'include' | 'exclude' },
+    pages: { min: '', max: '', mode: 'include' as 'include' | 'exclude' },
+    clicks: { min: '', max: '', mode: 'include' as 'include' | 'exclude' },
+    timeSpent: { min: '', max: '', mode: 'include' as 'include' | 'exclude' },
+    status: { values: [] as string[], mode: 'include' as 'include' | 'exclude' }
+  });
 
   // Get unique values for filters
   const deviceTypes = useMemo(() => {
@@ -79,20 +91,81 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
         if (!matchesSearch) return false;
       }
 
-      // Device filter
-      if (deviceFilter !== 'all' && session.deviceType !== deviceFilter) return false;
-
-      // Location filter
-      if (locationFilter !== 'all') {
-        const sessionLocation = `${session.city || 'Unknown'}, ${session.country || 'Unknown'}`;
-        if (sessionLocation !== locationFilter) return false;
+      // Time filter
+      if (filters.time.start || filters.time.end) {
+        const sessionTime = new Date(session.updated_at);
+        let timeMatches = true;
+        if (filters.time.start && sessionTime < new Date(filters.time.start)) timeMatches = false;
+        if (filters.time.end && sessionTime > new Date(filters.time.end)) timeMatches = false;
+        if (filters.time.mode === 'exclude' ? timeMatches : !timeMatches) return false;
       }
 
-      // Intent filter
-      if (intentFilter === 'intent' && !session.hasIntent) return false;
-      if (intentFilter === 'converted' && !session.converted) return false;
-      if (intentFilter === 'frustrated' && !session.hasFrustration) return false;
-      if (intentFilter === 'errors' && !session.hasErrors) return false;
+      // Device filter
+      if (filters.device.values.length > 0) {
+        const deviceMatches = filters.device.values.includes(session.deviceType);
+        if (filters.device.mode === 'exclude' ? deviceMatches : !deviceMatches) return false;
+      }
+
+      // Location filter
+      if (filters.location.values.length > 0) {
+        const sessionLocation = `${session.city || 'Unknown'}, ${session.country || 'Unknown'}`;
+        const locationMatches = filters.location.values.includes(sessionLocation);
+        if (filters.location.mode === 'exclude' ? locationMatches : !locationMatches) return false;
+      }
+
+      // IP Address filter
+      if (filters.ipAddress.value) {
+        const ipMatches = session.ipAddress.includes(filters.ipAddress.value);
+        if (filters.ipAddress.mode === 'exclude' ? ipMatches : !ipMatches) return false;
+      }
+
+      // Referrer filter
+      if (filters.referrer.value) {
+        const referrerMatches = session.referrer.toLowerCase().includes(filters.referrer.value.toLowerCase());
+        if (filters.referrer.mode === 'exclude' ? referrerMatches : !referrerMatches) return false;
+      }
+
+      // Landing Page filter
+      if (filters.landingPage.value) {
+        const landingPageMatches = session.landingPage.toLowerCase().includes(filters.landingPage.value.toLowerCase());
+        if (filters.landingPage.mode === 'exclude' ? landingPageMatches : !landingPageMatches) return false;
+      }
+
+      // Pages filter
+      if (filters.pages.min || filters.pages.max) {
+        let pagesMatches = true;
+        if (filters.pages.min && session.pageviews < parseInt(filters.pages.min)) pagesMatches = false;
+        if (filters.pages.max && session.pageviews > parseInt(filters.pages.max)) pagesMatches = false;
+        if (filters.pages.mode === 'exclude' ? pagesMatches : !pagesMatches) return false;
+      }
+
+      // Clicks filter
+      if (filters.clicks.min || filters.clicks.max) {
+        let clicksMatches = true;
+        if (filters.clicks.min && session.clicks < parseInt(filters.clicks.min)) clicksMatches = false;
+        if (filters.clicks.max && session.clicks > parseInt(filters.clicks.max)) clicksMatches = false;
+        if (filters.clicks.mode === 'exclude' ? clicksMatches : !clicksMatches) return false;
+      }
+
+      // Time Spent filter
+      if (filters.timeSpent.min || filters.timeSpent.max) {
+        let timeSpentMatches = true;
+        if (filters.timeSpent.min && session.timeSpent < parseInt(filters.timeSpent.min)) timeSpentMatches = false;
+        if (filters.timeSpent.max && session.timeSpent > parseInt(filters.timeSpent.max)) timeSpentMatches = false;
+        if (filters.timeSpent.mode === 'exclude' ? timeSpentMatches : !timeSpentMatches) return false;
+      }
+
+      // Status filter
+      if (filters.status.values.length > 0) {
+        let sessionStatus = 'normal';
+        if (session.converted) sessionStatus = 'converted';
+        else if (session.hasIntent) sessionStatus = 'intent';
+        else if (session.hasFrustration) sessionStatus = 'frustrated';
+        else if (session.hasErrors) sessionStatus = 'errors';
+        
+        const statusMatches = filters.status.values.includes(sessionStatus);
+        if (filters.status.mode === 'exclude' ? statusMatches : !statusMatches) return false;
+      }
 
       return true;
     });
@@ -148,7 +221,7 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
     });
 
     return filtered;
-  }, [sessions, searchTerm, deviceFilter, locationFilter, intentFilter, sortField, sortDirection]);
+  }, [sessions, searchTerm, filters, sortField, sortDirection]);
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -157,6 +230,62 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
       setSortField(field);
       setSortDirection('desc');
     }
+  };
+
+  const updateFilter = (column: keyof typeof filters, value: any) => {
+    setFilters(prev => ({
+      ...prev,
+      [column]: value
+    }));
+  };
+
+  const clearFilter = (column: keyof typeof filters) => {
+    const defaultValue = {
+      time: { start: '', end: '', mode: 'include' as 'include' | 'exclude' },
+      device: { values: [] as string[], mode: 'include' as 'include' | 'exclude' },
+      location: { values: [] as string[], mode: 'include' as 'include' | 'exclude' },
+      ipAddress: { value: '', mode: 'include' as 'include' | 'exclude' },
+      referrer: { value: '', mode: 'include' as 'include' | 'exclude' },
+      landingPage: { value: '', mode: 'include' as 'include' | 'exclude' },
+      pages: { min: '', max: '', mode: 'include' as 'include' | 'exclude' },
+      clicks: { min: '', max: '', mode: 'include' as 'include' | 'exclude' },
+      timeSpent: { min: '', max: '', mode: 'include' as 'include' | 'exclude' },
+      status: { values: [] as string[], mode: 'include' as 'include' | 'exclude' }
+    };
+    setFilters(prev => ({
+      ...prev,
+      [column]: defaultValue[column]
+    }));
+  };
+
+  const clearAllFilters = () => {
+    setFilters({
+      time: { start: '', end: '', mode: 'include' as 'include' | 'exclude' },
+      device: { values: [] as string[], mode: 'include' as 'include' | 'exclude' },
+      location: { values: [] as string[], mode: 'include' as 'include' | 'exclude' },
+      ipAddress: { value: '', mode: 'include' as 'include' | 'exclude' },
+      referrer: { value: '', mode: 'include' as 'include' | 'exclude' },
+      landingPage: { value: '', mode: 'include' as 'include' | 'exclude' },
+      pages: { min: '', max: '', mode: 'include' as 'include' | 'exclude' },
+      clicks: { min: '', max: '', mode: 'include' as 'include' | 'exclude' },
+      timeSpent: { min: '', max: '', mode: 'include' as 'include' | 'exclude' },
+      status: { values: [] as string[], mode: 'include' as 'include' | 'exclude' }
+    });
+  };
+
+  const hasActiveFilters = () => {
+    return (
+      filters.time.start !== '' || filters.time.end !== '' ||
+      filters.device.values.length > 0 ||
+      filters.location.values.length > 0 ||
+      filters.ipAddress.value !== '' ||
+      filters.referrer.value !== '' ||
+      filters.landingPage.value !== '' ||
+      filters.pages.min !== '' || filters.pages.max !== '' ||
+      filters.clicks.min !== '' || filters.clicks.max !== '' ||
+      filters.timeSpent.min !== '' || filters.timeSpent.max !== '' ||
+      filters.status.values.length > 0
+    );
   };
 
   const formatTime = (seconds: number) => {
@@ -184,56 +313,34 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
 
   return (
     <div className="bg-white rounded-lg border border-gray-200">
-      {/* Filters */}
+      {/* Search and Clear Filters */}
       <div className="p-4 border-b border-gray-200">
-        <div className="flex flex-wrap gap-4 items-center">
+        <div className="flex flex-col sm:flex-row gap-4">
           {/* Search */}
-          <div className="flex-1 min-w-64">
-            <input
-              type="text"
-              placeholder="Search sessions, pages, locations..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
-            />
+          <div className="flex-1">
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Search sessions..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              />
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <span className="text-gray-400">☰</span>
+              </div>
+            </div>
           </div>
 
-          {/* Device Filter */}
-          <select
-            value={deviceFilter}
-            onChange={(e) => setDeviceFilter(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
-          >
-            <option value="all">All Devices</option>
-            {deviceTypes.map(device => (
-              <option key={device} value={device}>{device}</option>
-            ))}
-          </select>
-
-          {/* Location Filter */}
-          <select
-            value={locationFilter}
-            onChange={(e) => setLocationFilter(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
-          >
-            <option value="all">All Locations</option>
-            {locations.map(location => (
-              <option key={location} value={location}>{location}</option>
-            ))}
-          </select>
-
-          {/* Intent Filter */}
-          <select
-            value={intentFilter}
-            onChange={(e) => setIntentFilter(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
-          >
-            <option value="all">All Sessions</option>
-            <option value="converted">Converted</option>
-            <option value="intent">High Intent</option>
-            <option value="frustrated">Frustrated</option>
-            <option value="errors">Errors</option>
-          </select>
+          {/* Clear Filters */}
+          {hasActiveFilters() && (
+            <button
+              onClick={clearAllFilters}
+              className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
+            >
+              Clear All Filters
+            </button>
+          )}
         </div>
 
         {/* Results count */}
@@ -245,127 +352,889 @@ export default function VisitorsTable({ sessions, onSelectSession }: VisitorsTab
       {/* Table */}
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+          <thead className="bg-gray-50 relative">
             <tr>
               <th 
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 relative"
                 onClick={() => handleSort('time')}
               >
-                <div className="flex items-center gap-1">
-                  Time
-                  {sortField === 'time' && (
-                    <span className="text-purple-600">
-                      {sortDirection === 'asc' ? '↑' : '↓'}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1">
+                    Time
+                    {sortField === 'time' && (
+                      <span className="text-purple-600">
+                        {sortDirection === 'asc' ? '↑' : '↓'}
+                      </span>
+                    )}
+                  </div>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setExpandedFilter(expandedFilter === 'time' ? null : 'time');
+                    }}
+                    className="p-1 hover:bg-gray-200 rounded"
+                  >
+                    <span className={`text-xs ${filters.time.start || filters.time.end ? (filters.time.mode === 'exclude' ? 'text-red-600' : 'text-purple-600') : 'text-gray-400'}`}>
+                      ☰
                     </span>
-                  )}
+                  </button>
                 </div>
+                {expandedFilter === 'time' && (
+                  <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-md shadow-lg z-10 p-3 mt-1">
+                    <div className="space-y-3">
+                      {/* Include/Exclude Toggle */}
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-medium text-gray-700">Mode:</span>
+                        <div className="flex bg-gray-100 rounded-md p-1">
+                          <button
+                            onClick={() => updateFilter('time', { ...filters.time, mode: 'include' })}
+                            className={`px-2 py-1 text-xs rounded ${
+                              filters.time.mode === 'include' 
+                                ? 'bg-white text-purple-600 shadow-sm' 
+                                : 'text-gray-600 hover:text-gray-800'
+                            }`}
+                          >
+                            Include
+                          </button>
+                          <button
+                            onClick={() => updateFilter('time', { ...filters.time, mode: 'exclude' })}
+                            className={`px-2 py-1 text-xs rounded ${
+                              filters.time.mode === 'exclude' 
+                                ? 'bg-white text-red-600 shadow-sm' 
+                                : 'text-gray-600 hover:text-gray-800'
+                            }`}
+                          >
+                            Exclude
+                          </button>
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">From</label>
+                        <input
+                          type="datetime-local"
+                          value={filters.time.start}
+                          onChange={(e) => updateFilter('time', { ...filters.time, start: e.target.value })}
+                          className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-purple-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">To</label>
+                        <input
+                          type="datetime-local"
+                          value={filters.time.end}
+                          onChange={(e) => updateFilter('time', { ...filters.time, end: e.target.value })}
+                          className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-purple-500"
+                        />
+                      </div>
+                      <div className="flex justify-between">
+                        <button
+                          onClick={() => clearFilter('time')}
+                          className="text-xs text-gray-500 hover:text-gray-700"
+                        >
+                          Clear
+                        </button>
+                        <button
+                          onClick={() => setExpandedFilter(null)}
+                          className="text-xs text-purple-600 hover:text-purple-700"
+                        >
+                          Done
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </th>
               <th 
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 relative"
                 onClick={() => handleSort('device')}
               >
-                <div className="flex items-center gap-1">
-                  Device
-                  {sortField === 'device' && (
-                    <span className="text-purple-600">
-                      {sortDirection === 'asc' ? '↑' : '↓'}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1">
+                    Device
+                    {sortField === 'device' && (
+                      <span className="text-purple-600">
+                        {sortDirection === 'asc' ? '↑' : '↓'}
+                      </span>
+                    )}
+                  </div>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setExpandedFilter(expandedFilter === 'device' ? null : 'device');
+                    }}
+                    className="p-1 hover:bg-gray-200 rounded"
+                  >
+                    <span className={`text-xs ${filters.device.values.length > 0 ? (filters.device.mode === 'exclude' ? 'text-red-600' : 'text-purple-600') : 'text-gray-400'}`}>
+                      ☰
                     </span>
-                  )}
+                  </button>
                 </div>
+                {expandedFilter === 'device' && (
+                  <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-md shadow-lg z-10 p-3 mt-1">
+                    <div className="space-y-3">
+                      {/* Include/Exclude Toggle */}
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-medium text-gray-700">Mode:</span>
+                        <div className="flex bg-gray-100 rounded-md p-1">
+                          <button
+                            onClick={() => updateFilter('device', { ...filters.device, mode: 'include' })}
+                            className={`px-2 py-1 text-xs rounded ${
+                              filters.device.mode === 'include' 
+                                ? 'bg-white text-purple-600 shadow-sm' 
+                                : 'text-gray-600 hover:text-gray-800'
+                            }`}
+                          >
+                            Include
+                          </button>
+                          <button
+                            onClick={() => updateFilter('device', { ...filters.device, mode: 'exclude' })}
+                            className={`px-2 py-1 text-xs rounded ${
+                              filters.device.mode === 'exclude' 
+                                ? 'bg-white text-red-600 shadow-sm' 
+                                : 'text-gray-600 hover:text-gray-800'
+                            }`}
+                          >
+                            Exclude
+                          </button>
+                        </div>
+                      </div>
+                      
+                      <div className="max-h-32 overflow-y-auto">
+                        {deviceTypes.map(device => (
+                          <label key={device} className="flex items-center space-x-2 text-xs">
+                            <input
+                              type="checkbox"
+                              checked={filters.device.values.includes(device)}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  updateFilter('device', { ...filters.device, values: [...filters.device.values, device] });
+                                } else {
+                                  updateFilter('device', { ...filters.device, values: filters.device.values.filter(d => d !== device) });
+                                }
+                              }}
+                              className="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                            />
+                            <span>{device}</span>
+                          </label>
+                        ))}
+                      </div>
+                      <div className="flex justify-between">
+                        <button
+                          onClick={() => clearFilter('device')}
+                          className="text-xs text-gray-500 hover:text-gray-700"
+                        >
+                          Clear
+                        </button>
+                        <button
+                          onClick={() => setExpandedFilter(null)}
+                          className="text-xs text-purple-600 hover:text-purple-700"
+                        >
+                          Done
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </th>
               <th 
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 relative"
                 onClick={() => handleSort('location')}
               >
-                <div className="flex items-center gap-1">
-                  Location
-                  {sortField === 'location' && (
-                    <span className="text-purple-600">
-                      {sortDirection === 'asc' ? '↑' : '↓'}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1">
+                    Location
+                    {sortField === 'location' && (
+                      <span className="text-purple-600">
+                        {sortDirection === 'asc' ? '↑' : '↓'}
+                      </span>
+                    )}
+                  </div>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setExpandedFilter(expandedFilter === 'location' ? null : 'location');
+                    }}
+                    className="p-1 hover:bg-gray-200 rounded"
+                  >
+                    <span className={`text-xs ${filters.location.values.length > 0 ? (filters.location.mode === 'exclude' ? 'text-red-600' : 'text-purple-600') : 'text-gray-400'}`}>
+                      ☰
                     </span>
-                  )}
+                  </button>
                 </div>
+                {expandedFilter === 'location' && (
+                  <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-md shadow-lg z-10 p-3 mt-1">
+                    <div className="space-y-3">
+                      {/* Include/Exclude Toggle */}
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-medium text-gray-700">Mode:</span>
+                        <div className="flex bg-gray-100 rounded-md p-1">
+                          <button
+                            onClick={() => updateFilter('location', { ...filters.location, mode: 'include' })}
+                            className={`px-2 py-1 text-xs rounded ${
+                              filters.location.mode === 'include' 
+                                ? 'bg-white text-purple-600 shadow-sm' 
+                                : 'text-gray-600 hover:text-gray-800'
+                            }`}
+                          >
+                            Include
+                          </button>
+                          <button
+                            onClick={() => updateFilter('location', { ...filters.location, mode: 'exclude' })}
+                            className={`px-2 py-1 text-xs rounded ${
+                              filters.location.mode === 'exclude' 
+                                ? 'bg-white text-red-600 shadow-sm' 
+                                : 'text-gray-600 hover:text-gray-800'
+                            }`}
+                          >
+                            Exclude
+                          </button>
+                        </div>
+                      </div>
+                      
+                      <div className="max-h-32 overflow-y-auto">
+                        {locations.map(location => (
+                          <label key={location} className="flex items-center space-x-2 text-xs">
+                            <input
+                              type="checkbox"
+                              checked={filters.location.values.includes(location)}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  updateFilter('location', { ...filters.location, values: [...filters.location.values, location] });
+                                } else {
+                                  updateFilter('location', { ...filters.location, values: filters.location.values.filter(l => l !== location) });
+                                }
+                              }}
+                              className="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                            />
+                            <span>{location}</span>
+                          </label>
+                        ))}
+                      </div>
+                      <div className="flex justify-between">
+                        <button
+                          onClick={() => clearFilter('location')}
+                          className="text-xs text-gray-500 hover:text-gray-700"
+                        >
+                          Clear
+                        </button>
+                        <button
+                          onClick={() => setExpandedFilter(null)}
+                          className="text-xs text-purple-600 hover:text-purple-700"
+                        >
+                          Done
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </th>
               <th 
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 relative"
                 onClick={() => handleSort('ipAddress')}
               >
-                <div className="flex items-center gap-1">
-                  IP Address
-                  {sortField === 'ipAddress' && (
-                    <span className="text-purple-600">
-                      {sortDirection === 'asc' ? '↑' : '↓'}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1">
+                    IP Address
+                    {sortField === 'ipAddress' && (
+                      <span className="text-purple-600">
+                        {sortDirection === 'asc' ? '↑' : '↓'}
+                      </span>
+                    )}
+                  </div>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setExpandedFilter(expandedFilter === 'ipAddress' ? null : 'ipAddress');
+                    }}
+                    className="p-1 hover:bg-gray-200 rounded"
+                  >
+                    <span className={`text-xs ${filters.ipAddress.value ? (filters.ipAddress.mode === 'exclude' ? 'text-red-600' : 'text-purple-600') : 'text-gray-400'}`}>
+                      ☰
                     </span>
-                  )}
+                  </button>
                 </div>
+                {expandedFilter === 'ipAddress' && (
+                  <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-md shadow-lg z-10 p-3 mt-1">
+                    <div className="space-y-3">
+                      {/* Include/Exclude Toggle */}
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-medium text-gray-700">Mode:</span>
+                        <div className="flex bg-gray-100 rounded-md p-1">
+                          <button
+                            onClick={() => updateFilter('ipAddress', { ...filters.ipAddress, mode: 'include' })}
+                            className={`px-2 py-1 text-xs rounded ${
+                              filters.ipAddress.mode === 'include' 
+                                ? 'bg-white text-purple-600 shadow-sm' 
+                                : 'text-gray-600 hover:text-gray-800'
+                            }`}
+                          >
+                            Include
+                          </button>
+                          <button
+                            onClick={() => updateFilter('ipAddress', { ...filters.ipAddress, mode: 'exclude' })}
+                            className={`px-2 py-1 text-xs rounded ${
+                              filters.ipAddress.mode === 'exclude' 
+                                ? 'bg-white text-red-600 shadow-sm' 
+                                : 'text-gray-600 hover:text-gray-800'
+                            }`}
+                          >
+                            Exclude
+                          </button>
+                        </div>
+                      </div>
+                      
+                      <input
+                        type="text"
+                        placeholder="Filter by IP address..."
+                        value={filters.ipAddress.value}
+                        onChange={(e) => updateFilter('ipAddress', { ...filters.ipAddress, value: e.target.value })}
+                        className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-purple-500"
+                      />
+                      <div className="flex justify-between">
+                        <button
+                          onClick={() => clearFilter('ipAddress')}
+                          className="text-xs text-gray-500 hover:text-gray-700"
+                        >
+                          Clear
+                        </button>
+                        <button
+                          onClick={() => setExpandedFilter(null)}
+                          className="text-xs text-purple-600 hover:text-purple-700"
+                        >
+                          Done
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </th>
               <th 
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 relative"
                 onClick={() => handleSort('referrer')}
               >
-                <div className="flex items-center gap-1">
-                  Referrer
-                  {sortField === 'referrer' && (
-                    <span className="text-purple-600">
-                      {sortDirection === 'asc' ? '↑' : '↓'}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1">
+                    Referrer
+                    {sortField === 'referrer' && (
+                      <span className="text-purple-600">
+                        {sortDirection === 'asc' ? '↑' : '↓'}
+                      </span>
+                    )}
+                  </div>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setExpandedFilter(expandedFilter === 'referrer' ? null : 'referrer');
+                    }}
+                    className="p-1 hover:bg-gray-200 rounded"
+                  >
+                    <span className={`text-xs ${filters.referrer.value ? (filters.referrer.mode === 'exclude' ? 'text-red-600' : 'text-purple-600') : 'text-gray-400'}`}>
+                      ☰
                     </span>
-                  )}
+                  </button>
                 </div>
+                {expandedFilter === 'referrer' && (
+                  <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-md shadow-lg z-10 p-3 mt-1">
+                    <div className="space-y-3">
+                      {/* Include/Exclude Toggle */}
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-medium text-gray-700">Mode:</span>
+                        <div className="flex bg-gray-100 rounded-md p-1">
+                          <button
+                            onClick={() => updateFilter('referrer', { ...filters.referrer, mode: 'include' })}
+                            className={`px-2 py-1 text-xs rounded ${
+                              filters.referrer.mode === 'include' 
+                                ? 'bg-white text-purple-600 shadow-sm' 
+                                : 'text-gray-600 hover:text-gray-800'
+                            }`}
+                          >
+                            Include
+                          </button>
+                          <button
+                            onClick={() => updateFilter('referrer', { ...filters.referrer, mode: 'exclude' })}
+                            className={`px-2 py-1 text-xs rounded ${
+                              filters.referrer.mode === 'exclude' 
+                                ? 'bg-white text-red-600 shadow-sm' 
+                                : 'text-gray-600 hover:text-gray-800'
+                            }`}
+                          >
+                            Exclude
+                          </button>
+                        </div>
+                      </div>
+                      
+                      <input
+                        type="text"
+                        placeholder="Filter by referrer..."
+                        value={filters.referrer.value}
+                        onChange={(e) => updateFilter('referrer', { ...filters.referrer, value: e.target.value })}
+                        className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-purple-500"
+                      />
+                      <div className="flex justify-between">
+                        <button
+                          onClick={() => clearFilter('referrer')}
+                          className="text-xs text-gray-500 hover:text-gray-700"
+                        >
+                          Clear
+                        </button>
+                        <button
+                          onClick={() => setExpandedFilter(null)}
+                          className="text-xs text-purple-600 hover:text-purple-700"
+                        >
+                          Done
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Landing Page
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider relative">
+                <div className="flex items-center justify-between">
+                  <span>Landing Page</span>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setExpandedFilter(expandedFilter === 'landingPage' ? null : 'landingPage');
+                    }}
+                    className="p-1 hover:bg-gray-200 rounded"
+                  >
+                    <span className={`text-xs ${filters.landingPage.value ? (filters.landingPage.mode === 'exclude' ? 'text-red-600' : 'text-purple-600') : 'text-gray-400'}`}>
+                      ☰
+                    </span>
+                  </button>
+                </div>
+                {expandedFilter === 'landingPage' && (
+                  <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-md shadow-lg z-10 p-3 mt-1">
+                    <div className="space-y-3">
+                      {/* Include/Exclude Toggle */}
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-medium text-gray-700">Mode:</span>
+                        <div className="flex bg-gray-100 rounded-md p-1">
+                          <button
+                            onClick={() => updateFilter('landingPage', { ...filters.landingPage, mode: 'include' })}
+                            className={`px-2 py-1 text-xs rounded ${
+                              filters.landingPage.mode === 'include' 
+                                ? 'bg-white text-purple-600 shadow-sm' 
+                                : 'text-gray-600 hover:text-gray-800'
+                            }`}
+                          >
+                            Include
+                          </button>
+                          <button
+                            onClick={() => updateFilter('landingPage', { ...filters.landingPage, mode: 'exclude' })}
+                            className={`px-2 py-1 text-xs rounded ${
+                              filters.landingPage.mode === 'exclude' 
+                                ? 'bg-white text-red-600 shadow-sm' 
+                                : 'text-gray-600 hover:text-gray-800'
+                            }`}
+                          >
+                            Exclude
+                          </button>
+                        </div>
+                      </div>
+                      
+                      <input
+                        type="text"
+                        placeholder="Filter by landing page..."
+                        value={filters.landingPage.value}
+                        onChange={(e) => updateFilter('landingPage', { ...filters.landingPage, value: e.target.value })}
+                        className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-purple-500"
+                      />
+                      <div className="flex justify-between">
+                        <button
+                          onClick={() => clearFilter('landingPage')}
+                          className="text-xs text-gray-500 hover:text-gray-700"
+                        >
+                          Clear
+                        </button>
+                        <button
+                          onClick={() => setExpandedFilter(null)}
+                          className="text-xs text-purple-600 hover:text-purple-700"
+                        >
+                          Done
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </th>
               <th 
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 relative"
                 onClick={() => handleSort('pages')}
               >
-                <div className="flex items-center gap-1">
-                  Pages
-                  {sortField === 'pages' && (
-                    <span className="text-purple-600">
-                      {sortDirection === 'asc' ? '↑' : '↓'}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1">
+                    Pages
+                    {sortField === 'pages' && (
+                      <span className="text-purple-600">
+                        {sortDirection === 'asc' ? '↑' : '↓'}
+                      </span>
+                    )}
+                  </div>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setExpandedFilter(expandedFilter === 'pages' ? null : 'pages');
+                    }}
+                    className="p-1 hover:bg-gray-200 rounded"
+                  >
+                    <span className={`text-xs ${filters.pages.min || filters.pages.max ? (filters.pages.mode === 'exclude' ? 'text-red-600' : 'text-purple-600') : 'text-gray-400'}`}>
+                      ☰
                     </span>
-                  )}
+                  </button>
                 </div>
+                {expandedFilter === 'pages' && (
+                  <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-md shadow-lg z-10 p-3 mt-1">
+                    <div className="space-y-3">
+                      {/* Include/Exclude Toggle */}
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-medium text-gray-700">Mode:</span>
+                        <div className="flex bg-gray-100 rounded-md p-1">
+                          <button
+                            onClick={() => updateFilter('pages', { ...filters.pages, mode: 'include' })}
+                            className={`px-2 py-1 text-xs rounded ${
+                              filters.pages.mode === 'include' 
+                                ? 'bg-white text-purple-600 shadow-sm' 
+                                : 'text-gray-600 hover:text-gray-800'
+                            }`}
+                          >
+                            Include
+                          </button>
+                          <button
+                            onClick={() => updateFilter('pages', { ...filters.pages, mode: 'exclude' })}
+                            className={`px-2 py-1 text-xs rounded ${
+                              filters.pages.mode === 'exclude' 
+                                ? 'bg-white text-red-600 shadow-sm' 
+                                : 'text-gray-600 hover:text-gray-800'
+                            }`}
+                          >
+                            Exclude
+                          </button>
+                        </div>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 mb-1">Min</label>
+                          <input
+                            type="number"
+                            placeholder="Min pages"
+                            value={filters.pages.min}
+                            onChange={(e) => updateFilter('pages', { ...filters.pages, min: e.target.value })}
+                            className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-purple-500"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 mb-1">Max</label>
+                          <input
+                            type="number"
+                            placeholder="Max pages"
+                            value={filters.pages.max}
+                            onChange={(e) => updateFilter('pages', { ...filters.pages, max: e.target.value })}
+                            className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-purple-500"
+                          />
+                        </div>
+                      </div>
+                      <div className="flex justify-between">
+                        <button
+                          onClick={() => clearFilter('pages')}
+                          className="text-xs text-gray-500 hover:text-gray-700"
+                        >
+                          Clear
+                        </button>
+                        <button
+                          onClick={() => setExpandedFilter(null)}
+                          className="text-xs text-purple-600 hover:text-purple-700"
+                        >
+                          Done
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </th>
               <th 
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 relative"
                 onClick={() => handleSort('clicks')}
               >
-                <div className="flex items-center gap-1">
-                  Clicks
-                  {sortField === 'clicks' && (
-                    <span className="text-purple-600">
-                      {sortDirection === 'asc' ? '↑' : '↓'}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1">
+                    Clicks
+                    {sortField === 'clicks' && (
+                      <span className="text-purple-600">
+                        {sortDirection === 'asc' ? '↑' : '↓'}
+                      </span>
+                    )}
+                  </div>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setExpandedFilter(expandedFilter === 'clicks' ? null : 'clicks');
+                    }}
+                    className="p-1 hover:bg-gray-200 rounded"
+                  >
+                    <span className={`text-xs ${filters.clicks.min || filters.clicks.max ? (filters.clicks.mode === 'exclude' ? 'text-red-600' : 'text-purple-600') : 'text-gray-400'}`}>
+                      ☰
                     </span>
-                  )}
+                  </button>
                 </div>
+                {expandedFilter === 'clicks' && (
+                  <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-md shadow-lg z-10 p-3 mt-1">
+                    <div className="space-y-3">
+                      {/* Include/Exclude Toggle */}
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-medium text-gray-700">Mode:</span>
+                        <div className="flex bg-gray-100 rounded-md p-1">
+                          <button
+                            onClick={() => updateFilter('clicks', { ...filters.clicks, mode: 'include' })}
+                            className={`px-2 py-1 text-xs rounded ${
+                              filters.clicks.mode === 'include' 
+                                ? 'bg-white text-purple-600 shadow-sm' 
+                                : 'text-gray-600 hover:text-gray-800'
+                            }`}
+                          >
+                            Include
+                          </button>
+                          <button
+                            onClick={() => updateFilter('clicks', { ...filters.clicks, mode: 'exclude' })}
+                            className={`px-2 py-1 text-xs rounded ${
+                              filters.clicks.mode === 'exclude' 
+                                ? 'bg-white text-red-600 shadow-sm' 
+                                : 'text-gray-600 hover:text-gray-800'
+                            }`}
+                          >
+                            Exclude
+                          </button>
+                        </div>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 mb-1">Min</label>
+                          <input
+                            type="number"
+                            placeholder="Min clicks"
+                            value={filters.clicks.min}
+                            onChange={(e) => updateFilter('clicks', { ...filters.clicks, min: e.target.value })}
+                            className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-purple-500"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 mb-1">Max</label>
+                          <input
+                            type="number"
+                            placeholder="Max clicks"
+                            value={filters.clicks.max}
+                            onChange={(e) => updateFilter('clicks', { ...filters.clicks, max: e.target.value })}
+                            className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-purple-500"
+                          />
+                        </div>
+                      </div>
+                      <div className="flex justify-between">
+                        <button
+                          onClick={() => clearFilter('clicks')}
+                          className="text-xs text-gray-500 hover:text-gray-700"
+                        >
+                          Clear
+                        </button>
+                        <button
+                          onClick={() => setExpandedFilter(null)}
+                          className="text-xs text-purple-600 hover:text-purple-700"
+                        >
+                          Done
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </th>
               <th 
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 relative"
                 onClick={() => handleSort('timeSpent')}
               >
-                <div className="flex items-center gap-1">
-                  Time Spent
-                  {sortField === 'timeSpent' && (
-                    <span className="text-purple-600">
-                      {sortDirection === 'asc' ? '↑' : '↓'}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1">
+                    Time Spent
+                    {sortField === 'timeSpent' && (
+                      <span className="text-purple-600">
+                        {sortDirection === 'asc' ? '↑' : '↓'}
+                      </span>
+                    )}
+                  </div>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setExpandedFilter(expandedFilter === 'timeSpent' ? null : 'timeSpent');
+                    }}
+                    className="p-1 hover:bg-gray-200 rounded"
+                  >
+                    <span className={`text-xs ${filters.timeSpent.min || filters.timeSpent.max ? (filters.timeSpent.mode === 'exclude' ? 'text-red-600' : 'text-purple-600') : 'text-gray-400'}`}>
+                      ☰
                     </span>
-                  )}
+                  </button>
                 </div>
+                {expandedFilter === 'timeSpent' && (
+                  <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-md shadow-lg z-10 p-3 mt-1">
+                    <div className="space-y-3">
+                      {/* Include/Exclude Toggle */}
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-medium text-gray-700">Mode:</span>
+                        <div className="flex bg-gray-100 rounded-md p-1">
+                          <button
+                            onClick={() => updateFilter('timeSpent', { ...filters.timeSpent, mode: 'include' })}
+                            className={`px-2 py-1 text-xs rounded ${
+                              filters.timeSpent.mode === 'include' 
+                                ? 'bg-white text-purple-600 shadow-sm' 
+                                : 'text-gray-600 hover:text-gray-800'
+                            }`}
+                          >
+                            Include
+                          </button>
+                          <button
+                            onClick={() => updateFilter('timeSpent', { ...filters.timeSpent, mode: 'exclude' })}
+                            className={`px-2 py-1 text-xs rounded ${
+                              filters.timeSpent.mode === 'exclude' 
+                                ? 'bg-white text-red-600 shadow-sm' 
+                                : 'text-gray-600 hover:text-gray-800'
+                            }`}
+                          >
+                            Exclude
+                          </button>
+                        </div>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 mb-1">Min (sec)</label>
+                          <input
+                            type="number"
+                            placeholder="Min seconds"
+                            value={filters.timeSpent.min}
+                            onChange={(e) => updateFilter('timeSpent', { ...filters.timeSpent, min: e.target.value })}
+                            className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-purple-500"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 mb-1">Max (sec)</label>
+                          <input
+                            type="number"
+                            placeholder="Max seconds"
+                            value={filters.timeSpent.max}
+                            onChange={(e) => updateFilter('timeSpent', { ...filters.timeSpent, max: e.target.value })}
+                            className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-purple-500"
+                          />
+                        </div>
+                      </div>
+                      <div className="flex justify-between">
+                        <button
+                          onClick={() => clearFilter('timeSpent')}
+                          className="text-xs text-gray-500 hover:text-gray-700"
+                        >
+                          Clear
+                        </button>
+                        <button
+                          onClick={() => setExpandedFilter(null)}
+                          className="text-xs text-purple-600 hover:text-purple-700"
+                        >
+                          Done
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </th>
               <th 
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 relative"
                 onClick={() => handleSort('status')}
               >
-                <div className="flex items-center gap-1">
-                  Status
-                  {sortField === 'status' && (
-                    <span className="text-purple-600">
-                      {sortDirection === 'asc' ? '↑' : '↓'}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1">
+                    Status
+                    {sortField === 'status' && (
+                      <span className="text-purple-600">
+                        {sortDirection === 'asc' ? '↑' : '↓'}
+                      </span>
+                    )}
+                  </div>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setExpandedFilter(expandedFilter === 'status' ? null : 'status');
+                    }}
+                    className="p-1 hover:bg-gray-200 rounded"
+                  >
+                    <span className={`text-xs ${filters.status.values.length > 0 ? (filters.status.mode === 'exclude' ? 'text-red-600' : 'text-purple-600') : 'text-gray-400'}`}>
+                      ☰
                     </span>
-                  )}
+                  </button>
                 </div>
+                {expandedFilter === 'status' && (
+                  <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-md shadow-lg z-10 p-3 mt-1">
+                    <div className="space-y-3">
+                      {/* Include/Exclude Toggle */}
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-medium text-gray-700">Mode:</span>
+                        <div className="flex bg-gray-100 rounded-md p-1">
+                          <button
+                            onClick={() => updateFilter('status', { ...filters.status, mode: 'include' })}
+                            className={`px-2 py-1 text-xs rounded ${
+                              filters.status.mode === 'include' 
+                                ? 'bg-white text-purple-600 shadow-sm' 
+                                : 'text-gray-600 hover:text-gray-800'
+                            }`}
+                          >
+                            Include
+                          </button>
+                          <button
+                            onClick={() => updateFilter('status', { ...filters.status, mode: 'exclude' })}
+                            className={`px-2 py-1 text-xs rounded ${
+                              filters.status.mode === 'exclude' 
+                                ? 'bg-white text-red-600 shadow-sm' 
+                                : 'text-gray-600 hover:text-gray-800'
+                            }`}
+                          >
+                            Exclude
+                          </button>
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-1">
+                        {['normal', 'converted', 'intent', 'frustrated', 'errors'].map(status => (
+                          <label key={status} className="flex items-center space-x-2 text-xs">
+                            <input
+                              type="checkbox"
+                              checked={filters.status.values.includes(status)}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  updateFilter('status', { ...filters.status, values: [...filters.status.values, status] });
+                                } else {
+                                  updateFilter('status', { ...filters.status, values: filters.status.values.filter(s => s !== status) });
+                                }
+                              }}
+                              className="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                            />
+                            <span className="capitalize">{status}</span>
+                          </label>
+                        ))}
+                      </div>
+                      <div className="flex justify-between">
+                        <button
+                          onClick={() => clearFilter('status')}
+                          className="text-xs text-gray-500 hover:text-gray-700"
+                        >
+                          Clear
+                        </button>
+                        <button
+                          onClick={() => setExpandedFilter(null)}
+                          className="text-xs text-purple-600 hover:text-purple-700"
+                        >
+                          Done
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Actions

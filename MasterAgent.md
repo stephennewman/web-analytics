@@ -217,6 +217,28 @@ Unlike Hotjar/FullStory: focus on conversion killers only, AI-suggested fixes, v
 - Cross-site conversion patterns
 - Unified reporting dashboard
 **Build:** ✅ Successful (14 routes compiled, 39s build time)
+
+### 2025-10-08 - Major Feature Update ✅
+**Commit:** `da41dd2` - Add site renaming, URL filtering, real-time visitor count, and visitors table
+**Changes:** 21 files changed, 2344 insertions(+), 71 deletions(-)
+**New Features:**
+- ✅ **Site Renaming** - Inline edit modal with gear icon next to site switcher
+- ✅ **URL Filtering** - Smart defaults + custom patterns to filter out localhost/test traffic
+- ✅ **Real-time Visitor Count** - Live visitor count in sidebar with (0) indicator
+- ✅ **Visitors Table** - Sortable table view replacing card-based visitors
+- ✅ **IP Address Column** - Extract and display IP addresses from geo data
+- ✅ **Referrer Column** - Show traffic sources with smart styling for direct vs external
+- ✅ **View Persistence** - Maintain current view when switching between sites
+- ✅ **UI Cleanup** - Removed send email button, improved sidebar indicators
+**Database Changes:**
+- ✅ Added `url_filters` JSONB column to clients table
+- ✅ Smart defaults: localhost, 127.0.0.1, test., staging., dev.
+**API Endpoints:**
+- ✅ `PATCH /api/clients/[id]` - Update site name, domain, and filters
+- ✅ `GET /api/live-visitors` - Real-time visitor count polling
+**Build:** ✅ Successful (22 routes compiled, 45s build time)
+**Deploy:** ✅ Live at https://web-analytics-ndt74zdhi-krezzo.vercel.app
+**Status:** Production ready
 **Deploy:** ✅ Live at https://web-analytics-l1oy27yu5-krezzo.vercel.app
 
 
