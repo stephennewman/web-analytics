@@ -5,7 +5,13 @@ export async function GET(request: NextRequest) {
   const clientId = request.nextUrl.searchParams.get('clientId');
   
   if (!clientId) {
-    return NextResponse.json({ enabled: false });
+    return NextResponse.json({ enabled: false }, {
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type',
+      }
+    });
   }
   
   const supabase = createClient(
@@ -19,6 +25,22 @@ export async function GET(request: NextRequest) {
     .eq('id', clientId)
     .single();
   
-  return NextResponse.json({ enabled: data?.feedback_enabled || false });
+  return NextResponse.json({ enabled: data?.feedback_enabled || false }, {
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
+    }
+  });
+}
+
+export async function OPTIONS() {
+  return NextResponse.json({}, {
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
+    }
+  });
 }
 
