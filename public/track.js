@@ -421,19 +421,23 @@
   // Feedback Widget (only loads if enabled)
   var feedbackWidget = {
     state: 'collapsed',
+    widgetStyle: 'glassmorphic', // glassmorphic, ticker, solid
     mediaRecorder: null,
     audioChunks: [],
     recordingStartTime: null,
     maxDuration: 60000,
     timerInterval: null,
     currentBlob: null,
+    recentQuotes: [],
     
     init: function() {
-      // Check if enabled for this client
+      // Check if enabled for this client and get style + recent quotes
       fetch(apiEndpoint.replace('/track', '/feedback/enabled?clientId=' + clientId))
         .then(function(res) { return res.json(); })
         .then(function(data) {
           if (data.enabled) {
+            feedbackWidget.widgetStyle = data.style || 'glassmorphic';
+            feedbackWidget.recentQuotes = data.recentQuotes || [];
             feedbackWidget.createWidget();
           }
         })
@@ -481,6 +485,15 @@
     },
     
     getHTML: function(state) {
+      // Route to different styles
+      if (this.widgetStyle === 'ticker') {
+        return this.getTickerHTML(state);
+      }
+      // Default: glassmorphic button style
+      return this.getGlassmorphicHTML(state);
+    },
+    
+    getGlassmorphicHTML: function(state) {
       var styles = {
         base: 'position:fixed;bottom:20px;right:20px;z-index:9999;transition:all 0.3s cubic-bezier(0.4,0,0.2,1);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);',
         collapsed: 'width:60px;height:60px;border-radius:30px;background:rgba(255,255,255,0.7);border:1px solid rgba(255,255,255,0.3);box-shadow:0 8px 32px rgba(0,0,0,0.12),0 0 0 0 rgba(255,255,255,0.5);cursor:pointer;display:flex;align-items:center;justify-content:center;animation:pulseGlow 3s ease-in-out infinite;',
@@ -509,6 +522,49 @@
       
       if (state === 'thankyou') {
         return '<div style="' + styles.base + styles.expanded + '"><div style="text-align:center;padding:20px 0;"><div style="font-size:48px;margin-bottom:10px;animation:scaleIn 0.3s ease-out;">✅</div><h3 style="margin:0 0 8px 0;font-size:16px;font-weight:600;color:#111;">Thank You!</h3><p style="margin:0;font-size:13px;color:#666;">Your feedback has been received</p></div><style>@keyframes scaleIn { from { transform:scale(0); } to { transform:scale(1); }}</style></div>';
+      }
+      
+      return '';
+    },
+    
+    getTickerHTML: function(state) {
+      // Ticker bar at bottom with scrolling quotes + mic button
+      if (state === 'collapsed') {
+        var quotesHTML = '';
+        if (this.recentQuotes.length > 0) {
+          // Create scrolling quotes
+          var quotes = this.recentQuotes.map(function(q) {
+            return '<span style="display:inline-block;padding:0 40px;white-space:nowrap;">"' + q.substring(0, 80) + (q.length > 80 ? '...' : '') + '"</span>';
+          }).join('');
+          quotesHTML = '<div style="overflow:hidden;flex:1;position:relative;"><div id="tb-ticker-scroll" style="display:flex;animation:tickerScroll 30s linear infinite;">' + quotes + quotes + '</div></div>';
+        } else {
+          quotesHTML = '<div style="flex:1;padding:0 20px;font-size:14px;color:#333;">💭 Share your feedback with us</div>';
+        }
+        
+        return '<div style="position:fixed;bottom:0;left:0;right:0;z-index:9998;background:linear-gradient(90deg,#FEF3C7,#FDE68A,#FCD34D);border-top:2px solid #F59E0B;box-shadow:0 -4px 12px rgba(0,0,0,0.1);display:flex;align-items:center;height:50px;font-family:system-ui,-apple-system,sans-serif;">' + quotesHTML + '<div style="padding:0 20px;border-left:2px solid #F59E0B;cursor:pointer;display:flex;align-items:center;gap:8px;" data-action="expand"><span style="font-size:24px;">🎤</span><span style="font-size:14px;font-weight:600;color:#92400E;">Submit Feedback →</span></div></div><style>@keyframes tickerScroll { 0% { transform:translateX(0); } 100% { transform:translateX(-50%); }}</style>';
+      }
+      
+      // Modal for recording/states (overlays ticker)
+      var modalBase = 'position:fixed;bottom:60px;right:20px;width:320px;background:white;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,0.3);z-index:9999;padding:24px;';
+      
+      if (state === 'expanded') {
+        return '<div style="' + modalBase + '"><div style="text-align:center;"><div style="font-size:24px;margin-bottom:12px;">🎙️</div><h3 style="margin:0 0 8px 0;font-size:18px;font-weight:600;color:#111;">Voice Feedback</h3><p style="margin:0 0 20px 0;font-size:14px;color:#666;">Share your thoughts (max 60s)</p><button data-action="start-recording" style="width:100%;padding:14px;background:linear-gradient(135deg,#EF4444,#DC2626);color:white;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;box-shadow:0 4px 12px rgba(239,68,68,0.3);">Start Recording</button><button data-action="collapse" style="width:100%;margin-top:12px;padding:10px;background:transparent;color:#666;border:none;font-size:13px;cursor:pointer;">Cancel</button></div></div>';
+      }
+      
+      if (state === 'recording') {
+        return '<div style="' + modalBase + '"><div style="text-align:center;"><div style="width:70px;height:70px;margin:0 auto 20px;background:#EF4444;border-radius:50%;display:flex;align-items:center;justify-content:center;animation:recordPulse 1.5s ease-in-out infinite;"><svg width="32" height="32" viewBox="0 0 24 24" fill="white"><circle cx="12" cy="12" r="4"/></svg></div><div id="tb-timer" style="font-size:28px;font-weight:700;color:#111;margin-bottom:24px;">00:00</div><button data-action="stop-recording" style="width:100%;padding:14px;background:#111;color:white;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;">Stop Recording</button></div><style>@keyframes recordPulse { 0%, 100% { transform:scale(1); opacity:1; } 50% { transform:scale(1.1); opacity:0.8; }}</style></div>';
+      }
+      
+      if (state === 'review') {
+        return '<div style="' + modalBase + '"><div style="text-align:center;"><div style="font-size:24px;margin-bottom:12px;">🎧</div><h3 style="margin:0 0 20px 0;font-size:18px;font-weight:600;color:#111;">Review Recording</h3><audio id="tb-review-audio" controls style="width:100%;margin-bottom:20px;"></audio><button data-action="submit" style="width:100%;padding:14px;background:linear-gradient(135deg,#10B981,#059669);color:white;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;margin-bottom:12px;">Submit Feedback</button><button data-action="redo" style="width:100%;padding:10px;background:transparent;color:#666;border:none;font-size:13px;cursor:pointer;">Record Again</button></div></div>';
+      }
+      
+      if (state === 'submitting') {
+        return '<div style="' + modalBase + '"><div style="text-align:center;padding:20px 0;"><div style="width:50px;height:50px;margin:0 auto 20px;border:4px solid #e5e7eb;border-top-color:#F59E0B;border-radius:50%;animation:spin 1s linear infinite;"></div><p style="margin:0;font-size:15px;color:#666;">Submitting...</p></div><style>@keyframes spin { to { transform:rotate(360deg); }}</style></div>';
+      }
+      
+      if (state === 'thankyou') {
+        return '<div style="' + modalBase + '"><div style="text-align:center;padding:20px 0;"><div style="font-size:60px;margin-bottom:16px;animation:scaleIn 0.3s ease-out;">✅</div><h3 style="margin:0 0 8px 0;font-size:18px;font-weight:600;color:#111;">Thank You!</h3><p style="margin:0;font-size:14px;color:#666;">Your feedback has been received</p></div><style>@keyframes scaleIn { from { transform:scale(0); } to { transform:scale(1); }}</style></div>';
       }
       
       return '';

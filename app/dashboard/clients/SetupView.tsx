@@ -19,6 +19,7 @@ interface Client {
   name: string;
   domain: string;
   feedback_enabled?: boolean;
+  feedback_widget_style?: string;
 }
 
 interface Stats {
@@ -341,11 +342,88 @@ export default function SetupView({
                   </label>
                 </div>
                 {client.feedback_enabled && (
-                  <div className="mt-4 p-3 bg-green-50 rounded-lg border border-green-200">
-                    <p className="text-sm text-green-800">
-                      ✅ Feedback widget is active on your site. Visitors can now submit voice feedback.
-                    </p>
-                  </div>
+                  <>
+                    <div className="mt-4 p-3 bg-green-50 rounded-lg border border-green-200">
+                      <p className="text-sm text-green-800">
+                        ✅ Feedback widget is active on your site. Visitors can now submit voice feedback.
+                      </p>
+                    </div>
+                    
+                    {/* Widget Design Selector */}
+                    <div className="mt-6 border-t border-gray-200 pt-6">
+                      <h4 className="text-md font-semibold text-gray-900 mb-4">Choose Widget Design</h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {/* Glassmorphic Button */}
+                        <div
+                          onClick={async () => {
+                            const response = await fetch(`/api/clients/${client.id}`, {
+                              method: 'PATCH',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ feedback_widget_style: 'glassmorphic' })
+                            });
+                            if (response.ok) {
+                              window.location.reload();
+                            }
+                          }}
+                          className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                            (client.feedback_widget_style || 'glassmorphic') === 'glassmorphic'
+                              ? 'border-yellow-500 bg-yellow-50'
+                              : 'border-gray-200 hover:border-gray-300'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between mb-3">
+                            <h5 className="font-semibold text-gray-900">Glassmorphic Button</h5>
+                            {(client.feedback_widget_style || 'glassmorphic') === 'glassmorphic' && (
+                              <span className="text-yellow-600 text-sm">✓ Active</span>
+                            )}
+                          </div>
+                          <div className="relative bg-gradient-to-br from-blue-50 to-purple-50 h-32 rounded-lg overflow-hidden flex items-end justify-end p-3">
+                            <div className="w-12 h-12 rounded-full bg-white/70 backdrop-blur-sm border border-white/30 shadow-lg flex items-center justify-center">
+                              <span className="text-xl">🎤</span>
+                            </div>
+                          </div>
+                          <p className="text-xs text-gray-600 mt-3">
+                            Modern frosted-glass button in bottom-right corner
+                          </p>
+                        </div>
+
+                        {/* Ticker Style */}
+                        <div
+                          onClick={async () => {
+                            const response = await fetch(`/api/clients/${client.id}`, {
+                              method: 'PATCH',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ feedback_widget_style: 'ticker' })
+                            });
+                            if (response.ok) {
+                              window.location.reload();
+                            }
+                          }}
+                          className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                            client.feedback_widget_style === 'ticker'
+                              ? 'border-yellow-500 bg-yellow-50'
+                              : 'border-gray-200 hover:border-gray-300'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between mb-3">
+                            <h5 className="font-semibold text-gray-900">Scrolling Ticker</h5>
+                            {client.feedback_widget_style === 'ticker' && (
+                              <span className="text-yellow-600 text-sm">✓ Active</span>
+                            )}
+                          </div>
+                          <div className="relative bg-gradient-to-br from-blue-50 to-purple-50 h-32 rounded-lg overflow-hidden flex items-end">
+                            <div className="w-full h-12 bg-gradient-to-r from-yellow-100 via-yellow-200 to-yellow-100 border-t-2 border-yellow-500 flex items-center justify-between px-3">
+                              <span className="text-xs text-gray-700 truncate">💭 "Great experience!"</span>
+                              <span className="text-lg ml-2">🎤</span>
+                            </div>
+                          </div>
+                          <p className="text-xs text-gray-600 mt-3">
+                            Bottom banner with scrolling feedback quotes + social proof
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </>
                 )}
               </div>
             )}
