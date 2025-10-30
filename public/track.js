@@ -445,6 +445,39 @@
       widget.id = 'tb-feedback-widget';
       widget.innerHTML = this.getHTML('collapsed');
       document.body.appendChild(widget);
+      this.attachEventListeners();
+    },
+    
+    attachEventListeners: function() {
+      var widget = document.getElementById('tb-feedback-widget');
+      if (!widget) return;
+      
+      // Find and attach click handlers based on current state
+      var expandBtn = widget.querySelector('[data-action="expand"]');
+      var collapseBtn = widget.querySelector('[data-action="collapse"]');
+      var startBtn = widget.querySelector('[data-action="start-recording"]');
+      var stopBtn = widget.querySelector('[data-action="stop-recording"]');
+      var submitBtn = widget.querySelector('[data-action="submit"]');
+      var redoBtn = widget.querySelector('[data-action="redo"]');
+      
+      if (expandBtn) {
+        expandBtn.onclick = function() { feedbackWidget.expand(); };
+      }
+      if (collapseBtn) {
+        collapseBtn.onclick = function() { feedbackWidget.collapse(); };
+      }
+      if (startBtn) {
+        startBtn.onclick = function() { feedbackWidget.startRecording(); };
+      }
+      if (stopBtn) {
+        stopBtn.onclick = function() { feedbackWidget.stopRecording(); };
+      }
+      if (submitBtn) {
+        submitBtn.onclick = function() { feedbackWidget.submitFeedback(); };
+      }
+      if (redoBtn) {
+        redoBtn.onclick = function() { feedbackWidget.expand(); };
+      }
     },
     
     getHTML: function(state) {
@@ -455,19 +488,19 @@
       };
       
       if (state === 'collapsed') {
-        return '<div style="' + styles.base + styles.collapsed + '" onclick="feedbackWidget.expand()"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></div><style>@keyframes pulseGlow { 0%, 100% { box-shadow: 0 8px 32px rgba(0,0,0,0.12), 0 0 0 0 rgba(255,255,255,0.5); } 50% { box-shadow: 0 8px 32px rgba(0,0,0,0.12), 0 0 20px 5px rgba(255,255,255,0.8); }}@media (max-width: 768px) { #tb-feedback-widget { bottom:16px !important; right:16px !important; width:52px !important; height:52px !important; } #tb-feedback-widget.expanded { width:calc(100vw - 32px) !important; max-width:320px !important; }}</style>';
+        return '<div style="' + styles.base + styles.collapsed + '" data-action="expand"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></div><style>@keyframes pulseGlow { 0%, 100% { box-shadow: 0 8px 32px rgba(0,0,0,0.12), 0 0 0 0 rgba(255,255,255,0.5); } 50% { box-shadow: 0 8px 32px rgba(0,0,0,0.12), 0 0 20px 5px rgba(255,255,255,0.8); }}@media (max-width: 768px) { #tb-feedback-widget { bottom:16px !important; right:16px !important; width:52px !important; height:52px !important; } #tb-feedback-widget.expanded { width:calc(100vw - 32px) !important; max-width:320px !important; }}</style>';
       }
       
       if (state === 'expanded') {
-        return '<div style="' + styles.base + styles.expanded + '"><div style="text-align:center;"><div style="font-size:20px;margin-bottom:10px;">🎙️</div><h3 style="margin:0 0 8px 0;font-size:16px;font-weight:600;color:#111;">Voice Feedback</h3><p style="margin:0 0 20px 0;font-size:13px;color:#666;">Share your thoughts (max 60s)</p><button onclick="feedbackWidget.startRecording()" style="width:100%;padding:12px;background:linear-gradient(135deg,#EF4444,#DC2626);color:white;border:none;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;box-shadow:0 2px 8px rgba(239,68,68,0.3);">Start Recording</button><button onclick="feedbackWidget.collapse()" style="width:100%;margin-top:10px;padding:8px;background:transparent;color:#666;border:none;font-size:12px;cursor:pointer;">Cancel</button></div></div>';
+        return '<div style="' + styles.base + styles.expanded + '"><div style="text-align:center;"><div style="font-size:20px;margin-bottom:10px;">🎙️</div><h3 style="margin:0 0 8px 0;font-size:16px;font-weight:600;color:#111;">Voice Feedback</h3><p style="margin:0 0 20px 0;font-size:13px;color:#666;">Share your thoughts (max 60s)</p><button data-action="start-recording" style="width:100%;padding:12px;background:linear-gradient(135deg,#EF4444,#DC2626);color:white;border:none;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;box-shadow:0 2px 8px rgba(239,68,68,0.3);">Start Recording</button><button data-action="collapse" style="width:100%;margin-top:10px;padding:8px;background:transparent;color:#666;border:none;font-size:12px;cursor:pointer;">Cancel</button></div></div>';
       }
       
       if (state === 'recording') {
-        return '<div style="' + styles.base + styles.expanded + '"><div style="text-align:center;"><div style="width:60px;height:60px;margin:0 auto 15px;background:#EF4444;border-radius:50%;display:flex;align-items:center;justify-content:center;animation:recordPulse 1.5s ease-in-out infinite;"><svg width="28" height="28" viewBox="0 0 24 24" fill="white"><circle cx="12" cy="12" r="4"/></svg></div><div id="tb-timer" style="font-size:24px;font-weight:600;color:#111;margin-bottom:20px;">00:00</div><button onclick="feedbackWidget.stopRecording()" style="width:100%;padding:12px;background:#111;color:white;border:none;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;">Stop Recording</button></div><style>@keyframes recordPulse { 0%, 100% { transform:scale(1); opacity:1; } 50% { transform:scale(1.1); opacity:0.8; }}</style></div>';
+        return '<div style="' + styles.base + styles.expanded + '"><div style="text-align:center;"><div style="width:60px;height:60px;margin:0 auto 15px;background:#EF4444;border-radius:50%;display:flex;align-items:center;justify-content:center;animation:recordPulse 1.5s ease-in-out infinite;"><svg width="28" height="28" viewBox="0 0 24 24" fill="white"><circle cx="12" cy="12" r="4"/></svg></div><div id="tb-timer" style="font-size:24px;font-weight:600;color:#111;margin-bottom:20px;">00:00</div><button data-action="stop-recording" style="width:100%;padding:12px;background:#111;color:white;border:none;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;">Stop Recording</button></div><style>@keyframes recordPulse { 0%, 100% { transform:scale(1); opacity:1; } 50% { transform:scale(1.1); opacity:0.8; }}</style></div>';
       }
       
       if (state === 'review') {
-        return '<div style="' + styles.base + styles.expanded + '"><div style="text-align:center;"><div style="font-size:20px;margin-bottom:10px;">🎧</div><h3 style="margin:0 0 15px 0;font-size:16px;font-weight:600;color:#111;">Review Recording</h3><audio id="tb-review-audio" controls style="width:100%;margin-bottom:20px;"></audio><button onclick="feedbackWidget.submitFeedback()" style="width:100%;padding:12px;background:linear-gradient(135deg,#10B981,#059669);color:white;border:none;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;margin-bottom:10px;">Submit Feedback</button><button onclick="feedbackWidget.expand()" style="width:100%;padding:8px;background:transparent;color:#666;border:none;font-size:12px;cursor:pointer;">Record Again</button></div></div>';
+        return '<div style="' + styles.base + styles.expanded + '"><div style="text-align:center;"><div style="font-size:20px;margin-bottom:10px;">🎧</div><h3 style="margin:0 0 15px 0;font-size:16px;font-weight:600;color:#111;">Review Recording</h3><audio id="tb-review-audio" controls style="width:100%;margin-bottom:20px;"></audio><button data-action="submit" style="width:100%;padding:12px;background:linear-gradient(135deg,#10B981,#059669);color:white;border:none;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;margin-bottom:10px;">Submit Feedback</button><button data-action="redo" style="width:100%;padding:8px;background:transparent;color:#666;border:none;font-size:12px;cursor:pointer;">Record Again</button></div></div>';
       }
       
       if (state === 'submitting') {
@@ -591,6 +624,7 @@
         } else {
           widget.className = '';
         }
+        this.attachEventListeners();
       }
     }
   };
