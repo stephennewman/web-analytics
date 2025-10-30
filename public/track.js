@@ -539,7 +539,7 @@
           var quotes = this.recentQuotes.map(function(q) {
             return '<span style="display:inline-block;padding:0 40px;white-space:nowrap;">"' + q.substring(0, 80) + (q.length > 80 ? '...' : '') + '"</span>';
           }).join('');
-          quotesHTML = '<div style="overflow:hidden;flex:1;position:relative;"><div id="tb-ticker-scroll" style="display:flex;animation:tickerScroll 30s linear infinite;">' + quotes + quotes + '</div></div>';
+          quotesHTML = '<div style="overflow:hidden;flex:1;position:relative;"><div id="tb-ticker-scroll" style="display:flex;animation:tickerScroll 20s linear infinite;">' + quotes + quotes + '</div></div>';
         } else {
           quotesHTML = '<div style="flex:1;padding:0 20px;font-size:14px;color:#333;">💭 Share your feedback with us</div>';
         }
@@ -582,7 +582,7 @@
           var quotes = this.recentQuotes.map(function(q) {
             return '<span style="display:inline-block;padding:0 50px;white-space:nowrap;font-size:13px;">💬 ' + q.substring(0, 70) + (q.length > 70 ? '...' : '') + '</span>';
           }).join('');
-          quotesHTML = '<div style="overflow:hidden;flex:1;position:relative;"><div id="tb-ticker-scroll" style="display:flex;animation:tickerScrollFast 12s linear infinite;">' + quotes + quotes + '</div></div>';
+          quotesHTML = '<div style="overflow:hidden;flex:1;position:relative;"><div id="tb-ticker-scroll" style="display:flex;animation:tickerScrollFast 8s linear infinite;">' + quotes + quotes + '</div></div>';
         } else {
           quotesHTML = '<div style="flex:1;padding:0 20px;font-size:13px;color:#E0E7FF;font-weight:500;">💡 Share your product feedback</div>';
         }
