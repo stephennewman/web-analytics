@@ -14,6 +14,7 @@ interface Feedback {
   insights: string;
   status: string;
   created_at: string;
+  ticket_id?: string;
   sessions: {
     session_id: string;
     country: string;
@@ -35,6 +36,7 @@ export default function FeedbackView({ clientId }: { clientId: string }) {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'positive' | 'neutral' | 'negative'>('all');
   const [playingId, setPlayingId] = useState<string | null>(null);
+  const [creatingTicket, setCreatingTicket] = useState<string | null>(null);
   
   useEffect(() => {
     fetchFeedback();
@@ -49,6 +51,29 @@ export default function FeedbackView({ clientId }: { clientId: string }) {
       console.error('Error fetching feedback:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const createTicket = async (feedbackId: string) => {
+    setCreatingTicket(feedbackId);
+    try {
+      const response = await fetch('/api/feedback/create-ticket', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ feedbackId })
+      });
+      const data = await response.json();
+      if (response.ok) {
+        alert(`✅ Ticket ${data.action === 'created' ? 'created' : 'linked'}!`);
+        fetchFeedback(); // Refresh to show updated ticket_id
+      } else {
+        alert(`❌ Error: ${data.error}`);
+      }
+    } catch (error) {
+      console.error('Error creating ticket:', error);
+      alert('❌ Failed to create ticket');
+    } finally {
+      setCreatingTicket(null);
     }
   };
   
@@ -173,6 +198,29 @@ export default function FeedbackView({ clientId }: { clientId: string }) {
                     <p className="text-sm text-blue-800">{item.insights}</p>
                   </div>
                 )}
+
+                {/* Ticket Status / Create Button */}
+                <div className="mt-4 pt-4 border-t border-gray-200">
+                  {item.ticket_id ? (
+                    <div className="flex items-center gap-2 text-sm">
+                      <span className="text-green-600 font-medium">✓ Linked to ticket</span>
+                      <button
+                        onClick={() => window.location.href = '/dashboard/clients?view=roadmap'}
+                        className="text-purple-600 hover:text-purple-700 underline"
+                      >
+                        View in Roadmap →
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => createTicket(item.id)}
+                      disabled={creatingTicket === item.id}
+                      className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-sm font-medium transition-colors"
+                    >
+                      {creatingTicket === item.id ? '⏳ Creating Ticket...' : '🎫 Create Roadmap Ticket'}
+                    </button>
+                  )}
+                </div>
               </>
             )}
             
