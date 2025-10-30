@@ -322,4 +322,19 @@ Unlike Hotjar/FullStory: focus on conversion killers only, AI-suggested fixes, v
 **Build:** ✅ Successful (22 routes compiled, 40s build time)
 **Status:** Live and ready - Complete brand consistency across all pages
 
+### 2025-10-30 - Settings Page Tracking Script Access ✅
+**Changes:** 1 file changed, 28 insertions(+), 6 deletions(-)
+**Modified files:**
+- `app/dashboard/clients/SetupView.tsx` - Enhanced settings view with tracking script display
+**Features:**
+- ✅ Tracking script display in Settings view
+- ✅ Copy button with bee theme styling (yellow-400 to amber-500 gradient)
+- ✅ Installation instructions with yellow-themed tip box
+- ✅ Each site's unique client_id embedded in script
+- ✅ Hidden for "All Sites" view (only shows for individual sites)
+- ✅ Slack settings maintained below tracking script section
+**Script format:** `<script src="/track.js?id=CLIENT_ID"></script>`
+**Build:** ✅ Successful (22 routes compiled, 6.6s compile time)
+**Status:** Ready for deploy
+
 

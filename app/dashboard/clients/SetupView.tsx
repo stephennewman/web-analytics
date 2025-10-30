@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import SessionFeed from './SessionFeed';
 import VisitorsTable from './VisitorsTable';
 import InsightsPanel from './InsightsPanel';
@@ -12,11 +12,13 @@ import ExitAnalysis from './ExitAnalysis';
 import ScrollEngagement from './ScrollEngagement';
 import SessionDetailPanel from './SessionDetailPanel';
 import SlackSettings from './SlackSettings';
+import FeedbackView from './FeedbackView';
 
 interface Client {
   id: string;
   name: string;
   domain: string;
+  feedback_enabled?: boolean;
 }
 
 interface Stats {
@@ -51,8 +53,14 @@ export default function SetupView({
   const [selectedSession, setSelectedSession] = useState<any>(null);
   const [filterType, setFilterType] = useState('all');
   const [sortBy, setSortBy] = useState('recent');
+  const [origin, setOrigin] = useState('https://your-domain.com');
   
-  const trackingScript = `<script src="${typeof window !== 'undefined' ? window.location.origin : ''}/track.js?id=${client.id}"></script>`;
+  // Set origin on client side only to avoid hydration mismatch
+  useEffect(() => {
+    setOrigin(window.location.origin);
+  }, []);
+  
+  const trackingScript = `<script src="${origin}/track.js?id=${client.id}"></script>`;
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(trackingScript);
@@ -270,9 +278,79 @@ export default function SetupView({
           </>
         );
 
+      case 'feedback':
+        return (
+          <FeedbackView clientId={client.id} />
+        );
+
       case 'settings':
         return (
-          <div className="max-w-2xl">
+          <div className="max-w-4xl space-y-6">
+            {/* Tracking Script Section */}
+            {client.id !== 'all' && (
+              <div className="bg-white rounded-lg border border-gray-200 p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Tracking Script</h3>
+                <p className="text-sm text-gray-600 mb-4">
+                  Install this script on your website to start tracking visitor behavior.
+                </p>
+                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 font-mono text-sm break-all mb-3">
+                  {trackingScript}
+                </div>
+                <button
+                  onClick={copyToClipboard}
+                  className="px-4 py-2 bg-gradient-to-r from-yellow-400 to-amber-500 text-black rounded-lg hover:shadow-lg font-medium transition-all cursor-pointer"
+                >
+                  {copied ? '✓ Copied!' : 'Copy Script'}
+                </button>
+                <div className="mt-4 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+                  <p className="text-sm text-gray-700">
+                    <strong className="text-yellow-900">💡 Installation:</strong> Add this script to the <code className="bg-yellow-100 px-1 rounded">&lt;head&gt;</code> section of your website. Data will appear within 60 seconds.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Feedback Widget Toggle */}
+            {client.id !== 'all' && (
+              <div className="bg-white rounded-lg border border-gray-200 p-6">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Voice Feedback Widget</h3>
+                    <p className="text-sm text-gray-600 mb-4">
+                      Allow visitors to submit voice feedback directly on your website. When enabled, a microphone button appears in the bottom-right corner.
+                    </p>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer ml-4">
+                    <input
+                      type="checkbox"
+                      checked={client.feedback_enabled || false}
+                      onChange={async (e) => {
+                        const enabled = e.target.checked;
+                        const response = await fetch(`/api/clients/${client.id}`, {
+                          method: 'PATCH',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ feedback_enabled: enabled })
+                        });
+                        if (response.ok) {
+                          window.location.reload();
+                        }
+                      }}
+                      className="sr-only peer"
+                    />
+                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-yellow-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-yellow-500"></div>
+                  </label>
+                </div>
+                {client.feedback_enabled && (
+                  <div className="mt-4 p-3 bg-green-50 rounded-lg border border-green-200">
+                    <p className="text-sm text-green-800">
+                      ✅ Feedback widget is active on your site. Visitors can now submit voice feedback.
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Slack Integration */}
             <SlackSettings />
           </div>
         );

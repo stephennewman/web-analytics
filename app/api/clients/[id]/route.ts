@@ -17,9 +17,9 @@ export async function PATCH(
     }
 
     const body = await request.json();
-    const { name, domain, url_filters } = body;
+    const { name, domain, url_filters, feedback_enabled } = body;
 
-    if (!name) {
+    if (!name && name !== undefined) {
       return NextResponse.json({ error: 'Site name is required' }, { status: 400 });
     }
 
@@ -29,17 +29,24 @@ export async function PATCH(
       id: resolvedParams.id,
       name,
       domain,
+      feedback_enabled,
       user_id: user.id
     });
 
     // Update client
-    const updateData: any = {
-      name,
-      domain: domain || '',
-    };
+    const updateData: any = {};
     
-    if (url_filters) {
+    if (name !== undefined) {
+      updateData.name = name;
+    }
+    if (domain !== undefined) {
+      updateData.domain = domain || '';
+    }
+    if (url_filters !== undefined) {
       updateData.url_filters = url_filters;
+    }
+    if (feedback_enabled !== undefined) {
+      updateData.feedback_enabled = feedback_enabled;
     }
 
     const { data: updatedClient, error } = await supabase

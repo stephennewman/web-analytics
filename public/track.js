@@ -417,5 +417,189 @@
       track('conversion', window.location.href, { value: value || 1 });
     }
   };
+
+  // Feedback Widget (only loads if enabled)
+  var feedbackWidget = {
+    state: 'collapsed',
+    mediaRecorder: null,
+    audioChunks: [],
+    recordingStartTime: null,
+    maxDuration: 60000,
+    timerInterval: null,
+    currentBlob: null,
+    
+    init: function() {
+      // Check if enabled for this client
+      fetch(apiEndpoint.replace('/track', '/feedback/enabled?clientId=' + clientId))
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+          if (data.enabled) {
+            feedbackWidget.createWidget();
+          }
+        })
+        .catch(function(err) { console.log('Feedback widget check failed:', err); });
+    },
+    
+    createWidget: function() {
+      var widget = document.createElement('div');
+      widget.id = 'tb-feedback-widget';
+      widget.innerHTML = this.getHTML('collapsed');
+      document.body.appendChild(widget);
+    },
+    
+    getHTML: function(state) {
+      var styles = {
+        base: 'position:fixed;bottom:20px;right:20px;z-index:9999;transition:all 0.3s cubic-bezier(0.4,0,0.2,1);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);',
+        collapsed: 'width:60px;height:60px;border-radius:30px;background:rgba(255,255,255,0.7);border:1px solid rgba(255,255,255,0.3);box-shadow:0 8px 32px rgba(0,0,0,0.12),0 0 0 0 rgba(255,255,255,0.5);cursor:pointer;display:flex;align-items:center;justify-content:center;animation:pulseGlow 3s ease-in-out infinite;',
+        expanded: 'width:320px;min-height:200px;border-radius:16px;background:rgba(255,255,255,0.9);border:1px solid rgba(255,255,255,0.3);box-shadow:0 8px 32px rgba(0,0,0,0.12);padding:20px;'
+      };
+      
+      if (state === 'collapsed') {
+        return '<div style="' + styles.base + styles.collapsed + '" onclick="feedbackWidget.expand()"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></div><style>@keyframes pulseGlow { 0%, 100% { box-shadow: 0 8px 32px rgba(0,0,0,0.12), 0 0 0 0 rgba(255,255,255,0.5); } 50% { box-shadow: 0 8px 32px rgba(0,0,0,0.12), 0 0 20px 5px rgba(255,255,255,0.8); }}@media (max-width: 768px) { #tb-feedback-widget { bottom:16px !important; right:16px !important; width:52px !important; height:52px !important; } #tb-feedback-widget.expanded { width:calc(100vw - 32px) !important; max-width:320px !important; }}</style>';
+      }
+      
+      if (state === 'expanded') {
+        return '<div style="' + styles.base + styles.expanded + '"><div style="text-align:center;"><div style="font-size:20px;margin-bottom:10px;">🎙️</div><h3 style="margin:0 0 8px 0;font-size:16px;font-weight:600;color:#111;">Voice Feedback</h3><p style="margin:0 0 20px 0;font-size:13px;color:#666;">Share your thoughts (max 60s)</p><button onclick="feedbackWidget.startRecording()" style="width:100%;padding:12px;background:linear-gradient(135deg,#EF4444,#DC2626);color:white;border:none;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;box-shadow:0 2px 8px rgba(239,68,68,0.3);">Start Recording</button><button onclick="feedbackWidget.collapse()" style="width:100%;margin-top:10px;padding:8px;background:transparent;color:#666;border:none;font-size:12px;cursor:pointer;">Cancel</button></div></div>';
+      }
+      
+      if (state === 'recording') {
+        return '<div style="' + styles.base + styles.expanded + '"><div style="text-align:center;"><div style="width:60px;height:60px;margin:0 auto 15px;background:#EF4444;border-radius:50%;display:flex;align-items:center;justify-content:center;animation:recordPulse 1.5s ease-in-out infinite;"><svg width="28" height="28" viewBox="0 0 24 24" fill="white"><circle cx="12" cy="12" r="4"/></svg></div><div id="tb-timer" style="font-size:24px;font-weight:600;color:#111;margin-bottom:20px;">00:00</div><button onclick="feedbackWidget.stopRecording()" style="width:100%;padding:12px;background:#111;color:white;border:none;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;">Stop Recording</button></div><style>@keyframes recordPulse { 0%, 100% { transform:scale(1); opacity:1; } 50% { transform:scale(1.1); opacity:0.8; }}</style></div>';
+      }
+      
+      if (state === 'review') {
+        return '<div style="' + styles.base + styles.expanded + '"><div style="text-align:center;"><div style="font-size:20px;margin-bottom:10px;">🎧</div><h3 style="margin:0 0 15px 0;font-size:16px;font-weight:600;color:#111;">Review Recording</h3><audio id="tb-review-audio" controls style="width:100%;margin-bottom:20px;"></audio><button onclick="feedbackWidget.submitFeedback()" style="width:100%;padding:12px;background:linear-gradient(135deg,#10B981,#059669);color:white;border:none;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;margin-bottom:10px;">Submit Feedback</button><button onclick="feedbackWidget.expand()" style="width:100%;padding:8px;background:transparent;color:#666;border:none;font-size:12px;cursor:pointer;">Record Again</button></div></div>';
+      }
+      
+      if (state === 'submitting') {
+        return '<div style="' + styles.base + styles.expanded + '"><div style="text-align:center;padding:20px 0;"><div style="width:40px;height:40px;margin:0 auto 15px;border:3px solid #e5e7eb;border-top-color:#3b82f6;border-radius:50%;animation:spin 1s linear infinite;"></div><p style="margin:0;font-size:14px;color:#666;">Submitting...</p></div><style>@keyframes spin { to { transform:rotate(360deg); }}</style></div>';
+      }
+      
+      if (state === 'thankyou') {
+        return '<div style="' + styles.base + styles.expanded + '"><div style="text-align:center;padding:20px 0;"><div style="font-size:48px;margin-bottom:10px;animation:scaleIn 0.3s ease-out;">✅</div><h3 style="margin:0 0 8px 0;font-size:16px;font-weight:600;color:#111;">Thank You!</h3><p style="margin:0;font-size:13px;color:#666;">Your feedback has been received</p></div><style>@keyframes scaleIn { from { transform:scale(0); } to { transform:scale(1); }}</style></div>';
+      }
+      
+      return '';
+    },
+    
+    expand: function() {
+      this.updateState('expanded');
+    },
+    
+    collapse: function() {
+      this.updateState('collapsed');
+    },
+    
+    startRecording: function() {
+      navigator.mediaDevices.getUserMedia({ audio: true })
+        .then(function(stream) {
+          feedbackWidget.mediaRecorder = new MediaRecorder(stream);
+          feedbackWidget.audioChunks = [];
+          
+          feedbackWidget.mediaRecorder.ondataavailable = function(e) {
+            feedbackWidget.audioChunks.push(e.data);
+          };
+          
+          feedbackWidget.mediaRecorder.onstop = function() {
+            var audioBlob = new Blob(feedbackWidget.audioChunks, { type: 'audio/webm' });
+            feedbackWidget.showReview(audioBlob);
+          };
+          
+          feedbackWidget.mediaRecorder.start();
+          feedbackWidget.recordingStartTime = Date.now();
+          feedbackWidget.updateState('recording');
+          feedbackWidget.startTimer();
+          
+          setTimeout(function() {
+            if (feedbackWidget.mediaRecorder && feedbackWidget.mediaRecorder.state === 'recording') {
+              feedbackWidget.stopRecording();
+            }
+          }, feedbackWidget.maxDuration);
+        })
+        .catch(function(error) {
+          alert('Microphone access denied. Please allow microphone access to record feedback.');
+          feedbackWidget.collapse();
+        });
+    },
+    
+    stopRecording: function() {
+      if (this.mediaRecorder && this.mediaRecorder.state === 'recording') {
+        this.mediaRecorder.stop();
+        this.mediaRecorder.stream.getTracks().forEach(function(track) { track.stop(); });
+        if (this.timerInterval) {
+          clearInterval(this.timerInterval);
+        }
+      }
+    },
+    
+    startTimer: function() {
+      this.timerInterval = setInterval(function() {
+        var elapsed = Math.floor((Date.now() - feedbackWidget.recordingStartTime) / 1000);
+        var mins = Math.floor(elapsed / 60).toString();
+        var secs = (elapsed % 60).toString();
+        if (mins.length === 1) mins = '0' + mins;
+        if (secs.length === 1) secs = '0' + secs;
+        var timer = document.getElementById('tb-timer');
+        if (timer) timer.textContent = mins + ':' + secs;
+      }, 100);
+    },
+    
+    showReview: function(audioBlob) {
+      this.currentBlob = audioBlob;
+      this.updateState('review');
+      setTimeout(function() {
+        var audio = document.getElementById('tb-review-audio');
+        if (audio) audio.src = URL.createObjectURL(audioBlob);
+      }, 100);
+    },
+    
+    submitFeedback: function() {
+      this.updateState('submitting');
+      
+      var formData = new FormData();
+      formData.append('audio', this.currentBlob, 'feedback.webm');
+      formData.append('clientId', clientId);
+      formData.append('sessionId', sessionId);
+      formData.append('url', window.location.href);
+      formData.append('duration', Math.floor((Date.now() - this.recordingStartTime) / 1000).toString());
+      
+      fetch(apiEndpoint.replace('/track', '/feedback/upload'), {
+        method: 'POST',
+        body: formData
+      })
+        .then(function(response) {
+          if (response.ok) {
+            feedbackWidget.updateState('thankyou');
+            setTimeout(function() { feedbackWidget.collapse(); }, 3000);
+          } else {
+            alert('Failed to submit. Please try again.');
+            feedbackWidget.updateState('review');
+          }
+        })
+        .catch(function(error) {
+          alert('Failed to submit. Please try again.');
+          feedbackWidget.updateState('review');
+        });
+    },
+    
+    updateState: function(newState) {
+      this.state = newState;
+      var widget = document.getElementById('tb-feedback-widget');
+      if (widget) {
+        widget.innerHTML = this.getHTML(newState);
+        if (newState === 'expanded') {
+          widget.className = 'expanded';
+        } else {
+          widget.className = '';
+        }
+      }
+    }
+  };
+
+  // Initialize widget check after page load
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() { feedbackWidget.init(); });
+  } else {
+    feedbackWidget.init();
+  }
 })();
 

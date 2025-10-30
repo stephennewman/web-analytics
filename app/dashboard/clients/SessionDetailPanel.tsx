@@ -126,6 +126,40 @@ export default function SessionDetailPanel({ session, onClose }: SessionDetailPa
             </div>
           )}
 
+          {/* Voice Feedback */}
+          {session.events.some((e: any) => e.event_type === 'feedback_submitted') && (
+            <div>
+              <h3 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                <span>🎙️</span>
+                Voice Feedback
+              </h3>
+              <div className="space-y-3">
+                {session.events
+                  .filter((e: any) => e.event_type === 'feedback_submitted')
+                  .map((event: any, idx: number) => (
+                    <div key={idx} className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-medium text-blue-900">
+                          Feedback submitted
+                        </span>
+                        <span className="text-xs text-blue-600">
+                          {new Date(event.timestamp).toLocaleTimeString()}
+                        </span>
+                      </div>
+                      {event.data?.audio_url && (
+                        <audio controls src={event.data.audio_url} className="w-full mt-2" />
+                      )}
+                      {event.data?.duration && (
+                        <p className="text-xs text-blue-600 mt-2">
+                          Duration: {event.data.duration}s
+                        </p>
+                      )}
+                    </div>
+                  ))}
+              </div>
+            </div>
+          )}
+
           {/* Engagement Metrics */}
           <div>
             <h3 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
