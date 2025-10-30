@@ -13,6 +13,7 @@ import ScrollEngagement from './ScrollEngagement';
 import SessionDetailPanel from './SessionDetailPanel';
 import SlackSettings from './SlackSettings';
 import FeedbackView from './FeedbackView';
+import RoadmapView from './RoadmapView';
 
 interface Client {
   id: string;
@@ -284,6 +285,11 @@ export default function SetupView({
           <FeedbackView clientId={client.id} />
         );
 
+      case 'roadmap':
+        return (
+          <RoadmapView client={client} />
+        );
+
       case 'settings':
         return (
           <div className="max-w-4xl space-y-6">
@@ -419,6 +425,41 @@ export default function SetupView({
                           </div>
                           <p className="text-xs text-gray-600 mt-3">
                             Bottom banner with scrolling feedback quotes + social proof
+                          </p>
+                        </div>
+
+                        {/* B2B SaaS Style */}
+                        <div
+                          onClick={async () => {
+                            const response = await fetch(`/api/clients/${client.id}`, {
+                              method: 'PATCH',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ feedback_widget_style: 'b2b-saas' })
+                            });
+                            if (response.ok) {
+                              window.location.reload();
+                            }
+                          }}
+                          className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                            client.feedback_widget_style === 'b2b-saas'
+                              ? 'border-yellow-500 bg-yellow-50'
+                              : 'border-gray-200 hover:border-gray-300'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between mb-3">
+                            <h5 className="font-semibold text-gray-900">B2B Product Roadmap</h5>
+                            {client.feedback_widget_style === 'b2b-saas' && (
+                              <span className="text-yellow-600 text-sm">✓ Active</span>
+                            )}
+                          </div>
+                          <div className="relative bg-gradient-to-br from-blue-50 to-purple-50 h-32 rounded-lg overflow-hidden flex items-end">
+                            <div className="w-full h-12 bg-gradient-to-r from-indigo-500 via-purple-500 to-purple-600 border-t-2 border-indigo-400 flex items-center justify-between px-3">
+                              <span className="text-xs text-white/90 truncate">💬 "Need dark mode" 💬 "API docs please"</span>
+                              <span className="text-base ml-2 font-bold text-white text-xs">🎤 VOICE FEEDBACK</span>
+                            </div>
+                          </div>
+                          <p className="text-xs text-gray-600 mt-3">
+                            Fast-scrolling product feedback + AI-powered ticket consolidation
                           </p>
                         </div>
                       </div>

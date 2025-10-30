@@ -421,7 +421,7 @@
   // Feedback Widget (only loads if enabled)
   var feedbackWidget = {
     state: 'collapsed',
-    widgetStyle: 'glassmorphic', // glassmorphic, ticker, solid
+    widgetStyle: 'glassmorphic', // glassmorphic, ticker, b2b-saas
     mediaRecorder: null,
     audioChunks: [],
     recordingStartTime: null,
@@ -488,6 +488,9 @@
       // Route to different styles
       if (this.widgetStyle === 'ticker') {
         return this.getTickerHTML(state);
+      }
+      if (this.widgetStyle === 'b2b-saas') {
+        return this.getB2BSaasHTML(state);
       }
       // Default: glassmorphic button style
       return this.getGlassmorphicHTML(state);
@@ -565,6 +568,49 @@
       
       if (state === 'thankyou') {
         return '<div style="' + modalBase + '"><div style="text-align:center;padding:20px 0;"><div style="font-size:60px;margin-bottom:16px;animation:scaleIn 0.3s ease-out;">✅</div><h3 style="margin:0 0 8px 0;font-size:18px;font-weight:600;color:#111;">Thank You!</h3><p style="margin:0;font-size:14px;color:#666;">Your feedback has been received</p></div><style>@keyframes scaleIn { from { transform:scale(0); } to { transform:scale(1); }}</style></div>';
+      }
+      
+      return '';
+    },
+    
+    getB2BSaasHTML: function(state) {
+      // B2B SaaS ticker - faster scroll, product-focused, purple/blue theme
+      if (state === 'collapsed') {
+        var quotesHTML = '';
+        if (this.recentQuotes.length > 0) {
+          // Create fast-scrolling product feedback quotes
+          var quotes = this.recentQuotes.map(function(q) {
+            return '<span style="display:inline-block;padding:0 50px;white-space:nowrap;font-size:13px;">💬 ' + q.substring(0, 70) + (q.length > 70 ? '...' : '') + '</span>';
+          }).join('');
+          quotesHTML = '<div style="overflow:hidden;flex:1;position:relative;"><div id="tb-ticker-scroll" style="display:flex;animation:tickerScrollFast 12s linear infinite;">' + quotes + quotes + '</div></div>';
+        } else {
+          quotesHTML = '<div style="flex:1;padding:0 20px;font-size:13px;color:#E0E7FF;font-weight:500;">💡 Share your product feedback</div>';
+        }
+        
+        return '<div style="position:fixed;bottom:0;left:0;right:0;z-index:9998;background:linear-gradient(90deg,#6366F1,#8B5CF6,#A855F7);border-top:2px solid #818CF8;box-shadow:0 -4px 12px rgba(0,0,0,0.15);display:flex;align-items:center;height:48px;font-family:system-ui,-apple-system,sans-serif;">' + quotesHTML + '<div style="padding:0 20px;border-left:2px solid #818CF8;cursor:pointer;display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.1);" data-action="expand"><span style="font-size:20px;">🎤</span><span style="font-size:13px;font-weight:700;color:#FFF;text-transform:uppercase;letter-spacing:0.5px;">Voice Feedback</span></div></div><style>@keyframes tickerScrollFast { 0% { transform:translateX(0); } 100% { transform:translateX(-50%); }}</style>';
+      }
+      
+      // Modal for recording/states (same as ticker but purple theme)
+      var modalBase = 'position:fixed;bottom:58px;right:20px;width:320px;background:white;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,0.3);z-index:9999;padding:24px;border:2px solid #8B5CF6;';
+      
+      if (state === 'expanded') {
+        return '<div style="' + modalBase + '"><div style="text-align:center;"><div style="font-size:24px;margin-bottom:12px;">🎤</div><h3 style="margin:0 0 8px 0;font-size:18px;font-weight:600;color:#111;">Voice Product Feedback</h3><p style="margin:0 0 20px 0;font-size:14px;color:#666;">Help us build what you need (max 60s)</p><button data-action="start-recording" style="width:100%;padding:14px;background:linear-gradient(135deg,#8B5CF6,#A855F7);color:white;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;box-shadow:0 4px 12px rgba(139,92,246,0.3);">Start Recording</button><button data-action="collapse" style="width:100%;margin-top:12px;padding:10px;background:transparent;color:#666;border:none;font-size:13px;cursor:pointer;">Cancel</button></div></div>';
+      }
+      
+      if (state === 'recording') {
+        return '<div style="' + modalBase + '"><div style="text-align:center;"><div style="width:70px;height:70px;margin:0 auto 20px;background:#8B5CF6;border-radius:50%;display:flex;align-items:center;justify-content:center;animation:recordPulse 1.5s ease-in-out infinite;"><svg width="32" height="32" viewBox="0 0 24 24" fill="white"><circle cx="12" cy="12" r="4"/></svg></div><div id="tb-timer" style="font-size:28px;font-weight:700;color:#111;margin-bottom:24px;">00:00</div><button data-action="stop-recording" style="width:100%;padding:14px;background:#111;color:white;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;">Stop Recording</button></div><style>@keyframes recordPulse { 0%, 100% { transform:scale(1); opacity:1; } 50% { transform:scale(1.1); opacity:0.8; }}</style></div>';
+      }
+      
+      if (state === 'review') {
+        return '<div style="' + modalBase + '"><div style="text-align:center;"><div style="font-size:24px;margin-bottom:12px;">🎧</div><h3 style="margin:0 0 20px 0;font-size:18px;font-weight:600;color:#111;">Review Recording</h3><audio id="tb-review-audio" controls style="width:100%;margin-bottom:20px;"></audio><button data-action="submit" style="width:100%;padding:14px;background:linear-gradient(135deg,#10B981,#059669);color:white;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;margin-bottom:12px;">Submit Feedback</button><button data-action="redo" style="width:100%;padding:10px;background:transparent;color:#666;border:none;font-size:13px;cursor:pointer;">Record Again</button></div></div>';
+      }
+      
+      if (state === 'submitting') {
+        return '<div style="' + modalBase + '"><div style="text-align:center;padding:20px 0;"><div style="width:50px;height:50px;margin:0 auto 20px;border:4px solid #e5e7eb;border-top-color:#8B5CF6;border-radius:50%;animation:spin 1s linear infinite;"></div><p style="margin:0;font-size:15px;color:#666;">Submitting...</p></div><style>@keyframes spin { to { transform:rotate(360deg); }}</style></div>';
+      }
+      
+      if (state === 'thankyou') {
+        return '<div style="' + modalBase + '"><div style="text-align:center;padding:20px 0;"><div style="font-size:60px;margin-bottom:16px;animation:scaleIn 0.3s ease-out;">✅</div><h3 style="margin:0 0 8px 0;font-size:18px;font-weight:600;color:#111;">Thank You!</h3><p style="margin:0;font-size:14px;color:#666;">Your feedback will help shape our roadmap</p></div><style>@keyframes scaleIn { from { transform:scale(0); } to { transform:scale(1); }}</style></div>';
       }
       
       return '';

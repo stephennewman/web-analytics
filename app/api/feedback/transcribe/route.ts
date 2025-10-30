@@ -76,6 +76,73 @@ export async function POST(request: NextRequest) {
       })
       .eq('id', feedbackId);
     
+    // AI Ticket Consolidation (only for B2B SaaS widget)
+    const { data: client } = await supabase
+      .from('clients')
+      .select('feedback_widget_style')
+      .eq('id', feedback.client_id)
+      .single();
+    
+    if (client?.feedback_widget_style === 'b2b-saas') {
+      try {
+        // Get all open tickets for this client
+        const { data: existingTickets } = await supabase
+          .from('tickets')
+          .select('id, title, description')
+          .eq('client_id', feedback.client_id)
+          .neq('status', 'shipped');
+        
+        // Use GPT to determine if feedback matches existing ticket or needs new one
+        const ticketDecision = await openai.chat.completions.create({
+          model: 'gpt-4o-mini',
+          messages: [{
+            role: 'system',
+            content: 'You are a product manager analyzing user feedback for ticket consolidation. Be AGGRESSIVE in matching similar requests. Determine if this feedback matches an existing ticket or needs a new one. Return JSON with: matchingTicketId (UUID or null), newTicketTitle (if creating new), newTicketDescription (if creating new), suggestedPriority (low/medium/high based on urgency and impact).'
+          }, {
+            role: 'user',
+            content: `Feedback: "${result.cleanedTranscript}"\n\nExisting Tickets:\n${(existingTickets || []).map(t => `ID: ${t.id}\nTitle: ${t.title}\nDescription: ${t.description}`).join('\n\n')}`
+          }],
+          response_format: { type: 'json_object' }
+        });
+        
+        const decision = JSON.parse(ticketDecision.choices[0].message.content || '{}');
+        
+        if (decision.matchingTicketId && existingTickets?.some(t => t.id === decision.matchingTicketId)) {
+          // Link to existing ticket and increment count
+          await supabase
+            .from('feedback')
+            .update({ ticket_id: decision.matchingTicketId })
+            .eq('id', feedbackId);
+          
+          await supabase.rpc('increment_ticket_count', { ticket_id: decision.matchingTicketId });
+        } else if (decision.newTicketTitle) {
+          // Create new ticket
+          const { data: newTicket } = await supabase
+            .from('tickets')
+            .insert({
+              client_id: feedback.client_id,
+              title: decision.newTicketTitle,
+              description: decision.newTicketDescription || result.cleanedTranscript,
+              status: 'new',
+              ai_suggested_priority: decision.suggestedPriority,
+              feedback_count: 1
+            })
+            .select()
+            .single();
+          
+          if (newTicket) {
+            await supabase
+              .from('feedback')
+              .update({ ticket_id: newTicket.id })
+              .eq('id', feedbackId);
+          }
+        }
+      } catch (ticketError) {
+        console.error('Ticket consolidation error:', ticketError);
+        // Don't fail the whole request if ticket logic fails
+      }
+    }
+    
     return NextResponse.json({ success: true });
     
   } catch (error) {
