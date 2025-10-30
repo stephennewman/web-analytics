@@ -41,6 +41,28 @@ export default function DemoPage() {
       
       demoWidgets.createGlassmorphic();
       demoWidgets.createTicker();
+      
+      // B2B SaaS Widget
+      var b2bContainer = document.getElementById('demo-b2b');
+      if (b2bContainer) {
+        var b2bWidget = document.createElement('div');
+        b2bWidget.style.cssText = 'position:relative;width:100%;height:400px;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);border-radius:16px;overflow:hidden;';
+        
+        var productQuotes = [
+          "Need dark mode",
+          "API docs please",
+          "Export to CSV",
+          "Slack integration",
+          "2FA support"
+        ];
+        
+        var b2bQuotesHTML = productQuotes.map(function(q) {
+          return '<span style="display:inline-block;padding:0 50px;white-space:nowrap;font-size:13px;">💬 ' + q + '</span>';
+        }).join('');
+        
+        b2bWidget.innerHTML = '<div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(90deg,#6366F1,#8B5CF6,#A855F7);border-top:2px solid #818CF8;box-shadow:0 -4px 12px rgba(0,0,0,0.15);display:flex;align-items:center;height:48px;font-family:system-ui,-apple-system,sans-serif;"><div style="overflow:hidden;flex:1;position:relative;"><div style="display:flex;animation:b2bScroll 10s linear infinite;">' + b2bQuotesHTML + b2bQuotesHTML + '</div></div><div style="padding:0 20px;border-left:2px solid #818CF8;cursor:pointer;display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.1);"><span style="font-size:20px;">🎤</span><span style="font-size:13px;font-weight:700;color:#FFF;text-transform:uppercase;letter-spacing:0.5px;">VOICE FEEDBACK</span></div></div><style>@keyframes b2bScroll { 0% { transform:translateX(0); } 100% { transform:translateX(-50%); }}</style>';
+        b2bContainer.appendChild(b2bWidget);
+      }
     `;
     document.body.appendChild(script);
   }, []);
@@ -53,7 +75,7 @@ export default function DemoPage() {
           <p className="text-gray-600">Compare both feedback widget styles side-by-side</p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Glassmorphic Design */}
           <div className="bg-white rounded-xl shadow-lg p-6">
             <div className="mb-4">
@@ -97,6 +119,28 @@ export default function DemoPage() {
               </ul>
             </div>
           </div>
+
+          {/* B2B SaaS Design */}
+          <div className="bg-white rounded-xl shadow-lg p-6">
+            <div className="mb-4">
+              <h2 className="text-xl font-bold text-gray-900 mb-2">B2B Product Roadmap</h2>
+              <p className="text-sm text-gray-600">
+                Fast-scrolling product feedback banner with AI-powered ticket consolidation. Purple/indigo theme.
+              </p>
+            </div>
+            
+            <div id="demo-b2b" className="relative"></div>
+            
+            <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+              <h3 className="font-semibold text-gray-900 mb-2">Best For:</h3>
+              <ul className="text-sm text-gray-600 space-y-1">
+                <li>✓ B2B SaaS products</li>
+                <li>✓ Product roadmap transparency</li>
+                <li>✓ Feature request consolidation</li>
+                <li>✓ AI-powered ticket management</li>
+              </ul>
+            </div>
+          </div>
         </div>
 
         {/* Comparison Table */}
@@ -109,6 +153,7 @@ export default function DemoPage() {
                   <th className="text-left py-3 px-4">Feature</th>
                   <th className="text-center py-3 px-4">Glassmorphic</th>
                   <th className="text-center py-3 px-4">Ticker</th>
+                  <th className="text-center py-3 px-4">B2B Roadmap</th>
                 </tr>
               </thead>
               <tbody>
@@ -116,19 +161,23 @@ export default function DemoPage() {
                   <td className="py-3 px-4">Visibility</td>
                   <td className="text-center py-3 px-4">Subtle</td>
                   <td className="text-center py-3 px-4">High</td>
+                  <td className="text-center py-3 px-4">Very High</td>
                 </tr>
                 <tr className="border-b">
                   <td className="py-3 px-4">Social Proof</td>
                   <td className="text-center py-3 px-4">None</td>
                   <td className="text-center py-3 px-4">Shows real quotes</td>
+                  <td className="text-center py-3 px-4">Product requests</td>
                 </tr>
                 <tr className="border-b">
                   <td className="py-3 px-4">Screen Space</td>
                   <td className="text-center py-3 px-4">Minimal (60px circle)</td>
                   <td className="text-center py-3 px-4">50px bottom banner</td>
+                  <td className="text-center py-3 px-4">48px bottom banner</td>
                 </tr>
                 <tr className="border-b">
                   <td className="py-3 px-4">Mobile Friendly</td>
+                  <td className="text-center py-3 px-4">✅</td>
                   <td className="text-center py-3 px-4">✅</td>
                   <td className="text-center py-3 px-4">✅</td>
                 </tr>
@@ -136,11 +185,19 @@ export default function DemoPage() {
                   <td className="py-3 px-4">Engagement Rate</td>
                   <td className="text-center py-3 px-4">Good</td>
                   <td className="text-center py-3 px-4">Excellent</td>
+                  <td className="text-center py-3 px-4">Excellent</td>
+                </tr>
+                <tr className="border-b">
+                  <td className="py-3 px-4">AI Features</td>
+                  <td className="text-center py-3 px-4">Basic</td>
+                  <td className="text-center py-3 px-4">Basic</td>
+                  <td className="text-center py-3 px-4">Ticket consolidation</td>
                 </tr>
                 <tr>
                   <td className="py-3 px-4">Brand Presence</td>
                   <td className="text-center py-3 px-4">Neutral</td>
-                  <td className="text-center py-3 px-4">Strong (yellow/bee theme)</td>
+                  <td className="text-center py-3 px-4">Strong (yellow/bee)</td>
+                  <td className="text-center py-3 px-4">Strong (purple/indigo)</td>
                 </tr>
               </tbody>
             </table>
