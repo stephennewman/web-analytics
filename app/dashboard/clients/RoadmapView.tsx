@@ -534,6 +534,294 @@ export default function RoadmapView({ client }: RoadmapViewProps) {
               </p>
             </div>
 
+            {/* AI Scoring Breakdown */}
+            {selectedTicket.scores && selectedTicket.scores.last_scored_at && (
+              <div className="p-6 border-b border-gray-200">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-bold text-gray-900">AI Scoring Breakdown</h3>
+                  <span className="text-xs text-gray-500">
+                    Scored {new Date(selectedTicket.scores.last_scored_at).toLocaleDateString()}
+                  </span>
+                </div>
+
+                {/* Core Dimensions */}
+                <div className="mb-6">
+                  <h4 className="text-sm font-semibold text-gray-700 mb-3">Core Dimensions (1-10)</h4>
+                  <div className="space-y-3">
+                    {/* Demand */}
+                    <div>
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-sm font-medium text-gray-700">Demand</span>
+                        <span className="text-sm font-bold text-purple-600">{selectedTicket.scores.demand}/10</span>
+                      </div>
+                      <div className="w-full h-3 bg-gray-200 rounded-full overflow-hidden">
+                        <div 
+                          className="h-full bg-purple-500 transition-all"
+                          style={{ width: `${(selectedTicket.scores.demand / 10) * 100}%` }}
+                        />
+                      </div>
+                      <p className="text-xs text-gray-500 mt-1">Based on unique users, not raw feedback count</p>
+                    </div>
+
+                    {/* Differentiation */}
+                    <div>
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-sm font-medium text-gray-700">Differentiation</span>
+                        <span className="text-sm font-bold text-blue-600">{selectedTicket.scores.differentiation}/10</span>
+                      </div>
+                      <div className="w-full h-3 bg-gray-200 rounded-full overflow-hidden">
+                        <div 
+                          className="h-full bg-blue-500 transition-all"
+                          style={{ width: `${(selectedTicket.scores.differentiation / 10) * 100}%` }}
+                        />
+                      </div>
+                      <p className="text-xs text-gray-500 mt-1">Competitive advantage & uniqueness</p>
+                    </div>
+
+                    {/* Value */}
+                    <div>
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-sm font-medium text-gray-700">Value</span>
+                        <span className="text-sm font-bold text-green-600">{selectedTicket.scores.value}/10</span>
+                      </div>
+                      <div className="w-full h-3 bg-gray-200 rounded-full overflow-hidden">
+                        <div 
+                          className="h-full bg-green-500 transition-all"
+                          style={{ width: `${(selectedTicket.scores.value / 10) * 100}%` }}
+                        />
+                      </div>
+                      <p className="text-xs text-gray-500 mt-1">Quality × Efficiency × User Reach</p>
+                    </div>
+
+                    {/* Implementation */}
+                    <div>
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-sm font-medium text-gray-700">Implementation</span>
+                        <span className="text-sm font-bold text-yellow-600">{selectedTicket.scores.implementation}/10</span>
+                      </div>
+                      <div className="w-full h-3 bg-gray-200 rounded-full overflow-hidden">
+                        <div 
+                          className="h-full bg-yellow-500 transition-all"
+                          style={{ width: `${(selectedTicket.scores.implementation / 10) * 100}%` }}
+                        />
+                      </div>
+                      <p className="text-xs text-gray-500 mt-1">Ease of building (10=1 day, 1=3+ months)</p>
+                    </div>
+
+                    {/* Strategic Fit */}
+                    <div>
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-sm font-medium text-gray-700">Strategic Fit</span>
+                        <span className="text-sm font-bold text-indigo-600">{selectedTicket.scores.strategic_fit}/10</span>
+                      </div>
+                      <div className="w-full h-3 bg-gray-200 rounded-full overflow-hidden">
+                        <div 
+                          className="h-full bg-indigo-500 transition-all"
+                          style={{ width: `${(selectedTicket.scores.strategic_fit / 10) * 100}%` }}
+                        />
+                      </div>
+                      <p className="text-xs text-gray-500 mt-1">Alignment with product vision</p>
+                    </div>
+
+                    {/* Virality */}
+                    <div>
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-sm font-medium text-gray-700">Virality</span>
+                        <span className="text-sm font-bold text-pink-600">{selectedTicket.scores.virality}/10</span>
+                      </div>
+                      <div className="w-full h-3 bg-gray-200 rounded-full overflow-hidden">
+                        <div 
+                          className="h-full bg-pink-500 transition-all"
+                          style={{ width: `${(selectedTicket.scores.virality / 10) * 100}%` }}
+                        />
+                      </div>
+                      <p className="text-xs text-gray-500 mt-1">Encourages sharing & new user acquisition</p>
+                    </div>
+
+                    {/* Implied Need */}
+                    <div>
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-sm font-medium text-gray-700">Implied Need</span>
+                        <span className="text-sm font-bold text-orange-600">{selectedTicket.scores.implied_need}/10</span>
+                      </div>
+                      <div className="w-full h-3 bg-gray-200 rounded-full overflow-hidden">
+                        <div 
+                          className="h-full bg-orange-500 transition-all"
+                          style={{ width: `${(selectedTicket.scores.implied_need / 10) * 100}%` }}
+                        />
+                      </div>
+                      <p className="text-xs text-gray-500 mt-1">Unstated problems hinted in feedback</p>
+                    </div>
+
+                    {/* Enterprise Blocker */}
+                    <div>
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-sm font-medium text-gray-700">Enterprise Blocker</span>
+                        <span className={`text-sm font-bold ${selectedTicket.scores.enterprise_blocker ? 'text-red-600' : 'text-gray-400'}`}>
+                          {selectedTicket.scores.enterprise_blocker ? '⚠️ YES' : 'No'}
+                        </span>
+                      </div>
+                      <p className="text-xs text-gray-500">Critical for enterprise adoption</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Framework Scores */}
+                <div>
+                  <h4 className="text-sm font-semibold text-gray-700 mb-3">Framework Scores (Weighted)</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Traditional */}
+                    <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-semibold text-gray-900">Traditional</span>
+                        <span className="text-lg font-bold text-gray-700">{selectedTicket.scores.traditional_score.toFixed(1)}</span>
+                      </div>
+                      <div className="space-y-1 text-xs text-gray-600">
+                        <div className="flex justify-between">
+                          <span>Demand (40%)</span>
+                          <span>{(selectedTicket.scores.demand * 0.4).toFixed(1)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Value (30%)</span>
+                          <span>{(selectedTicket.scores.value * 0.3).toFixed(1)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Implementation (20%)</span>
+                          <span>{(selectedTicket.scores.implementation * 0.2).toFixed(1)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Strategic Fit (10%)</span>
+                          <span>{(selectedTicket.scores.strategic_fit * 0.1).toFixed(1)}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Differentiation */}
+                    <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-semibold text-blue-900">Differentiation</span>
+                        <span className="text-lg font-bold text-blue-700">{selectedTicket.scores.differentiation_score.toFixed(1)}</span>
+                      </div>
+                      <div className="space-y-1 text-xs text-blue-800">
+                        <div className="flex justify-between">
+                          <span>Differentiation (50%)</span>
+                          <span>{(selectedTicket.scores.differentiation * 0.5).toFixed(1)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Value (30%)</span>
+                          <span>{(selectedTicket.scores.value * 0.3).toFixed(1)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Strategic Fit (20%)</span>
+                          <span>{(selectedTicket.scores.strategic_fit * 0.2).toFixed(1)}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Gray Area */}
+                    <div className="bg-orange-50 rounded-lg p-4 border border-orange-200">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-semibold text-orange-900">Gray Area</span>
+                        <span className="text-lg font-bold text-orange-700">{selectedTicket.scores.gray_area_score.toFixed(1)}</span>
+                      </div>
+                      <div className="space-y-1 text-xs text-orange-800">
+                        <div className="flex justify-between">
+                          <span>Implied Need (40%)</span>
+                          <span>{(selectedTicket.scores.implied_need * 0.4).toFixed(1)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Strategic Fit (30%)</span>
+                          <span>{(selectedTicket.scores.strategic_fit * 0.3).toFixed(1)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Differentiation (20%)</span>
+                          <span>{(selectedTicket.scores.differentiation * 0.2).toFixed(1)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Value (10%)</span>
+                          <span>{(selectedTicket.scores.value * 0.1).toFixed(1)}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Quick Win */}
+                    <div className="bg-green-50 rounded-lg p-4 border border-green-200">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-semibold text-green-900">Quick Wins</span>
+                        <span className="text-lg font-bold text-green-700">{selectedTicket.scores.quick_win_score.toFixed(1)}</span>
+                      </div>
+                      <div className="text-xs text-green-800">
+                        <p>Value ÷ Effort × √Demand</p>
+                        <p className="mt-1 text-gray-600">
+                          {selectedTicket.scores.effort_hours && `Est. ${selectedTicket.scores.effort_hours}h`}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Enterprise */}
+                    <div className="bg-red-50 rounded-lg p-4 border border-red-200">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-semibold text-red-900">Enterprise</span>
+                        <span className="text-lg font-bold text-red-700">{selectedTicket.scores.enterprise_score.toFixed(1)}</span>
+                      </div>
+                      <div className="space-y-1 text-xs text-red-800">
+                        <div className="flex justify-between">
+                          <span>Strategic Fit (40%)</span>
+                          <span>{(selectedTicket.scores.strategic_fit * 0.4).toFixed(1)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Blocker (30%)</span>
+                          <span>{selectedTicket.scores.enterprise_blocker ? '3.0' : '0.0'}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Value (20%)</span>
+                          <span>{(selectedTicket.scores.value * 0.2).toFixed(1)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Demand (10%)</span>
+                          <span>{(selectedTicket.scores.demand * 0.1).toFixed(1)}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Viral Growth */}
+                    <div className="bg-pink-50 rounded-lg p-4 border border-pink-200">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-semibold text-pink-900">Viral Growth</span>
+                        <span className="text-lg font-bold text-pink-700">{selectedTicket.scores.viral_score.toFixed(1)}</span>
+                      </div>
+                      <div className="space-y-1 text-xs text-pink-800">
+                        <div className="flex justify-between">
+                          <span>Virality (40%)</span>
+                          <span>{(selectedTicket.scores.virality * 0.4).toFixed(1)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Value (30%)</span>
+                          <span>{(selectedTicket.scores.value * 0.3).toFixed(1)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Implementation (20%)</span>
+                          <span>{(selectedTicket.scores.implementation * 0.2).toFixed(1)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Differentiation (10%)</span>
+                          <span>{(selectedTicket.scores.differentiation * 0.1).toFixed(1)}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* AI Insight */}
+                {selectedTicket.scores.ai_insight && (
+                  <div className="mt-6 p-4 bg-purple-50 rounded-lg border border-purple-200">
+                    <h4 className="text-sm font-semibold text-purple-900 mb-2">💡 AI Insight</h4>
+                    <p className="text-sm text-purple-800">{selectedTicket.scores.ai_insight}</p>
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Voice Feedback List */}
             <div className="p-6">
               <h3 className="text-lg font-bold text-gray-900 mb-4">
