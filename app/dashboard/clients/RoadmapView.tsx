@@ -80,6 +80,7 @@ export default function RoadmapView({ client }: RoadmapViewProps) {
   const [loading, setLoading] = useState(true);
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const [draggedTicket, setDraggedTicket] = useState<Ticket | null>(null);
+  const [dragOverColumn, setDragOverColumn] = useState<string | null>(null);
   const [framework, setFramework] = useState<Framework>('traditional');
   const [scoring, setScoring] = useState<string | null>(null);
   const [batchScoring, setBatchScoring] = useState(false);
@@ -100,14 +101,26 @@ export default function RoadmapView({ client }: RoadmapViewProps) {
   };
 
   const updateTicketStatus = async (ticketId: string, newStatus: string) => {
+    // Optimistic update - update UI immediately for smooth UX
+    setTickets(prevTickets => 
+      prevTickets.map(ticket => 
+        ticket.id === ticketId 
+          ? { ...ticket, status: newStatus as any }
+          : ticket
+      )
+    );
+
+    // Then update on server in background
     const response = await fetch(`/api/tickets/${ticketId}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status: newStatus })
     });
 
-    if (response.ok) {
-      fetchTickets();
+    // If it failed, revert and refetch to get correct state
+    if (!response.ok) {
+      console.error('Failed to update ticket status');
+      fetchTickets(); // Revert by fetching actual state
     }
   };
 
@@ -127,8 +140,13 @@ export default function RoadmapView({ client }: RoadmapViewProps) {
     setDraggedTicket(ticket);
   };
 
-  const handleDragOver = (e: React.DragEvent) => {
+  const handleDragOver = (e: React.DragEvent, columnId: string) => {
     e.preventDefault();
+    setDragOverColumn(columnId);
+  };
+
+  const handleDragLeave = () => {
+    setDragOverColumn(null);
   };
 
   const handleDrop = (newStatus: string) => {
@@ -136,6 +154,7 @@ export default function RoadmapView({ client }: RoadmapViewProps) {
       updateTicketStatus(draggedTicket.id, newStatus);
     }
     setDraggedTicket(null);
+    setDragOverColumn(null);
   };
 
   const viewTicketDetails = async (ticketId: string) => {
@@ -317,8 +336,13 @@ export default function RoadmapView({ client }: RoadmapViewProps) {
           return (
             <div
               key={column.id}
-              className={`rounded-lg border-2 p-4 min-h-[500px] ${column.color}`}
-              onDragOver={handleDragOver}
+              className={`rounded-lg border-2 p-4 min-h-[500px] transition-all duration-200 ${column.color} ${
+                dragOverColumn === column.id 
+                  ? 'ring-4 ring-purple-400 ring-opacity-50 border-purple-500 scale-[1.02]' 
+                  : ''
+              }`}
+              onDragOver={(e) => handleDragOver(e, column.id)}
+              onDragLeave={handleDragLeave}
               onDrop={() => handleDrop(column.id)}
             >
               <div className="flex items-center justify-between mb-4">
@@ -338,7 +362,7 @@ export default function RoadmapView({ client }: RoadmapViewProps) {
                       key={ticket.id}
                       draggable
                       onDragStart={() => handleDragStart(ticket)}
-                      className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 hover:shadow-md transition-all cursor-move hover:border-purple-300"
+                      className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 hover:shadow-md transition-all duration-200 cursor-move hover:border-purple-300 animate-in fade-in slide-in-from-bottom-2"
                       >
                         {/* AI Generated Badge */}
                         {ticket.ai_generated && (
