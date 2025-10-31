@@ -15,6 +15,11 @@ export async function POST(request: NextRequest) {
     const url = formData.get('url') as string;
     const duration = parseInt(formData.get('duration') as string);
     
+    // Extract IP address for user consolidation
+    const ip = request.headers.get('x-forwarded-for')?.split(',')[0] || 
+               request.headers.get('x-real-ip') || 
+               null;
+    
     if (!audioFile || !clientId || !sessionId) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
@@ -47,6 +52,7 @@ export async function POST(request: NextRequest) {
         audio_url: publicUrl,
         url: url,
         duration: duration,
+        ip_address: ip,
         status: 'pending',
         created_at: new Date().toISOString()
       })

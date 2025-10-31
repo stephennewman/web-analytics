@@ -10,6 +10,9 @@ interface Ticket {
   priority: string | null;
   ai_suggested_priority: string | null;
   feedback_count: number;
+  unique_user_count?: number;
+  power_user_count?: number;
+  user_quality_score?: number;
   is_public: boolean;
   created_at: string;
   ai_generated?: boolean;
@@ -364,11 +367,18 @@ export default function RoadmapView({ client }: RoadmapViewProps) {
                                 {score.toFixed(1)}
                               </span>
                             )}
-                            {ticket.feedback_count > 0 && (
+                            {ticket.unique_user_count && ticket.unique_user_count > 0 ? (
+                              <span className="bg-purple-100 text-purple-700 text-xs px-2 py-1 rounded-full font-semibold flex items-center gap-1">
+                                <span>{ticket.unique_user_count} 👤</span>
+                                {ticket.power_user_count && ticket.power_user_count > 0 && (
+                                  <span className="text-purple-900">({ticket.power_user_count} ⭐)</span>
+                                )}
+                              </span>
+                            ) : ticket.feedback_count > 0 ? (
                               <span className="bg-purple-100 text-purple-700 text-xs px-2 py-1 rounded-full font-semibold">
                                 {ticket.feedback_count} 🎤
                               </span>
-                            )}
+                            ) : null}
                           </div>
                         </div>
 
@@ -494,6 +504,34 @@ export default function RoadmapView({ client }: RoadmapViewProps) {
                   </div>
                 )}
               </div>
+            </div>
+
+            {/* User Quality Metrics */}
+            <div className="p-6 border-b border-gray-200">
+              <h3 className="text-lg font-bold text-gray-900 mb-4">
+                User Engagement
+              </h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="bg-purple-50 rounded-lg p-4 border border-purple-200">
+                  <div className="text-2xl font-bold text-purple-700">{selectedTicket.feedback_count || 0}</div>
+                  <div className="text-xs text-gray-600 mt-1">Total Feedback</div>
+                </div>
+                <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                  <div className="text-2xl font-bold text-blue-700">{selectedTicket.unique_user_count || 0}</div>
+                  <div className="text-xs text-gray-600 mt-1">Unique Users 👤</div>
+                </div>
+                <div className="bg-yellow-50 rounded-lg p-4 border border-yellow-200">
+                  <div className="text-2xl font-bold text-yellow-700">{selectedTicket.power_user_count || 0}</div>
+                  <div className="text-xs text-gray-600 mt-1">Power Users ⭐</div>
+                </div>
+                <div className="bg-green-50 rounded-lg p-4 border border-green-200">
+                  <div className="text-2xl font-bold text-green-700">{selectedTicket.user_quality_score?.toFixed(1) || '0.0'}</div>
+                  <div className="text-xs text-gray-600 mt-1">Quality Score</div>
+                </div>
+              </div>
+              <p className="text-xs text-gray-500 mt-3">
+                💡 Quality Score = (Unique Users × 1.0) + (Power Users × 2.0). Power users have 3+ feedback or converted.
+              </p>
             </div>
 
             {/* Voice Feedback List */}

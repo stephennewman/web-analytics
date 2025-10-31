@@ -85,6 +85,16 @@ export async function POST(request: NextRequest) {
     
     if (client?.feedback_widget_style === 'b2b-saas') {
       try {
+        // Check if this IP already submitted similar feedback recently (within 7 days)
+        const { data: recentFeedbackFromIP } = await supabase
+          .from('feedback')
+          .select('ticket_id, cleaned_transcript')
+          .eq('client_id', feedback.client_id)
+          .eq('ip_address', feedback.ip_address)
+          .eq('status', 'completed')
+          .gte('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
+          .limit(10);
+        
         // Get all open tickets for this client
         const { data: existingTickets } = await supabase
           .from('tickets')
@@ -92,15 +102,20 @@ export async function POST(request: NextRequest) {
           .eq('client_id', feedback.client_id)
           .neq('status', 'shipped');
         
+        // Build context with IP history
+        const ipHistoryContext = recentFeedbackFromIP && recentFeedbackFromIP.length > 0
+          ? `\n\nNOTE: This same user (IP) recently submitted:\n${recentFeedbackFromIP.map(f => `- "${f.cleaned_transcript}" ${f.ticket_id ? '(already linked to ticket)' : ''}`).join('\n')}`
+          : '\n\n(This is the first feedback from this user)';
+        
         // Use GPT to determine if feedback matches existing ticket or needs new one
         const ticketDecision = await openai.chat.completions.create({
           model: 'gpt-4o-mini',
           messages: [{
             role: 'system',
-            content: 'You are a product manager analyzing user feedback for ticket consolidation. Be AGGRESSIVE in matching similar requests. Determine if this feedback matches an existing ticket or needs a new one. Return JSON with: matchingTicketId (UUID or null), newTicketTitle (if creating new), newTicketDescription (if creating new), suggestedPriority (low/medium/high based on urgency and impact).'
+            content: 'You are a product manager analyzing user feedback for ticket consolidation. Be AGGRESSIVE in matching similar requests. If the same user already submitted similar feedback, link to that ticket. Determine if this feedback matches an existing ticket or needs a new one. Return JSON with: matchingTicketId (UUID or null), newTicketTitle (if creating new), newTicketDescription (if creating new), suggestedPriority (low/medium/high based on urgency and impact).'
           }, {
             role: 'user',
-            content: `Feedback: "${result.cleanedTranscript}"\n\nExisting Tickets:\n${(existingTickets || []).map(t => `ID: ${t.id}\nTitle: ${t.title}\nDescription: ${t.description}`).join('\n\n')}`
+            content: `Feedback: "${result.cleanedTranscript}"${ipHistoryContext}\n\nExisting Tickets:\n${(existingTickets || []).map(t => `ID: ${t.id}\nTitle: ${t.title}\nDescription: ${t.description}`).join('\n\n')}`
           }],
           response_format: { type: 'json_object' }
         });

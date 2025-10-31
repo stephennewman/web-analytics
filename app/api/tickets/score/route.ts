@@ -54,14 +54,17 @@ export async function POST(request: NextRequest) {
 TICKET:
 Title: ${ticket.title}
 Description: ${ticket.description}
-Feedback Count: ${ticket.feedback_count}
+Feedback Count: ${ticket.feedback_count} entries
+Unique Users: ${ticket.unique_user_count || 0} (${ticket.power_user_count || 0} power users)
+User Quality Score: ${ticket.user_quality_score || 0}
 Voice Feedback:
 ${feedbackContext || 'No voice feedback yet'}
 
 Score each dimension from 1-10:
 
-1. DEMAND (1-10): Based on feedback count, recency, user urgency
-   - Consider: How many people want this? How recent are requests? How urgent?
+1. DEMAND (1-10): Based on UNIQUE USERS (not raw feedback), recency, user quality
+   - CRITICAL: Weight unique users heavily! 5 unique users > 10 feedback from 1 user
+   - Consider: How many DIFFERENT people want this? Are they power users? How urgent?
 
 2. DIFFERENTIATION (1-10): How unique/competitive advantage is this?
    - 10 = Nobody else has this, creates moat
