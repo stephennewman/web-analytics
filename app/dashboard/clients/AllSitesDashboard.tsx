@@ -95,29 +95,49 @@ export default function AllSitesDashboard({ sessions, clients, stats }: AllSites
       <div>
         <h2 className="text-xl font-bold text-gray-900 mb-4">Portfolio Overview</h2>
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-          <Card decoration="top" decorationColor="purple">
-            <Metric>{siteMetrics.length}</Metric>
-            <p className="text-sm text-gray-600 mt-1">Total Sites</p>
+          <Card 
+            decoration="top" 
+            decorationColor="purple"
+            className="shadow-[4px_4px_0px_rgba(168,85,247,0.4)] border-2 border-purple-200 hover:shadow-[6px_6px_0px_rgba(168,85,247,0.5)] transition-all hover:-translate-y-1"
+          >
+            <Metric className="text-purple-600">{siteMetrics.length}</Metric>
+            <p className="text-sm text-gray-600 mt-1 font-semibold">Total Sites</p>
             <p className="text-xs text-gray-500 mt-1">With traffic</p>
           </Card>
-          <Card decoration="top" decorationColor="blue">
-            <Metric>{stats.totalSessions}</Metric>
-            <p className="text-sm text-gray-600 mt-1">Total Sessions</p>
+          <Card 
+            decoration="top" 
+            decorationColor="blue"
+            className="shadow-[4px_4px_0px_rgba(59,130,246,0.4)] border-2 border-blue-200 hover:shadow-[6px_6px_0px_rgba(59,130,246,0.5)] transition-all hover:-translate-y-1"
+          >
+            <Metric className="text-blue-600">{stats.totalSessions}</Metric>
+            <p className="text-sm text-gray-600 mt-1 font-semibold">Total Sessions</p>
             <p className="text-xs text-gray-500 mt-1">All sites</p>
           </Card>
-          <Card decoration="top" decorationColor="green">
-            <Metric>{stats.conversionRate}%</Metric>
-            <p className="text-sm text-gray-600 mt-1">Avg Conversion</p>
+          <Card 
+            decoration="top" 
+            decorationColor="green"
+            className="shadow-[4px_4px_0px_rgba(34,197,94,0.4)] border-2 border-green-200 hover:shadow-[6px_6px_0px_rgba(34,197,94,0.5)] transition-all hover:-translate-y-1"
+          >
+            <Metric className="text-green-600">{stats.conversionRate}%</Metric>
+            <p className="text-sm text-gray-600 mt-1 font-semibold">Avg Conversion</p>
             <p className="text-xs text-gray-500 mt-1">{stats.convertedSessions} converted</p>
           </Card>
-          <Card decoration="top" decorationColor="yellow">
-            <Metric>{stats.sessionsWithIntent}</Metric>
-            <p className="text-sm text-gray-600 mt-1">High Intent</p>
+          <Card 
+            decoration="top" 
+            decorationColor="yellow"
+            className="shadow-[4px_4px_0px_rgba(234,179,8,0.4)] border-2 border-yellow-200 hover:shadow-[6px_6px_0px_rgba(234,179,8,0.5)] transition-all hover:-translate-y-1"
+          >
+            <Metric className="text-yellow-600">{stats.sessionsWithIntent}</Metric>
+            <p className="text-sm text-gray-600 mt-1 font-semibold">High Intent</p>
             <p className="text-xs text-gray-500 mt-1">Hot leads</p>
           </Card>
-          <Card decoration="top" decorationColor="gray">
-            <Metric>{stats.totalPageviews}</Metric>
-            <p className="text-sm text-gray-600 mt-1">Total Pageviews</p>
+          <Card 
+            decoration="top" 
+            decorationColor="gray"
+            className="shadow-[4px_4px_0px_rgba(0,0,0,0.2)] border-2 border-gray-200 hover:shadow-[6px_6px_0px_rgba(0,0,0,0.3)] transition-all hover:-translate-y-1"
+          >
+            <Metric className="text-gray-700">{stats.totalPageviews}</Metric>
+            <p className="text-sm text-gray-600 mt-1 font-semibold">Total Pageviews</p>
             <p className="text-xs text-gray-500 mt-1">All sites</p>
           </Card>
         </div>
@@ -126,7 +146,7 @@ export default function AllSitesDashboard({ sessions, clients, stats }: AllSites
       {/* Top Performing Sites */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Top by Traffic */}
-        <Card>
+        <Card className="shadow-[3px_3px_0px_rgba(0,0,0,0.15)] border-2 border-gray-200 hover:shadow-[5px_5px_0px_rgba(0,0,0,0.2)] transition-all">
           <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
             <span>🔥</span> Top by Traffic
           </h3>
@@ -156,7 +176,7 @@ export default function AllSitesDashboard({ sessions, clients, stats }: AllSites
         </Card>
 
         {/* Top by Conversion */}
-        <Card>
+        <Card className="shadow-[3px_3px_0px_rgba(0,0,0,0.15)] border-2 border-gray-200 hover:shadow-[5px_5px_0px_rgba(0,0,0,0.2)] transition-all">
           <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
             <span>💰</span> Top by Conversion
           </h3>
@@ -185,7 +205,7 @@ export default function AllSitesDashboard({ sessions, clients, stats }: AllSites
         </Card>
 
         {/* Top by Health */}
-        <Card>
+        <Card className="shadow-[3px_3px_0px_rgba(0,0,0,0.15)] border-2 border-gray-200 hover:shadow-[5px_5px_0px_rgba(0,0,0,0.2)] transition-all">
           <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
             <span>❤️</span> Healthiest Sites
           </h3>
@@ -222,7 +242,7 @@ export default function AllSitesDashboard({ sessions, clients, stats }: AllSites
       </div>
 
       {/* All Sites Performance Table */}
-      <Card className="overflow-hidden p-0">
+      <Card className="overflow-hidden p-0 shadow-[3px_3px_0px_rgba(0,0,0,0.15)] border-2 border-gray-200">
         <div className="p-6 border-b border-gray-200">
           <h3 className="text-lg font-bold text-gray-900">All Sites Performance</h3>
         </div>

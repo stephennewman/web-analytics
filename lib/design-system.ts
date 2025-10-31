@@ -9,7 +9,7 @@
 
 export const designConfig = {
   // Current boldness level (1-3)
-  boldnessLevel: 1,
+  boldnessLevel: 2,
   
   // Border widths
   borders: {

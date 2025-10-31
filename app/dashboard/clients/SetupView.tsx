@@ -147,25 +147,45 @@ export default function SetupView({
           <>
             {/* Quick Stats Bar - Dashboard Only */}
             <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
-              <Card decoration="top" decorationColor="gray">
-                <Metric>{stats.totalSessions}</Metric>
-                <p className="text-sm text-gray-600 mt-1">Total Sessions</p>
+              <Card 
+                decoration="top" 
+                decorationColor="gray"
+                className="shadow-[4px_4px_0px_rgba(0,0,0,0.2)] border-2 border-gray-200 hover:shadow-[6px_6px_0px_rgba(0,0,0,0.3)] transition-all hover:-translate-y-1"
+              >
+                <Metric className="text-gray-700">{stats.totalSessions}</Metric>
+                <p className="text-sm text-gray-600 mt-1 font-semibold">Total Sessions</p>
               </Card>
-              <Card decoration="top" decorationColor="gray">
-                <Metric>{stats.totalPageviews}</Metric>
-                <p className="text-sm text-gray-600 mt-1">Pageviews</p>
+              <Card 
+                decoration="top" 
+                decorationColor="gray"
+                className="shadow-[4px_4px_0px_rgba(0,0,0,0.2)] border-2 border-gray-200 hover:shadow-[6px_6px_0px_rgba(0,0,0,0.3)] transition-all hover:-translate-y-1"
+              >
+                <Metric className="text-gray-700">{stats.totalPageviews}</Metric>
+                <p className="text-sm text-gray-600 mt-1 font-semibold">Pageviews</p>
               </Card>
-              <Card decoration="top" decorationColor="purple">
-                <Metric>{stats.conversionRate}%</Metric>
-                <p className="text-sm text-gray-600 mt-1">Conversion Rate</p>
+              <Card 
+                decoration="top" 
+                decorationColor="purple"
+                className="shadow-[4px_4px_0px_rgba(168,85,247,0.4)] border-2 border-purple-200 hover:shadow-[6px_6px_0px_rgba(168,85,247,0.5)] transition-all hover:-translate-y-1"
+              >
+                <Metric className="text-purple-600">{stats.conversionRate}%</Metric>
+                <p className="text-sm text-gray-600 mt-1 font-semibold">Conversion Rate</p>
               </Card>
-              <Card decoration="top" decorationColor="green">
-                <Metric>{stats.sessionsWithIntent}</Metric>
-                <p className="text-sm text-gray-600 mt-1">High Intent</p>
+              <Card 
+                decoration="top" 
+                decorationColor="green"
+                className="shadow-[4px_4px_0px_rgba(34,197,94,0.4)] border-2 border-green-200 hover:shadow-[6px_6px_0px_rgba(34,197,94,0.5)] transition-all hover:-translate-y-1"
+              >
+                <Metric className="text-green-600">{stats.sessionsWithIntent}</Metric>
+                <p className="text-sm text-gray-600 mt-1 font-semibold">High Intent</p>
               </Card>
-              <Card decoration="top" decorationColor="blue">
-                <Metric>{stats.sessionsWithFrustration}</Metric>
-                <p className="text-sm text-gray-600 mt-1">Curious Explorers</p>
+              <Card 
+                decoration="top" 
+                decorationColor="blue"
+                className="shadow-[4px_4px_0px_rgba(59,130,246,0.4)] border-2 border-blue-200 hover:shadow-[6px_6px_0px_rgba(59,130,246,0.5)] transition-all hover:-translate-y-1"
+              >
+                <Metric className="text-blue-600">{stats.sessionsWithFrustration}</Metric>
+                <p className="text-sm text-gray-600 mt-1 font-semibold">Curious Explorers</p>
               </Card>
             </div>
 
