@@ -85,12 +85,20 @@ export default function RoadmapView({ client }: RoadmapViewProps) {
   const [scoring, setScoring] = useState<string | null>(null);
   const [batchScoring, setBatchScoring] = useState(false);
   const [generatingGrayArea, setGeneratingGrayArea] = useState(false);
+  const [reordering, setReordering] = useState(false);
 
   useEffect(() => {
     if (client.id !== 'all') {
       fetchTickets();
     }
   }, [client.id]);
+
+  // Trigger reordering animation when framework changes
+  useEffect(() => {
+    setReordering(true);
+    const timer = setTimeout(() => setReordering(false), 400);
+    return () => clearTimeout(timer);
+  }, [framework]);
 
   const fetchTickets = async () => {
     setLoading(true);
@@ -352,8 +360,8 @@ export default function RoadmapView({ client }: RoadmapViewProps) {
                 </span>
               </div>
 
-              <div className="space-y-3">
-                {getSortedTickets(columnTickets).map((ticket) => {
+              <div className="flex flex-col gap-3">
+                {getSortedTickets(columnTickets).map((ticket, index) => {
                   const score = getFrameworkScore(ticket);
                   const hasScores = ticket.scores && ticket.scores.last_scored_at;
                   
@@ -362,7 +370,12 @@ export default function RoadmapView({ client }: RoadmapViewProps) {
                       key={ticket.id}
                       draggable
                       onDragStart={() => handleDragStart(ticket)}
-                      className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 hover:shadow-md transition-all duration-200 cursor-move hover:border-purple-300 animate-in fade-in slide-in-from-bottom-2"
+                      style={{
+                        animationDelay: `${index * 30}ms`
+                      }}
+                      className={`bg-white rounded-lg p-4 shadow-sm border border-gray-200 hover:shadow-md transition-all duration-300 ease-out cursor-move hover:border-purple-300 ${
+                        reordering ? 'animate-pulse' : ''
+                      }`}
                       >
                         {/* AI Generated Badge */}
                         {ticket.ai_generated && (
