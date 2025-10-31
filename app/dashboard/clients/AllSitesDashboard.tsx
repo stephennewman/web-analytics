@@ -1,6 +1,8 @@
 'use client';
 
 import { useMemo } from 'react';
+import { Card, Metric, ProgressBar, BarList } from '@tremor/react';
+import { Badge } from '@/components/ui/badge';
 
 interface AllSitesDashboardProps {
   sessions: any[];
@@ -93,38 +95,38 @@ export default function AllSitesDashboard({ sessions, clients, stats }: AllSites
       <div>
         <h2 className="text-xl font-bold text-gray-900 mb-4">Portfolio Overview</h2>
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-          <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg border border-purple-200 p-4">
-            <p className="text-xs text-purple-600 mb-1 font-semibold">Total Sites</p>
-            <p className="text-3xl font-bold text-purple-700">{siteMetrics.length}</p>
-            <p className="text-xs text-purple-500 mt-1">With traffic</p>
-          </div>
-          <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg border border-blue-200 p-4">
-            <p className="text-xs text-blue-600 mb-1 font-semibold">Total Sessions</p>
-            <p className="text-3xl font-bold text-blue-700">{stats.totalSessions}</p>
-            <p className="text-xs text-blue-500 mt-1">All sites</p>
-          </div>
-          <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg border border-green-200 p-4">
-            <p className="text-xs text-green-600 mb-1 font-semibold">Avg Conversion</p>
-            <p className="text-3xl font-bold text-green-700">{stats.conversionRate}%</p>
-            <p className="text-xs text-green-500 mt-1">{stats.convertedSessions} converted</p>
-          </div>
-          <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-lg border border-yellow-200 p-4">
-            <p className="text-xs text-yellow-600 mb-1 font-semibold">High Intent</p>
-            <p className="text-3xl font-bold text-yellow-700">{stats.sessionsWithIntent}</p>
-            <p className="text-xs text-yellow-500 mt-1">Hot leads</p>
-          </div>
-          <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg border border-gray-200 p-4">
-            <p className="text-xs text-gray-600 mb-1 font-semibold">Total Pageviews</p>
-            <p className="text-3xl font-bold text-gray-700">{stats.totalPageviews}</p>
+          <Card decoration="top" decorationColor="purple">
+            <Metric>{siteMetrics.length}</Metric>
+            <p className="text-sm text-gray-600 mt-1">Total Sites</p>
+            <p className="text-xs text-gray-500 mt-1">With traffic</p>
+          </Card>
+          <Card decoration="top" decorationColor="blue">
+            <Metric>{stats.totalSessions}</Metric>
+            <p className="text-sm text-gray-600 mt-1">Total Sessions</p>
             <p className="text-xs text-gray-500 mt-1">All sites</p>
-          </div>
+          </Card>
+          <Card decoration="top" decorationColor="green">
+            <Metric>{stats.conversionRate}%</Metric>
+            <p className="text-sm text-gray-600 mt-1">Avg Conversion</p>
+            <p className="text-xs text-gray-500 mt-1">{stats.convertedSessions} converted</p>
+          </Card>
+          <Card decoration="top" decorationColor="yellow">
+            <Metric>{stats.sessionsWithIntent}</Metric>
+            <p className="text-sm text-gray-600 mt-1">High Intent</p>
+            <p className="text-xs text-gray-500 mt-1">Hot leads</p>
+          </Card>
+          <Card decoration="top" decorationColor="gray">
+            <Metric>{stats.totalPageviews}</Metric>
+            <p className="text-sm text-gray-600 mt-1">Total Pageviews</p>
+            <p className="text-xs text-gray-500 mt-1">All sites</p>
+          </Card>
         </div>
       </div>
 
       {/* Top Performing Sites */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Top by Traffic */}
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
+        <Card>
           <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
             <span>🔥</span> Top by Traffic
           </h3>
@@ -151,10 +153,10 @@ export default function AllSitesDashboard({ sessions, clients, stats }: AllSites
               </div>
             ))}
           </div>
-        </div>
+        </Card>
 
         {/* Top by Conversion */}
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
+        <Card>
           <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
             <span>💰</span> Top by Conversion
           </h3>
@@ -180,10 +182,10 @@ export default function AllSitesDashboard({ sessions, clients, stats }: AllSites
               </div>
             ))}
           </div>
-        </div>
+        </Card>
 
         {/* Top by Health */}
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
+        <Card>
           <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
             <span>❤️</span> Healthiest Sites
           </h3>
@@ -216,11 +218,11 @@ export default function AllSitesDashboard({ sessions, clients, stats }: AllSites
           <p className="text-xs text-gray-500 mt-4">
             Health = Traffic × Conversion × Engagement
           </p>
-        </div>
+        </Card>
       </div>
 
       {/* All Sites Performance Table */}
-      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+      <Card className="overflow-hidden p-0">
         <div className="p-6 border-b border-gray-200">
           <h3 className="text-lg font-bold text-gray-900">All Sites Performance</h3>
         </div>
@@ -281,12 +283,12 @@ export default function AllSitesDashboard({ sessions, clients, stats }: AllSites
             </tbody>
           </table>
         </div>
-      </div>
+      </Card>
 
       {/* Distribution Visualizations */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Device Distribution */}
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
+        <Card>
           <h3 className="text-lg font-bold text-gray-900 mb-4">📱 Device Distribution</h3>
           <div className="space-y-3">
             {deviceDistribution.map((item) => (
@@ -295,19 +297,14 @@ export default function AllSitesDashboard({ sessions, clients, stats }: AllSites
                   <span className="text-sm font-medium text-gray-700 capitalize">{item.device}</span>
                   <span className="text-sm text-gray-500">{item.percentage}%</span>
                 </div>
-                <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
-                  <div 
-                    className="h-full bg-purple-500"
-                    style={{ width: `${item.percentage}%` }}
-                  />
-                </div>
+                <ProgressBar value={Number(item.percentage)} color="purple" className="mt-2" />
               </div>
             ))}
           </div>
-        </div>
+        </Card>
 
         {/* Location Distribution */}
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
+        <Card>
           <h3 className="text-lg font-bold text-gray-900 mb-4">🌍 Top Locations</h3>
           <div className="space-y-2">
             {locationDistribution.map((item) => (
@@ -320,10 +317,10 @@ export default function AllSitesDashboard({ sessions, clients, stats }: AllSites
               </div>
             ))}
           </div>
-        </div>
+        </Card>
 
         {/* Traffic Sources */}
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
+        <Card>
           <h3 className="text-lg font-bold text-gray-900 mb-4">🚀 Traffic Sources</h3>
           <div className="space-y-3">
             {sourceDistribution.map((item) => (
@@ -332,16 +329,11 @@ export default function AllSitesDashboard({ sessions, clients, stats }: AllSites
                   <span className="text-sm font-medium text-gray-700">{item.source}</span>
                   <span className="text-sm text-gray-500">{item.percentage}%</span>
                 </div>
-                <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
-                  <div 
-                    className="h-full bg-blue-500"
-                    style={{ width: `${item.percentage}%` }}
-                  />
-                </div>
+                <ProgressBar value={Number(item.percentage)} color="blue" className="mt-2" />
               </div>
             ))}
           </div>
-        </div>
+        </Card>
       </div>
     </div>
   );
