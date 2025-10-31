@@ -96,7 +96,7 @@ export default function RoadmapView({ client }: RoadmapViewProps) {
   // Trigger reordering animation when framework changes
   useEffect(() => {
     setReordering(true);
-    const timer = setTimeout(() => setReordering(false), 400);
+    const timer = setTimeout(() => setReordering(false), 800); // Longer to see the animation
     return () => clearTimeout(timer);
   }, [framework]);
 
@@ -371,12 +371,18 @@ export default function RoadmapView({ client }: RoadmapViewProps) {
                       draggable
                       onDragStart={() => handleDragStart(ticket)}
                       style={{
-                        animationDelay: `${index * 30}ms`
+                        animationDelay: `${index * 50}ms`
                       }}
-                      className={`bg-white rounded-lg p-4 shadow-sm border border-gray-200 hover:shadow-md transition-all duration-300 ease-out cursor-move hover:border-purple-300 ${
-                        reordering ? 'animate-pulse' : ''
+                      className={`bg-white rounded-lg p-4 shadow-sm border border-gray-200 hover:shadow-md transition-all duration-500 ease-in-out cursor-move hover:border-purple-300 relative ${
+                        reordering ? 'scale-105 shadow-lg border-purple-400 bg-purple-50' : ''
                       }`}
                       >
+                        {/* Position Badge during reordering */}
+                        {reordering && (
+                          <div className="absolute -top-2 -left-2 w-6 h-6 bg-purple-600 text-white rounded-full flex items-center justify-center text-xs font-bold shadow-md animate-bounce">
+                            {index + 1}
+                          </div>
+                        )}
                         {/* AI Generated Badge */}
                         {ticket.ai_generated && (
                           <div className="mb-2 flex items-center gap-2">
