@@ -14,6 +14,7 @@ import SessionDetailPanel from './SessionDetailPanel';
 import SlackSettings from './SlackSettings';
 import FeedbackView from './FeedbackView';
 import RoadmapView from './RoadmapView';
+import AllSitesDashboard from './AllSitesDashboard';
 
 interface Client {
   id: string;
@@ -38,6 +39,7 @@ interface Stats {
 
 interface SetupViewProps {
   client: Client;
+  clients?: Client[];
   sessions: any[];
   stats: Stats;
   activeView: string;
@@ -45,7 +47,8 @@ interface SetupViewProps {
 }
 
 export default function SetupView({ 
-  client, 
+  client,
+  clients = [],
   sessions,
   stats,
   activeView,
@@ -133,6 +136,12 @@ export default function SetupView({
 
     switch (activeView) {
       case 'dashboard':
+        // Show portfolio view for "All Sites"
+        if (client.id === 'all') {
+          return <AllSitesDashboard sessions={sessions} clients={clients} stats={stats} />;
+        }
+        
+        // Show single site dashboard
         return (
           <>
             {/* Quick Stats Bar - Dashboard Only */}

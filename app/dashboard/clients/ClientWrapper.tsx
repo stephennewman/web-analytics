@@ -159,6 +159,7 @@ export default function ClientWrapper({ email, client, clients, sessions, stats,
         <main className="p-6">
           <SetupView 
             client={client}
+            clients={clients}
             sessions={sessions}
             stats={stats}
             activeView={activeView}
