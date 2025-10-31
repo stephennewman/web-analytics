@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import AudioPlayer from './AudioPlayer';
 
 interface Feedback {
   id: string;
@@ -160,12 +161,9 @@ export default function FeedbackView({ clientId }: { clientId: string }) {
             
             {/* Audio player */}
             <div className="mb-4 p-4 bg-gray-50 rounded-lg">
-              <audio 
-                controls 
+              <AudioPlayer 
                 src={item.audio_url}
                 className="w-full"
-                onPlay={() => setPlayingId(item.id)}
-                onPause={() => setPlayingId(null)}
               />
             </div>
             

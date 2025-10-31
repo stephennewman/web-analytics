@@ -1,5 +1,7 @@
 'use client';
 
+import AudioPlayer from './AudioPlayer';
+
 interface SessionDetailPanelProps {
   session: any;
   onClose: () => void;
@@ -147,7 +149,7 @@ export default function SessionDetailPanel({ session, onClose }: SessionDetailPa
                         </span>
                       </div>
                       {event.data?.audio_url && (
-                        <audio controls src={event.data.audio_url} className="w-full mt-2" />
+                        <AudioPlayer src={event.data.audio_url} className="w-full mt-2" />
                       )}
                       {event.data?.duration && (
                         <p className="text-xs text-blue-600 mt-2">

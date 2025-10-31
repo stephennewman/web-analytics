@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { getButtonClass, getBadgeClass } from '@/lib/design-system';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import AudioPlayer from './AudioPlayer';
 
 interface Ticket {
   id: string;
@@ -852,7 +853,7 @@ export default function RoadmapView({ client }: RoadmapViewProps) {
                         </span>
                       </div>
                       {fb.audio_url && (
-                        <audio controls src={fb.audio_url} className="w-full mt-2" />
+                        <AudioPlayer src={fb.audio_url} className="w-full mt-2" />
                       )}
                     </div>
                   ))
