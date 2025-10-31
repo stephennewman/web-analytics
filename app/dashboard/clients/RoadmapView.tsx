@@ -1,6 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { getButtonClass, getBadgeClass } from '@/lib/design-system';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 
 interface Ticket {
   id: string;
@@ -289,7 +292,7 @@ export default function RoadmapView({ client }: RoadmapViewProps) {
               <button
                 onClick={generateGrayAreaTickets}
                 disabled={generatingGrayArea}
-                className="px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg hover:from-purple-700 hover:to-indigo-700 disabled:bg-gray-400 text-sm font-medium transition-colors shadow-md"
+                className={`${getButtonClass('primary')} disabled:opacity-50 disabled:cursor-not-allowed`}
               >
                 {generatingGrayArea ? '⏳ Generating...' : '🤖 Generate New Tickets'}
               </button>
@@ -297,7 +300,7 @@ export default function RoadmapView({ client }: RoadmapViewProps) {
             <button
               onClick={batchScoreAll}
               disabled={batchScoring}
-              className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:bg-gray-400 text-sm font-medium transition-colors"
+              className={`${getButtonClass('primary')} disabled:opacity-50 disabled:cursor-not-allowed`}
             >
               {batchScoring ? '⏳ Scoring...' : '🔄 Score All Tickets'}
             </button>

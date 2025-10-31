@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { Card, Metric } from '@tremor/react';
 import SessionFeed from './SessionFeed';
 import VisitorsTable from './VisitorsTable';
 import InsightsPanel from './InsightsPanel';
@@ -146,26 +147,26 @@ export default function SetupView({
           <>
             {/* Quick Stats Bar - Dashboard Only */}
             <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
-              <div className="bg-white rounded-lg border border-gray-200 p-4">
-                <p className="text-xs text-gray-600 mb-1">Total Sessions</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.totalSessions}</p>
-              </div>
-              <div className="bg-white rounded-lg border border-gray-200 p-4">
-                <p className="text-xs text-gray-600 mb-1">Pageviews</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.totalPageviews}</p>
-              </div>
-              <div className="bg-white rounded-lg border border-gray-200 p-4">
-                <p className="text-xs text-gray-600 mb-1">Conversion Rate</p>
-                <p className="text-2xl font-bold text-purple-600">{stats.conversionRate}%</p>
-              </div>
-              <div className="bg-white rounded-lg border border-gray-200 p-4">
-                <p className="text-xs text-gray-600 mb-1">High Intent</p>
-                <p className="text-2xl font-bold text-green-600">{stats.sessionsWithIntent}</p>
-              </div>
-              <div className="bg-white rounded-lg border border-gray-200 p-4">
-                <p className="text-xs text-gray-600 mb-1">Curious Explorers</p>
-                <p className="text-2xl font-bold text-blue-600">{stats.sessionsWithFrustration}</p>
-              </div>
+              <Card decoration="top" decorationColor="gray">
+                <Metric>{stats.totalSessions}</Metric>
+                <p className="text-sm text-gray-600 mt-1">Total Sessions</p>
+              </Card>
+              <Card decoration="top" decorationColor="gray">
+                <Metric>{stats.totalPageviews}</Metric>
+                <p className="text-sm text-gray-600 mt-1">Pageviews</p>
+              </Card>
+              <Card decoration="top" decorationColor="purple">
+                <Metric>{stats.conversionRate}%</Metric>
+                <p className="text-sm text-gray-600 mt-1">Conversion Rate</p>
+              </Card>
+              <Card decoration="top" decorationColor="green">
+                <Metric>{stats.sessionsWithIntent}</Metric>
+                <p className="text-sm text-gray-600 mt-1">High Intent</p>
+              </Card>
+              <Card decoration="top" decorationColor="blue">
+                <Metric>{stats.sessionsWithFrustration}</Metric>
+                <p className="text-sm text-gray-600 mt-1">Curious Explorers</p>
+              </Card>
             </div>
 
             <div className="mb-6">
