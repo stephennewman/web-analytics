@@ -12,6 +12,12 @@ interface Ticket {
   feedback_count: number;
   is_public: boolean;
   created_at: string;
+  ai_generated?: boolean;
+  generation_source?: {
+    feedback_ids: string[];
+    reasoning: string;
+    confidence: number;
+  };
   feedback?: any[];
   scores?: {
     demand: number;
@@ -70,6 +76,7 @@ export default function RoadmapView({ client }: RoadmapViewProps) {
   const [framework, setFramework] = useState<Framework>('traditional');
   const [scoring, setScoring] = useState<string | null>(null);
   const [batchScoring, setBatchScoring] = useState(false);
+  const [generatingGrayArea, setGeneratingGrayArea] = useState(false);
 
   useEffect(() => {
     if (client.id !== 'all') {
@@ -173,6 +180,29 @@ export default function RoadmapView({ client }: RoadmapViewProps) {
     }
   };
 
+  const generateGrayAreaTickets = async () => {
+    setGeneratingGrayArea(true);
+    try {
+      const response = await fetch('/api/tickets/generate-gray-area', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ clientId: client.id })
+      });
+      const data = await response.json();
+      if (response.ok) {
+        alert(`✅ Generated ${data.generated} gray area tickets! Check the "New" column.`);
+        fetchTickets();
+      } else {
+        alert(`❌ ${data.error || 'Failed to generate tickets'}`);
+      }
+    } catch (error) {
+      console.error('Gray area generation error:', error);
+      alert('❌ Error generating tickets');
+    } finally {
+      setGeneratingGrayArea(false);
+    }
+  };
+
   const getFrameworkScore = (ticket: Ticket): number => {
     if (!ticket.scores) return 0;
     const scoreMap = {
@@ -252,6 +282,15 @@ export default function RoadmapView({ client }: RoadmapViewProps) {
             </p>
           </div>
           <div className="flex gap-2">
+            {framework === 'gray_area' && (
+              <button
+                onClick={generateGrayAreaTickets}
+                disabled={generatingGrayArea}
+                className="px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg hover:from-purple-700 hover:to-indigo-700 disabled:bg-gray-400 text-sm font-medium transition-colors shadow-md"
+              >
+                {generatingGrayArea ? '⏳ Generating...' : '🤖 Generate New Tickets'}
+              </button>
+            )}
             <button
               onClick={batchScoreAll}
               disabled={batchScoring}
@@ -293,31 +332,45 @@ export default function RoadmapView({ client }: RoadmapViewProps) {
                       draggable
                       onDragStart={() => handleDragStart(ticket)}
                       className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 hover:shadow-md transition-all cursor-move hover:border-purple-300"
-                    >
-                      <div 
-                        className="flex items-start justify-between mb-2"
-                        onClick={() => viewTicketDetails(ticket.id)}
                       >
-                        <h4 className="font-semibold text-sm text-gray-900 flex-1">
-                          {ticket.title}
-                        </h4>
-                        <div className="flex items-center gap-2 ml-2">
-                          {hasScores && score > 0 && (
-                            <span className={`text-xs px-2 py-1 rounded-full font-bold ${
-                              score >= 8 ? 'bg-green-100 text-green-800' :
-                              score >= 6 ? 'bg-yellow-100 text-yellow-800' :
-                              'bg-gray-100 text-gray-700'
-                            }`}>
-                              {score.toFixed(1)}
+                        {/* AI Generated Badge */}
+                        {ticket.ai_generated && (
+                          <div className="mb-2 flex items-center gap-2">
+                            <span className="bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-700 text-xs px-2 py-1 rounded-full font-semibold border border-purple-200">
+                              🤖 AI Generated
                             </span>
-                          )}
-                          {ticket.feedback_count > 0 && (
-                            <span className="bg-purple-100 text-purple-700 text-xs px-2 py-1 rounded-full font-semibold">
-                              {ticket.feedback_count} 🎤
-                            </span>
-                          )}
+                            {ticket.generation_source?.confidence && (
+                              <span className="text-xs text-gray-500">
+                                {Math.round(ticket.generation_source.confidence * 100)}% confident
+                              </span>
+                            )}
+                          </div>
+                        )}
+                        
+                        <div 
+                          className="flex items-start justify-between mb-2"
+                          onClick={() => viewTicketDetails(ticket.id)}
+                        >
+                          <h4 className="font-semibold text-sm text-gray-900 flex-1">
+                            {ticket.title}
+                          </h4>
+                          <div className="flex items-center gap-2 ml-2">
+                            {hasScores && score > 0 && (
+                              <span className={`text-xs px-2 py-1 rounded-full font-bold ${
+                                score >= 8 ? 'bg-green-100 text-green-800' :
+                                score >= 6 ? 'bg-yellow-100 text-yellow-800' :
+                                'bg-gray-100 text-gray-700'
+                              }`}>
+                                {score.toFixed(1)}
+                              </span>
+                            )}
+                            {ticket.feedback_count > 0 && (
+                              <span className="bg-purple-100 text-purple-700 text-xs px-2 py-1 rounded-full font-semibold">
+                                {ticket.feedback_count} 🎤
+                              </span>
+                            )}
+                          </div>
                         </div>
-                      </div>
 
                       {ticket.description && (
                         <p 
@@ -368,6 +421,24 @@ export default function RoadmapView({ client }: RoadmapViewProps) {
                 <div className="flex-1">
                   <h2 className="text-2xl font-bold text-gray-900 mb-2">{selectedTicket.title}</h2>
                   <p className="text-gray-600">{selectedTicket.description}</p>
+                  
+                  {/* AI Generation Info */}
+                  {selectedTicket.ai_generated && selectedTicket.generation_source && (
+                    <div className="mt-4 p-4 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg border border-purple-200">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-purple-700 font-semibold text-sm">🤖 AI-Generated Ticket</span>
+                        <span className="text-xs text-purple-600">
+                          {Math.round(selectedTicket.generation_source.confidence * 100)}% confidence
+                        </span>
+                      </div>
+                      <p className="text-sm text-gray-700 mb-2">
+                        <strong>AI Reasoning:</strong> {selectedTicket.generation_source.reasoning}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        Generated from {selectedTicket.generation_source.feedback_ids?.length || 0} feedback entries
+                      </p>
+                    </div>
+                  )}
                 </div>
                 <button
                   onClick={() => setSelectedTicket(null)}
