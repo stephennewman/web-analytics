@@ -74,6 +74,13 @@ export async function POST(request: NextRequest) {
 
       await supabase.rpc('increment_ticket_count', { ticket_id: decision.matchingTicketId });
 
+      // Rescore ticket with new feedback (async)
+      fetch(`${request.nextUrl.origin}/api/tickets/score`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ticketId: decision.matchingTicketId })
+      }).catch(err => console.error('Auto-rescoring failed:', err));
+
       return NextResponse.json({ 
         success: true, 
         action: 'linked', 
@@ -104,6 +111,13 @@ export async function POST(request: NextRequest) {
           .from('feedback')
           .update({ ticket_id: newTicket.id })
           .eq('id', feedbackId);
+
+        // Trigger AI scoring (async, don't wait)
+        fetch(`${request.nextUrl.origin}/api/tickets/score`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ticketId: newTicket.id })
+        }).catch(err => console.error('Auto-scoring failed:', err));
 
         return NextResponse.json({ 
           success: true, 

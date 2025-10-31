@@ -13,6 +13,25 @@ interface Ticket {
   is_public: boolean;
   created_at: string;
   feedback?: any[];
+  scores?: {
+    demand: number;
+    differentiation: number;
+    value: number;
+    implementation: number;
+    strategic_fit: number;
+    virality: number;
+    implied_need: number;
+    enterprise_blocker: boolean;
+    effort_hours: number | null;
+    quick_win_score: number;
+    traditional_score: number;
+    differentiation_score: number;
+    gray_area_score: number;
+    enterprise_score: number;
+    viral_score: number;
+    last_scored_at: string | null;
+    ai_insight: string | null;
+  };
 }
 
 interface RoadmapViewProps {
@@ -32,11 +51,25 @@ const priorityColors = {
   high: 'bg-red-100 text-red-800'
 };
 
+type Framework = 'traditional' | 'differentiation' | 'gray_area' | 'quick_wins' | 'enterprise' | 'viral';
+
+const frameworks = [
+  { id: 'traditional', label: '📊 Traditional', description: 'Build what customers want, weighted by effort' },
+  { id: 'differentiation', label: '🚀 Differentiation', description: 'Build unique features that create moat' },
+  { id: 'gray_area', label: '🔍 Gray Area', description: 'Solve unstated problems' },
+  { id: 'quick_wins', label: '⚡ Quick Wins', description: 'Maximum impact per hour' },
+  { id: 'enterprise', label: '🏢 Enterprise', description: 'Unlock big customers' },
+  { id: 'viral', label: '📈 Viral Growth', description: 'Features that make users share' }
+];
+
 export default function RoadmapView({ client }: RoadmapViewProps) {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const [draggedTicket, setDraggedTicket] = useState<Ticket | null>(null);
+  const [framework, setFramework] = useState<Framework>('traditional');
+  const [scoring, setScoring] = useState<string | null>(null);
+  const [batchScoring, setBatchScoring] = useState(false);
 
   useEffect(() => {
     if (client.id !== 'all') {
@@ -97,6 +130,67 @@ export default function RoadmapView({ client }: RoadmapViewProps) {
     setSelectedTicket(data.ticket);
   };
 
+  const scoreTicket = async (ticketId: string) => {
+    setScoring(ticketId);
+    try {
+      const response = await fetch('/api/tickets/score', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ticketId })
+      });
+      if (response.ok) {
+        fetchTickets(); // Refresh to show updated scores
+      } else {
+        alert('❌ Failed to score ticket');
+      }
+    } catch (error) {
+      console.error('Scoring error:', error);
+      alert('❌ Error scoring ticket');
+    } finally {
+      setScoring(null);
+    }
+  };
+
+  const batchScoreAll = async () => {
+    setBatchScoring(true);
+    try {
+      const response = await fetch('/api/tickets/score', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ clientId: client.id })
+      });
+      if (response.ok) {
+        alert('✅ All tickets scored!');
+        fetchTickets();
+      } else {
+        alert('❌ Batch scoring failed');
+      }
+    } catch (error) {
+      console.error('Batch scoring error:', error);
+      alert('❌ Error batch scoring');
+    } finally {
+      setBatchScoring(false);
+    }
+  };
+
+  const getFrameworkScore = (ticket: Ticket): number => {
+    if (!ticket.scores) return 0;
+    const scoreMap = {
+      traditional: ticket.scores.traditional_score,
+      differentiation: ticket.scores.differentiation_score,
+      gray_area: ticket.scores.gray_area_score,
+      quick_wins: ticket.scores.quick_win_score,
+      enterprise: ticket.scores.enterprise_score,
+      viral: ticket.scores.viral_score
+    };
+    return scoreMap[framework] || 0;
+  };
+
+  // Sort tickets by framework score within each column
+  const getSortedTickets = (statusTickets: Ticket[]) => {
+    return [...statusTickets].sort((a, b) => getFrameworkScore(b) - getFrameworkScore(a));
+  };
+
   if (client.id === 'all') {
     return (
       <div className="text-center py-12">
@@ -135,6 +229,40 @@ export default function RoadmapView({ client }: RoadmapViewProps) {
         </div>
       </div>
 
+      {/* Framework Selector & Actions */}
+      <div className="bg-white rounded-lg border border-gray-200 p-4">
+        <div className="flex items-center justify-between flex-wrap gap-4">
+          <div className="flex-1">
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Prioritization Framework:
+            </label>
+            <select
+              value={framework}
+              onChange={(e) => setFramework(e.target.value as Framework)}
+              className="w-full md:w-auto px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium focus:outline-none focus:ring-2 focus:ring-purple-500"
+            >
+              {frameworks.map(f => (
+                <option key={f.id} value={f.id}>
+                  {f.label}
+                </option>
+              ))}
+            </select>
+            <p className="text-xs text-gray-500 mt-1">
+              {frameworks.find(f => f.id === framework)?.description}
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={batchScoreAll}
+              disabled={batchScoring}
+              className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:bg-gray-400 text-sm font-medium transition-colors"
+            >
+              {batchScoring ? '⏳ Scoring...' : '🔄 Score All Tickets'}
+            </button>
+          </div>
+        </div>
+      </div>
+
       {/* Kanban Board */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         {statusColumns.map((column) => {
@@ -155,45 +283,76 @@ export default function RoadmapView({ client }: RoadmapViewProps) {
               </div>
 
               <div className="space-y-3">
-                {columnTickets.map((ticket) => (
-                  <div
-                    key={ticket.id}
-                    draggable
-                    onDragStart={() => handleDragStart(ticket)}
-                    onClick={() => viewTicketDetails(ticket.id)}
-                    className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 hover:shadow-md transition-all cursor-move hover:border-purple-300"
-                  >
-                    <div className="flex items-start justify-between mb-2">
-                      <h4 className="font-semibold text-sm text-gray-900 flex-1">
-                        {ticket.title}
-                      </h4>
-                      {ticket.feedback_count > 0 && (
-                        <span className="ml-2 bg-purple-100 text-purple-700 text-xs px-2 py-1 rounded-full font-semibold">
-                          {ticket.feedback_count} 🎤
-                        </span>
-                      )}
-                    </div>
-
-                    {ticket.description && (
-                      <p className="text-xs text-gray-600 mb-3 line-clamp-2">
-                        {ticket.description}
-                      </p>
-                    )}
-
-                    <div className="flex items-center justify-between">
-                      {(ticket.priority || ticket.ai_suggested_priority) && (
-                        <div className="flex items-center gap-2">
-                          <span className={`text-xs px-2 py-1 rounded ${priorityColors[(ticket.priority || ticket.ai_suggested_priority) as keyof typeof priorityColors]}`}>
-                            {ticket.priority || `AI: ${ticket.ai_suggested_priority}`}
-                          </span>
+                {getSortedTickets(columnTickets).map((ticket) => {
+                  const score = getFrameworkScore(ticket);
+                  const hasScores = ticket.scores && ticket.scores.last_scored_at;
+                  
+                  return (
+                    <div
+                      key={ticket.id}
+                      draggable
+                      onDragStart={() => handleDragStart(ticket)}
+                      className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 hover:shadow-md transition-all cursor-move hover:border-purple-300"
+                    >
+                      <div 
+                        className="flex items-start justify-between mb-2"
+                        onClick={() => viewTicketDetails(ticket.id)}
+                      >
+                        <h4 className="font-semibold text-sm text-gray-900 flex-1">
+                          {ticket.title}
+                        </h4>
+                        <div className="flex items-center gap-2 ml-2">
+                          {hasScores && score > 0 && (
+                            <span className={`text-xs px-2 py-1 rounded-full font-bold ${
+                              score >= 8 ? 'bg-green-100 text-green-800' :
+                              score >= 6 ? 'bg-yellow-100 text-yellow-800' :
+                              'bg-gray-100 text-gray-700'
+                            }`}>
+                              {score.toFixed(1)}
+                            </span>
+                          )}
+                          {ticket.feedback_count > 0 && (
+                            <span className="bg-purple-100 text-purple-700 text-xs px-2 py-1 rounded-full font-semibold">
+                              {ticket.feedback_count} 🎤
+                            </span>
+                          )}
                         </div>
+                      </div>
+
+                      {ticket.description && (
+                        <p 
+                          className="text-xs text-gray-600 mb-3 line-clamp-2"
+                          onClick={() => viewTicketDetails(ticket.id)}
+                        >
+                          {ticket.description}
+                        </p>
                       )}
-                      {ticket.is_public && (
-                        <span className="text-xs text-gray-500">🌐 Public</span>
-                      )}
+
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2 flex-1">
+                          {(ticket.priority || ticket.ai_suggested_priority) && (
+                            <span className={`text-xs px-2 py-1 rounded ${priorityColors[(ticket.priority || ticket.ai_suggested_priority) as keyof typeof priorityColors]}`}>
+                              {ticket.priority || `AI: ${ticket.ai_suggested_priority}`}
+                            </span>
+                          )}
+                          {ticket.is_public && (
+                            <span className="text-xs text-gray-500">🌐 Public</span>
+                          )}
+                        </div>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            scoreTicket(ticket.id);
+                          }}
+                          disabled={scoring === ticket.id}
+                          className="text-xs px-2 py-1 bg-purple-50 text-purple-600 rounded hover:bg-purple-100 disabled:opacity-50"
+                        >
+                          {scoring === ticket.id ? '⏳' : '🔄'}
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           );
