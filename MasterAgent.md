@@ -337,4 +337,36 @@ Unlike Hotjar/FullStory: focus on conversion killers only, AI-suggested fixes, v
 **Build:** ✅ Successful (22 routes compiled, 6.6s compile time)
 **Status:** Ready for deploy
 
+### 2025-10-31 - Design System Implementation: Tremor + shadcn/ui ✅
+**Phase 1 Commit:** `697a537` - Migrate AllSitesDashboard to Tremor
+**Phase 2 Commit:** `f5d4c0a` - Migrate single-site dashboard and roadmap buttons
+**Total Changes:** 3 files changed, 68 insertions(+), 72 deletions(-)
+**Modified files:**
+- `app/dashboard/clients/AllSitesDashboard.tsx` - Full Tremor migration
+- `app/dashboard/clients/SetupView.tsx` - Stat cards to Tremor
+- `app/dashboard/clients/RoadmapView.tsx` - Action buttons to design system
+- `lib/design-system.ts` - NEW: 3-level boldness system
+- `components/ui/button.tsx` - NEW: shadcn button component
+- `components/ui/card.tsx` - NEW: shadcn card component
+- `components/ui/badge.tsx` - NEW: shadcn badge component
+**Design System Features:**
+- ✅ Tremor components for analytics (Metric, Card, ProgressBar, BarList)
+- ✅ shadcn/ui components for general UI (Button, Card, Badge)
+- ✅ 3 boldness levels (1=Professional, 2=Balanced, 3=Bold/Neobrutalism)
+- ✅ Helper functions: getCardClass(), getButtonClass(), getBadgeClass()
+- ✅ Single-line boldness toggle (change 1 number in config)
+**Visual Changes:**
+- Portfolio dashboard: All cards, metrics, and progress bars use Tremor
+- Single-site dashboard: Stat cards upgraded to Tremor Metrics with colored top decorations
+- Roadmap: Primary action buttons standardized
+- Consistent spacing, typography, and shadows throughout
+**Bundle Impact:**
+- Dashboard: 25.9 kB → 46.2 kB (+20.3 kB for Tremor + shadcn)
+- Trade-off: Larger bundle for professional, consistent UI
+**Configuration:**
+- Boldness level: 1 (Professional - thin borders, subtle shadows, muted colors)
+- Can ramp up to 2 (Balanced) or 3 (Bold/Neobrutalism) in seconds
+**Build:** ✅ Successful (31 routes compiled, 5.6s compile time)
+**Documentation:** DESIGN_SYSTEM.md created with full usage guide
+**Status:** Phase 1 & 2 Complete - Core dashboards migrated
 
