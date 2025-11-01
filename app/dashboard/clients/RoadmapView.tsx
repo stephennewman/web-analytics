@@ -5,6 +5,7 @@ import { getButtonClass, getBadgeClass } from '@/lib/design-system';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import AudioPlayer from './AudioPlayer';
+import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 
 interface Ticket {
   id: string;
@@ -20,6 +21,8 @@ interface Ticket {
   is_public: boolean;
   created_at: string;
   ai_generated?: boolean;
+  custom_position?: number | null;
+  position_override?: boolean;
   generation_source?: {
     feedback_ids: string[];
     reasoning: string;
@@ -79,14 +82,12 @@ export default function RoadmapView({ client }: RoadmapViewProps) {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
-  const [draggedTicket, setDraggedTicket] = useState<Ticket | null>(null);
-  const [dragOverColumn, setDragOverColumn] = useState<string | null>(null);
-  const [dragOverTicket, setDragOverTicket] = useState<string | null>(null);
   const [framework, setFramework] = useState<Framework>('traditional');
   const [scoring, setScoring] = useState<string | null>(null);
   const [batchScoring, setBatchScoring] = useState(false);
   const [generatingGrayArea, setGeneratingGrayArea] = useState(false);
   const [reordering, setReordering] = useState(false);
+  const [clearingPositions, setClearingPositions] = useState(false);
 
   useEffect(() => {
     if (client.id !== 'all') {
@@ -97,7 +98,7 @@ export default function RoadmapView({ client }: RoadmapViewProps) {
   // Trigger reordering animation when framework changes
   useEffect(() => {
     setReordering(true);
-    const timer = setTimeout(() => setReordering(false), 800); // Longer to see the animation
+    const timer = setTimeout(() => setReordering(false), 600);
     return () => clearTimeout(timer);
   }, [framework]);
 
@@ -110,26 +111,17 @@ export default function RoadmapView({ client }: RoadmapViewProps) {
   };
 
   const updateTicketStatus = async (ticketId: string, newStatus: string) => {
-    // Optimistic update - update UI immediately for smooth UX
-    setTickets(prevTickets => 
-      prevTickets.map(ticket => 
-        ticket.id === ticketId 
-          ? { ...ticket, status: newStatus as any }
-          : ticket
-      )
-    );
-
-    // Then update on server in background
+    // Update on server (no optimistic update here since drag handler does it)
     const response = await fetch(`/api/tickets/${ticketId}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status: newStatus })
     });
 
-    // If it failed, revert and refetch to get correct state
+    // If it failed, revert by refetching
     if (!response.ok) {
       console.error('Failed to update ticket status');
-      fetchTickets(); // Revert by fetching actual state
+      fetchTickets();
     }
   };
 
@@ -145,79 +137,117 @@ export default function RoadmapView({ client }: RoadmapViewProps) {
     }
   };
 
-  const handleDragStart = (ticket: Ticket) => {
-    setDraggedTicket(ticket);
-  };
+  const handleDragEnd = async (result: DropResult) => {
+    const { destination, source, draggableId } = result;
 
-  const handleDragOver = (e: React.DragEvent, columnId: string) => {
-    e.preventDefault();
-    setDragOverColumn(columnId);
-  };
+    // Dropped outside a valid droppable
+    if (!destination) return;
 
-  const handleDragOverCard = (e: React.DragEvent, targetTicket: Ticket, columnTickets: Ticket[]) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    if (!draggedTicket || draggedTicket.id === targetTicket.id) return;
-    
-    setDragOverTicket(targetTicket.id);
-    
-    // Only reorder if in same column
-    if (draggedTicket.status === targetTicket.status) {
-      const sortedTickets = getSortedTickets(columnTickets);
-      const draggedIndex = sortedTickets.findIndex(t => t.id === draggedTicket.id);
-      const targetIndex = sortedTickets.findIndex(t => t.id === targetTicket.id);
-      
-      if (draggedIndex !== -1 && targetIndex !== -1 && draggedIndex !== targetIndex) {
-        // Create new array with live reordering
-        const newTickets = [...tickets];
-        const ticketsInColumn = newTickets.filter(t => t.status === targetTicket.status);
-        
-        // Remove dragged ticket
-        const [removed] = ticketsInColumn.splice(draggedIndex, 1);
-        
-        // Insert at target position
-        ticketsInColumn.splice(targetIndex, 0, removed);
-        
-        // Update state with new order
-        const otherTickets = newTickets.filter(t => t.status !== targetTicket.status);
-        setTickets([...otherTickets, ...ticketsInColumn]);
-      }
-    }
-  };
-
-  const handleDragLeave = () => {
-    setDragOverColumn(null);
-  };
-
-  const handleDrop = (newStatus: string) => {
-    if (draggedTicket && draggedTicket.status !== newStatus) {
-      updateTicketStatus(draggedTicket.id, newStatus);
-    }
-    setDraggedTicket(null);
-    setDragOverColumn(null);
-    setDragOverTicket(null);
-  };
-
-  const handleDropOnCard = (e: React.DragEvent, targetTicket: Ticket) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    if (!draggedTicket || draggedTicket.id === targetTicket.id) {
-      setDraggedTicket(null);
-      setDragOverTicket(null);
+    // Dropped in same position
+    if (destination.droppableId === source.droppableId && destination.index === source.index) {
       return;
     }
 
-    // If moving to different column, update status
-    if (draggedTicket.status !== targetTicket.status) {
-      updateTicketStatus(draggedTicket.id, targetTicket.status);
+    const sourceStatus = source.droppableId;
+    const destStatus = destination.droppableId;
+    const ticketId = draggableId;
+
+    // Get current sorted tickets for source and destination columns
+    const sourceTickets = getSortedTickets(tickets.filter(t => t.status === sourceStatus));
+    const destTickets = getSortedTickets(tickets.filter(t => t.status === destStatus));
+
+    // Find the dragged ticket
+    const draggedTicket = sourceTickets[source.index];
+    if (!draggedTicket) return;
+
+    // Moving to different column
+    if (sourceStatus !== destStatus) {
+      // Get destination column tickets (excluding the moved card)
+      const destColumnTickets = getSortedTickets(tickets.filter(t => t.status === destStatus && t.id !== ticketId));
+      
+      // Insert the moved card at the correct position
+      const movedTicket = { ...draggedTicket, status: destStatus as any, custom_position: destination.index, position_override: true };
+      destColumnTickets.splice(destination.index, 0, movedTicket);
+      
+      // Assign new positions to all cards in destination column
+      const updates = destColumnTickets.map((t, idx) => ({
+        id: t.id,
+        custom_position: idx,
+        position_override: true
+      }));
+      
+      // Update all tickets with new data immediately
+      const otherTickets = tickets.filter(t => t.status !== destStatus && t.id !== ticketId);
+      const updatedDestTickets = destColumnTickets.map((t, idx) => ({
+        ...t,
+        status: destStatus as any,
+        custom_position: idx,
+        position_override: true
+      }));
+      
+      setTickets([...otherTickets, ...updatedDestTickets]);
+      
+      // Save to backend (non-blocking for UI)
+      updateTicketStatus(ticketId, destStatus);
+      savePositions(updates);
+    } else {
+      // Reordering within same column
+      const reordered = Array.from(sourceTickets);
+      const [removed] = reordered.splice(source.index, 1);
+      reordered.splice(destination.index, 0, removed);
+
+      // Update all tickets with new positions
+      const updates = reordered.map((t, idx) => ({
+        id: t.id,
+        custom_position: idx,
+        position_override: true
+      }));
+
+      // Optimistically update UI
+      const newTickets = tickets.map(t => {
+        const update = updates.find(u => u.id === t.id);
+        if (update) {
+          return { ...t, custom_position: update.custom_position, position_override: true };
+        }
+        return t;
+      });
+
+      setTickets(newTickets);
+      await savePositions(updates);
     }
-    
-    // Order is already updated from handleDragOverCard
-    // Just clean up drag state
-    setDraggedTicket(null);
-    setDragOverTicket(null);
+  };
+
+  const savePositions = async (updates: Array<{ id: string; custom_position: number; position_override: boolean }>) => {
+    try {
+      await fetch('/api/tickets/reorder', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ updates })
+      });
+    } catch (error) {
+      console.error('Failed to save positions:', error);
+      // Revert by refetching
+      fetchTickets();
+    }
+  };
+
+  const clearCustomPositions = async (status?: string) => {
+    setClearingPositions(true);
+    try {
+      const params = new URLSearchParams({ clientId: client.id });
+      if (status) params.append('status', status);
+      
+      await fetch(`/api/tickets/reorder?${params}`, {
+        method: 'DELETE'
+      });
+      
+      fetchTickets();
+    } catch (error) {
+      console.error('Failed to clear positions:', error);
+      alert('❌ Failed to reset positions');
+    } finally {
+      setClearingPositions(false);
+    }
   };
 
   const viewTicketDetails = async (ticketId: string) => {
@@ -305,9 +335,24 @@ export default function RoadmapView({ client }: RoadmapViewProps) {
     return scoreMap[framework] || 0;
   };
 
-  // Sort tickets by framework score within each column
+  // Sort tickets: custom positioned first (by position), then by framework score
   const getSortedTickets = (statusTickets: Ticket[]) => {
-    return [...statusTickets].sort((a, b) => getFrameworkScore(b) - getFrameworkScore(a));
+    return [...statusTickets].sort((a, b) => {
+      const aPos = a.custom_position;
+      const bPos = b.custom_position;
+      
+      // Both have custom positions - sort by position
+      if (a.position_override && b.position_override && typeof aPos === 'number' && typeof bPos === 'number') {
+        return aPos - bPos;
+      }
+      // Only A has custom position - A goes first
+      if (a.position_override && typeof aPos === 'number') return -1;
+      // Only B has custom position - B goes first
+      if (b.position_override && typeof bPos === 'number') return 1;
+      
+      // Neither has custom position - sort by AI score
+      return getFrameworkScore(b) - getFrameworkScore(a);
+    });
   };
 
   if (client.id === 'all') {
@@ -381,6 +426,14 @@ export default function RoadmapView({ client }: RoadmapViewProps) {
               </button>
             )}
             <button
+              onClick={() => clearCustomPositions()}
+              disabled={clearingPositions}
+              className="px-4 py-2 bg-gray-600 text-white rounded-lg font-semibold shadow-[4px_4px_0px_rgba(0,0,0,0.25)] border-2 border-gray-700 hover:shadow-[6px_6px_0px_rgba(0,0,0,0.3)] hover:-translate-y-1 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+              title="Reset all cards to AI-based sorting"
+            >
+              {clearingPositions ? '⏳ Resetting...' : '↺ Reset Order'}
+            </button>
+            <button
               onClick={batchScoreAll}
               disabled={batchScoring}
               className="px-4 py-2 bg-purple-600 text-white rounded-lg font-semibold shadow-[4px_4px_0px_rgba(0,0,0,0.25)] border-2 border-purple-700 hover:shadow-[6px_6px_0px_rgba(0,0,0,0.3)] hover:-translate-y-1 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
@@ -392,57 +445,57 @@ export default function RoadmapView({ client }: RoadmapViewProps) {
       </div>
 
       {/* Kanban Board */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        {statusColumns.map((column) => {
-          const columnTickets = tickets.filter(t => t.status === column.id);
-          
-          return (
-            <div
-              key={column.id}
-              className={`rounded-lg border-2 p-4 min-h-[500px] transition-all duration-200 ${column.color} ${
-                dragOverColumn === column.id 
-                  ? 'ring-4 ring-purple-400 ring-opacity-50 border-purple-500 scale-[1.02]' 
-                  : ''
-              }`}
-              onDragOver={(e) => handleDragOver(e, column.id)}
-              onDragLeave={handleDragLeave}
-              onDrop={() => handleDrop(column.id)}
-            >
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-bold text-lg">{column.label}</h3>
-                <span className="bg-white px-2 py-1 rounded-full text-xs font-semibold">
-                  {columnTickets.length}
-                </span>
-              </div>
+      <DragDropContext onDragEnd={handleDragEnd}>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          {statusColumns.map((column) => {
+            const columnTickets = tickets.filter(t => t.status === column.id);
+            const sortedTickets = getSortedTickets(columnTickets);
+            
+            return (
+              <div key={column.id} className={`rounded-lg border-2 p-4 min-h-[500px] transition-all duration-200 ${column.color}`}>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-bold text-lg">{column.label}</h3>
+                  <span className="bg-white px-2 py-1 rounded-full text-xs font-semibold">
+                    {columnTickets.length}
+                  </span>
+                </div>
 
-              <div className="flex flex-col gap-3">
-                {getSortedTickets(columnTickets).map((ticket, index) => {
-                  const score = getFrameworkScore(ticket);
-                  const hasScores = ticket.scores && ticket.scores.last_scored_at;
-                  const isDraggedOver = dragOverTicket === ticket.id;
-                  
-                  return (
+                <Droppable droppableId={column.id}>
+                  {(provided, snapshot) => (
                     <div
-                      key={ticket.id}
-                      draggable
-                      onDragStart={() => handleDragStart(ticket)}
-                      onDragOver={(e) => handleDragOverCard(e, ticket, columnTickets)}
-                      onDrop={(e) => handleDropOnCard(e, ticket)}
-                      style={{
-                        animationDelay: `${index * 50}ms`
-                      }}
-                      className={`bg-white rounded-lg p-4 shadow-sm border-2 hover:shadow-md transition-all duration-200 ease-out cursor-move relative
-                        ${reordering ? 'scale-105 shadow-lg border-purple-400 bg-purple-50' : ''}
-                        ${isDraggedOver ? 'border-t-4 border-t-purple-600 border-purple-300 bg-purple-50' : 'border-gray-200 hover:border-purple-300'}
-                        ${draggedTicket?.id === ticket.id ? 'opacity-50' : ''}
-                      `}
-                      >
-                        {/* Position Badge during reordering */}
-                        {reordering && (
-                          <div className="absolute -top-2 -left-2 w-6 h-6 bg-purple-600 text-white rounded-full flex items-center justify-center text-xs font-bold shadow-md animate-bounce">
-                            {index + 1}
-                          </div>
-                        )}
+                      ref={provided.innerRef}
+                      {...provided.droppableProps}
+                      style={{ minHeight: '400px' }}
+                      className={`flex flex-col gap-3 transition-colors duration-200 ${
+                        snapshot.isDraggingOver ? 'bg-purple-50 rounded-lg' : ''
+                      }`}
+                    >
+                      {sortedTickets.map((ticket, index) => {
+                        const score = getFrameworkScore(ticket);
+                        const hasScores = ticket.scores && ticket.scores.last_scored_at;
+                        const isPinned = ticket.position_override && ticket.custom_position !== null;
+                        
+                        return (
+                          <Draggable key={ticket.id} draggableId={ticket.id} index={index}>
+                            {(provided, snapshot) => (
+                              <div
+                                ref={provided.innerRef}
+                                {...provided.draggableProps}
+                                {...provided.dragHandleProps}
+                                style={{
+                                  ...provided.draggableProps.style,
+                                  animationDelay: `${index * 50}ms`
+                                }}
+                                className={`bg-white rounded-lg p-4 shadow-sm border-2 hover:shadow-md relative cursor-move
+                                  ${reordering ? 'scale-105 shadow-lg border-purple-400 bg-purple-50 transition-all duration-300' : ''}
+                                  ${snapshot.isDragging ? 'shadow-2xl border-purple-500 rotate-1' : 'border-gray-200 hover:border-purple-300'}
+                                `}
+                              >
+                                {reordering && (
+                                  <div className="absolute -top-2 -left-2 w-6 h-6 bg-purple-600 text-white rounded-full flex items-center justify-center text-xs font-bold shadow-md animate-bounce">
+                                    {index + 1}
+                                  </div>
+                                )}
                         {/* AI Generated Badge */}
                         {ticket.ai_generated && (
                           <div className="mb-2 flex items-center gap-2">
@@ -456,78 +509,84 @@ export default function RoadmapView({ client }: RoadmapViewProps) {
                             )}
                           </div>
                         )}
-                        
-                        <div 
-                          className="flex items-start justify-between mb-2"
-                          onClick={() => viewTicketDetails(ticket.id)}
-                        >
-                          <h4 className="font-semibold text-sm text-gray-900 flex-1">
-                            {ticket.title}
-                          </h4>
-                          <div className="flex items-center gap-2 ml-2">
-                            {hasScores && score > 0 && (
-                              <span className={`text-xs px-2 py-1 rounded-full font-bold ${
-                                score >= 8 ? 'bg-green-100 text-green-800' :
-                                score >= 6 ? 'bg-yellow-100 text-yellow-800' :
-                                'bg-gray-100 text-gray-700'
-                              }`}>
-                                {score.toFixed(1)}
-                              </span>
-                            )}
-                            {ticket.unique_user_count && ticket.unique_user_count > 0 ? (
-                              <span className="bg-purple-100 text-purple-700 text-xs px-2 py-1 rounded-full font-semibold flex items-center gap-1">
-                                <span>{ticket.unique_user_count} 👤</span>
-                                {ticket.power_user_count && ticket.power_user_count > 0 && (
-                                  <span className="text-purple-900">({ticket.power_user_count} ⭐)</span>
+                                
+                                <div 
+                                  className="flex items-start justify-between mb-2 pl-4"
+                                  onClick={() => viewTicketDetails(ticket.id)}
+                                >
+                                  <h4 className="font-semibold text-sm text-gray-900 flex-1">
+                                    {ticket.title}
+                                  </h4>
+                                  <div className="flex items-center gap-2 ml-2">
+                                    {hasScores && score > 0 && (
+                                      <span className={`text-xs px-2 py-1 rounded-full font-bold ${
+                                        score >= 8 ? 'bg-green-100 text-green-800' :
+                                        score >= 6 ? 'bg-yellow-100 text-yellow-800' :
+                                        'bg-gray-100 text-gray-700'
+                                      }`}>
+                                        {score.toFixed(1)}
+                                      </span>
+                                    )}
+                                    {ticket.unique_user_count && ticket.unique_user_count > 0 ? (
+                                      <span className="bg-purple-100 text-purple-700 text-xs px-2 py-1 rounded-full font-semibold flex items-center gap-1">
+                                        <span>{ticket.unique_user_count} 👤</span>
+                                        {ticket.power_user_count && ticket.power_user_count > 0 && (
+                                          <span className="text-purple-900">({ticket.power_user_count} ⭐)</span>
+                                        )}
+                                      </span>
+                                    ) : ticket.feedback_count > 0 ? (
+                                      <span className="bg-purple-100 text-purple-700 text-xs px-2 py-1 rounded-full font-semibold">
+                                        {ticket.feedback_count} 🎤
+                                      </span>
+                                    ) : null}
+                                  </div>
+                                </div>
+
+                                {ticket.description && (
+                                  <p 
+                                    className="text-xs text-gray-600 mb-3 line-clamp-2 pl-4"
+                                    onClick={() => viewTicketDetails(ticket.id)}
+                                  >
+                                    {ticket.description}
+                                  </p>
                                 )}
-                              </span>
-                            ) : ticket.feedback_count > 0 ? (
-                              <span className="bg-purple-100 text-purple-700 text-xs px-2 py-1 rounded-full font-semibold">
-                                {ticket.feedback_count} 🎤
-                              </span>
-                            ) : null}
-                          </div>
-                        </div>
 
-                      {ticket.description && (
-                        <p 
-                          className="text-xs text-gray-600 mb-3 line-clamp-2"
-                          onClick={() => viewTicketDetails(ticket.id)}
-                        >
-                          {ticket.description}
-                        </p>
-                      )}
-
-                      <div className="flex items-center justify-between gap-2">
-                        <div className="flex items-center gap-2 flex-1">
-                          {(ticket.priority || ticket.ai_suggested_priority) && (
-                            <span className={`text-xs px-2 py-1 rounded ${priorityColors[(ticket.priority || ticket.ai_suggested_priority) as keyof typeof priorityColors]}`}>
-                              {ticket.priority || `AI: ${ticket.ai_suggested_priority}`}
-                            </span>
-                          )}
-                          {ticket.is_public && (
-                            <span className="text-xs text-gray-500">🌐 Public</span>
-                          )}
-                        </div>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            scoreTicket(ticket.id);
-                          }}
-                          disabled={scoring === ticket.id}
-                          className="text-xs px-2 py-1 bg-purple-50 text-purple-600 rounded hover:bg-purple-100 disabled:opacity-50"
-                        >
-                          {scoring === ticket.id ? '⏳' : '🔄'}
-                        </button>
-                      </div>
+                                <div className="flex items-center justify-between gap-2 pl-4">
+                                  <div className="flex items-center gap-2 flex-1">
+                                    {(ticket.priority || ticket.ai_suggested_priority) && (
+                                      <span className={`text-xs px-2 py-1 rounded ${priorityColors[(ticket.priority || ticket.ai_suggested_priority) as keyof typeof priorityColors]}`}>
+                                        {ticket.priority || `AI: ${ticket.ai_suggested_priority}`}
+                                      </span>
+                                    )}
+                                    {ticket.is_public && (
+                                      <span className="text-xs text-gray-500">🌐 Public</span>
+                                    )}
+                                  </div>
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      scoreTicket(ticket.id);
+                                    }}
+                                    disabled={scoring === ticket.id}
+                                    className="text-xs px-2 py-1 bg-purple-50 text-purple-600 rounded hover:bg-purple-100 disabled:opacity-50"
+                                  >
+                                    {scoring === ticket.id ? '⏳' : '🔄'}
+                                  </button>
+                                </div>
+                              </div>
+                            )}
+                          </Draggable>
+                        );
+                      })}
+                      <div style={{ display: 'none' }}>{provided.placeholder}</div>
                     </div>
-                  );
-                })}
+                  )}
+                </Droppable>
               </div>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
+      </DragDropContext>
 
       {/* Ticket Detail Modal */}
       {selectedTicket && (
@@ -971,4 +1030,5 @@ export default function RoadmapView({ client }: RoadmapViewProps) {
     </div>
   );
 }
+
 

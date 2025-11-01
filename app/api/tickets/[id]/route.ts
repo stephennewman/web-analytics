@@ -54,7 +54,7 @@ export async function PATCH(
 
   const resolvedParams = await context.params;
   const body = await request.json();
-  const { status, priority, title, description, is_public } = body;
+  const { status, priority, title, description, is_public, custom_position, position_override } = body;
 
   const updateData: any = { updated_at: new Date().toISOString() };
 
@@ -63,6 +63,8 @@ export async function PATCH(
   if (title) updateData.title = title;
   if (description !== undefined) updateData.description = description;
   if (is_public !== undefined) updateData.is_public = is_public;
+  if (custom_position !== undefined) updateData.custom_position = custom_position;
+  if (position_override !== undefined) updateData.position_override = position_override;
 
   const { data: updatedTicket, error } = await supabase
     .from('tickets')
