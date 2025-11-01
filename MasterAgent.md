@@ -370,3 +370,38 @@ Unlike Hotjar/FullStory: focus on conversion killers only, AI-suggested fixes, v
 **Documentation:** DESIGN_SYSTEM.md created with full usage guide
 **Status:** Phase 1 & 2 Complete - Core dashboards migrated
 
+### 2025-11-01 - Production Deploy #10 - Trello-Style Drag & Drop ✅
+**Commit:** `c215cc6` - Upgrade drag-and-drop to Trello-style with live preview and custom positioning
+**Changes:** 7 files changed, 630 insertions(+), 198 deletions(-)
+**New packages:** `@hello-pangea/dnd` (v16+)
+**New files:**
+- `app/api/tickets/reorder/route.ts` - Batch position updates endpoint
+- `supabase_migration_custom_positions.sql` - Database migration for custom positioning
+- `DRAG_DROP_UPGRADE.md` - Full implementation documentation
+**Modified files:**
+- `app/dashboard/clients/RoadmapView.tsx` - Complete drag-and-drop overhaul
+- `app/api/tickets/[id]/route.ts` - Support for custom_position fields
+- `package.json` & `package-lock.json` - New dependency
+**Features:**
+- ✅ Live visual preview while dragging (cards move before release)
+- ✅ Smooth Trello-like drag experience
+- ✅ Cards drop exactly where dragged (no jumping)
+- ✅ Hybrid sorting: AI scores + manual positioning
+- ✅ Drag between columns (status change + position)
+- ✅ Drag within column (reorder)
+- ✅ Position persistence to database
+- ✅ Entire card is draggable (cursor-move on hover)
+- ✅ Clean UI (no drag handles or pin icons)
+- ✅ Mobile touch support built-in
+- ✅ Reset Order button to return to AI sorting
+**Database Changes:**
+- ⚠️ **MIGRATION REQUIRED:** Add `custom_position` and `position_override` columns to `tickets` table
+- See `supabase_migration_custom_positions.sql` for SQL
+**API Endpoints:**
+- `POST /api/tickets/reorder` - Batch update positions
+- `DELETE /api/tickets/reorder` - Clear custom positions
+- `PATCH /api/tickets/[id]` - Now accepts position fields
+**Build:** ✅ Successful (32 routes compiled, 178 kB shared JS)
+**Deploy Method:** Git push → Vercel auto-deploy
+**Status:** 🚀 Deployed - Migration pending
+
