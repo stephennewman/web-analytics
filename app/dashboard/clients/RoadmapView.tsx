@@ -154,10 +154,36 @@ export default function RoadmapView({ client }: RoadmapViewProps) {
     setDragOverColumn(columnId);
   };
 
-  const handleDragOverCard = (e: React.DragEvent, ticketId: string) => {
+  const handleDragOverCard = (e: React.DragEvent, targetTicket: Ticket, columnTickets: Ticket[]) => {
     e.preventDefault();
     e.stopPropagation();
-    setDragOverTicket(ticketId);
+    
+    if (!draggedTicket || draggedTicket.id === targetTicket.id) return;
+    
+    setDragOverTicket(targetTicket.id);
+    
+    // Only reorder if in same column
+    if (draggedTicket.status === targetTicket.status) {
+      const sortedTickets = getSortedTickets(columnTickets);
+      const draggedIndex = sortedTickets.findIndex(t => t.id === draggedTicket.id);
+      const targetIndex = sortedTickets.findIndex(t => t.id === targetTicket.id);
+      
+      if (draggedIndex !== -1 && targetIndex !== -1 && draggedIndex !== targetIndex) {
+        // Create new array with live reordering
+        const newTickets = [...tickets];
+        const ticketsInColumn = newTickets.filter(t => t.status === targetTicket.status);
+        
+        // Remove dragged ticket
+        const [removed] = ticketsInColumn.splice(draggedIndex, 1);
+        
+        // Insert at target position
+        ticketsInColumn.splice(targetIndex, 0, removed);
+        
+        // Update state with new order
+        const otherTickets = newTickets.filter(t => t.status !== targetTicket.status);
+        setTickets([...otherTickets, ...ticketsInColumn]);
+      }
+    }
   };
 
   const handleDragLeave = () => {
@@ -173,7 +199,7 @@ export default function RoadmapView({ client }: RoadmapViewProps) {
     setDragOverTicket(null);
   };
 
-  const handleDropOnCard = (e: React.DragEvent, targetTicket: Ticket, columnTickets: Ticket[]) => {
+  const handleDropOnCard = (e: React.DragEvent, targetTicket: Ticket) => {
     e.preventDefault();
     e.stopPropagation();
     
@@ -183,32 +209,13 @@ export default function RoadmapView({ client }: RoadmapViewProps) {
       return;
     }
 
-    // Reorder within the same column
-    const sortedTickets = getSortedTickets(columnTickets);
-    const draggedIndex = sortedTickets.findIndex(t => t.id === draggedTicket.id);
-    const targetIndex = sortedTickets.findIndex(t => t.id === targetTicket.id);
-
-    if (draggedIndex === -1) {
-      // Moving from different column
-      if (draggedTicket.status !== targetTicket.status) {
-        updateTicketStatus(draggedTicket.id, targetTicket.status);
-      }
-    } else {
-      // Reordering within same column
-      const newTickets = [...tickets];
-      const ticketsInColumn = newTickets.filter(t => t.status === targetTicket.status);
-      
-      // Remove dragged ticket
-      const draggedTicketData = ticketsInColumn.splice(draggedIndex, 1)[0];
-      
-      // Insert at new position
-      ticketsInColumn.splice(targetIndex, 0, draggedTicketData);
-      
-      // Update all tickets with new order
-      const otherTickets = newTickets.filter(t => t.status !== targetTicket.status);
-      setTickets([...otherTickets, ...ticketsInColumn]);
+    // If moving to different column, update status
+    if (draggedTicket.status !== targetTicket.status) {
+      updateTicketStatus(draggedTicket.id, targetTicket.status);
     }
-
+    
+    // Order is already updated from handleDragOverCard
+    // Just clean up drag state
     setDraggedTicket(null);
     setDragOverTicket(null);
   };
@@ -419,14 +426,15 @@ export default function RoadmapView({ client }: RoadmapViewProps) {
                       key={ticket.id}
                       draggable
                       onDragStart={() => handleDragStart(ticket)}
-                      onDragOver={(e) => handleDragOverCard(e, ticket.id)}
-                      onDrop={(e) => handleDropOnCard(e, ticket, columnTickets)}
+                      onDragOver={(e) => handleDragOverCard(e, ticket, columnTickets)}
+                      onDrop={(e) => handleDropOnCard(e, ticket)}
                       style={{
                         animationDelay: `${index * 50}ms`
                       }}
-                      className={`bg-white rounded-lg p-4 shadow-sm border-2 hover:shadow-md transition-all duration-300 ease-in-out cursor-move relative
+                      className={`bg-white rounded-lg p-4 shadow-sm border-2 hover:shadow-md transition-all duration-200 ease-out cursor-move relative
                         ${reordering ? 'scale-105 shadow-lg border-purple-400 bg-purple-50' : ''}
                         ${isDraggedOver ? 'border-t-4 border-t-purple-600 border-purple-300 bg-purple-50' : 'border-gray-200 hover:border-purple-300'}
+                        ${draggedTicket?.id === ticket.id ? 'opacity-50' : ''}
                       `}
                       >
                         {/* Position Badge during reordering */}
