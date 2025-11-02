@@ -306,7 +306,13 @@
 
   function getElementPath(element) {
     if (element.id) return '#' + element.id;
-    if (element.className) return element.tagName.toLowerCase() + '.' + element.className.split(' ')[0];
+    if (element.className) {
+      // Handle SVG elements where className is an object
+      var className = typeof element.className === 'string' 
+        ? element.className 
+        : element.className.baseVal || element.className.animVal || '';
+      if (className) return element.tagName.toLowerCase() + '.' + className.split(' ')[0];
+    }
     return element.tagName.toLowerCase();
   }
 
