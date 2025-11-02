@@ -73,12 +73,7 @@ export default function Sidebar({ email, activeView, onViewChange, clientId }: S
               : 'text-gray-700 hover:bg-gray-100 border-2 border-transparent hover:border-gray-200'
           }`}
         >
-          <div className="flex items-center gap-2">
-            <span className="text-lg">🔴</span>
-            {isPolling && (
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-            )}
-          </div>
+          <span className="text-lg">🔴</span>
           <span className="flex-1 text-left">Live</span>
           <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
             liveVisitorCount > 0 
