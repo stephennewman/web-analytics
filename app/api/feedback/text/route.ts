@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
         client_id: clientId,
         session_id: sessionId,
         url: url,
-        audio_url: null, // No audio for text feedback
+        audio_url: '', // Empty string for text feedback (column has NOT NULL constraint)
         transcript: content, // Store text as transcript
         cleaned_transcript: content,
         duration: 0, // No audio duration
