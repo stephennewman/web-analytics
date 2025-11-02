@@ -86,6 +86,12 @@ export default function AllSitesDashboard({ sessions, clients, stats }: AllSites
       const avgTimePerSession = siteSessions.length > 0 ? Math.round(totalTime / siteSessions.length) : 0;
       const conversionRate = siteSessions.length > 0 ? ((converted / siteSessions.length) * 100).toFixed(1) : '0';
       
+      // Calculate average load time for this site
+      const sessionsWithLoadTime = siteSessions.filter(s => s.loadTime > 0);
+      const avgLoadTime = sessionsWithLoadTime.length > 0 
+        ? Math.round(sessionsWithLoadTime.reduce((sum, s) => sum + s.loadTime, 0) / sessionsWithLoadTime.length)
+        : 0;
+      
       return {
         id: client.id,
         name: client.name,
@@ -97,6 +103,7 @@ export default function AllSitesDashboard({ sessions, clients, stats }: AllSites
         pageviews: totalPageviews,
         clicks: totalClicks,
         avgTime: avgTimePerSession,
+        avgLoadTime,
         health: calculateHealthScore(siteSessions.length, converted, intent)
       };
     }).filter(m => m.sessions > 0); // Only show sites with traffic
@@ -176,6 +183,58 @@ export default function AllSitesDashboard({ sessions, clients, stats }: AllSites
       .slice(0, 10); // Top 10 referrers
   }, [sessions]);
 
+  // Performance metrics
+  const performanceMetrics = useMemo(() => {
+    // Overall average load time
+    const sessionsWithLoadTime = sessions.filter(s => s.loadTime > 0);
+    const overallAvgLoadTime = sessionsWithLoadTime.length > 0
+      ? Math.round(sessionsWithLoadTime.reduce((sum, s) => sum + s.loadTime, 0) / sessionsWithLoadTime.length)
+      : 0;
+
+    // Slowest pages - need to analyze events for page-specific load times
+    const pageLoadTimes: Record<string, { total: number; count: number; site: string }> = {};
+    
+    sessions.forEach(s => {
+      if (s.events && Array.isArray(s.events)) {
+        s.events.forEach((event: any) => {
+          if (event.event_type === 'performance' && event.data?.load_time && event.url) {
+            const url = event.url;
+            const siteName = clients.find(c => c.id === s.client_id)?.name || 'Unknown';
+            
+            if (!pageLoadTimes[url]) {
+              pageLoadTimes[url] = { total: 0, count: 0, site: siteName };
+            }
+            pageLoadTimes[url].total += event.data.load_time;
+            pageLoadTimes[url].count += 1;
+          }
+        });
+      }
+    });
+
+    const slowestPages = Object.entries(pageLoadTimes)
+      .map(([url, data]) => ({
+        url,
+        avgLoadTime: Math.round(data.total / data.count),
+        count: data.count,
+        site: data.site
+      }))
+      .sort((a, b) => b.avgLoadTime - a.avgLoadTime)
+      .slice(0, 10); // Top 10 slowest pages
+
+    // Fastest and slowest sites
+    const sitesBySpeed = [...siteMetrics]
+      .filter(s => s.avgLoadTime > 0)
+      .sort((a, b) => a.avgLoadTime - b.avgLoadTime);
+
+    return {
+      overallAvgLoadTime,
+      slowestPages,
+      fastestSite: sitesBySpeed[0],
+      slowestSite: sitesBySpeed[sitesBySpeed.length - 1],
+      slowSessions: sessions.filter(s => s.loadTime > 3000).length
+    };
+  }, [sessions, clients, siteMetrics]);
+
   return (
     <div className="space-y-6">
       {/* Portfolio Summary */}
@@ -208,6 +267,96 @@ export default function AllSitesDashboard({ sessions, clients, stats }: AllSites
             <Metric className="text-gray-700">{stats.totalPageviews}</Metric>
             <p className="text-sm text-gray-600 mt-1 font-semibold">Total Pageviews</p>
             <p className="text-xs text-gray-500 mt-1">All sites</p>
+          </Card>
+        </div>
+      </div>
+
+      {/* Performance Metrics */}
+      <div>
+        <h2 className="text-xl font-bold text-gray-900 mb-4">⚡ Performance Insights</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Average Load Time Card */}
+          <Card className="shadow-[3px_3px_0px_rgba(0,0,0,0.15)] border-2 border-gray-200">
+            <div className="flex items-start justify-between mb-4">
+              <div>
+                <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                  <span>⚡</span> Average Page Load Time
+                </h3>
+                <p className="text-xs text-gray-500 mt-1">Across all sites</p>
+              </div>
+              <div className="text-right">
+                <div className={`text-3xl font-bold ${
+                  performanceMetrics.overallAvgLoadTime < 2000 ? 'text-green-600' :
+                  performanceMetrics.overallAvgLoadTime < 3000 ? 'text-yellow-600' :
+                  'text-red-600'
+                }`}>
+                  {(performanceMetrics.overallAvgLoadTime / 1000).toFixed(2)}s
+                </div>
+              </div>
+            </div>
+            
+            {performanceMetrics.slowSessions > 0 && (
+              <div className="mt-4 p-3 bg-orange-50 rounded-lg border border-orange-200">
+                <p className="text-sm text-orange-800">
+                  ⚠️ <strong>{performanceMetrics.slowSessions}</strong> sessions experienced load times over 3 seconds
+                </p>
+              </div>
+            )}
+
+            {performanceMetrics.fastestSite && performanceMetrics.slowestSite && (
+              <div className="mt-4 space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-600">🏆 Fastest: <strong>{performanceMetrics.fastestSite.name}</strong></span>
+                  <span className="text-green-600 font-semibold">{(performanceMetrics.fastestSite.avgLoadTime / 1000).toFixed(2)}s</span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-600">🐌 Slowest: <strong>{performanceMetrics.slowestSite.name}</strong></span>
+                  <span className="text-red-600 font-semibold">{(performanceMetrics.slowestSite.avgLoadTime / 1000).toFixed(2)}s</span>
+                </div>
+              </div>
+            )}
+          </Card>
+
+          {/* Slowest Pages Card */}
+          <Card className="shadow-[3px_3px_0px_rgba(0,0,0,0.15)] border-2 border-gray-200">
+            <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+              <span>🐌</span> Slowest Pages
+            </h3>
+            {performanceMetrics.slowestPages.length > 0 ? (
+              <div className="space-y-2 max-h-64 overflow-y-auto">
+                {performanceMetrics.slowestPages.map((page, idx) => (
+                  <div key={page.url} className="flex items-start justify-between p-2 bg-gray-50 rounded hover:bg-gray-100 transition">
+                    <div className="flex-1 min-w-0 mr-3">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className={`text-xs font-bold px-1.5 py-0.5 rounded ${
+                          idx === 0 ? 'bg-red-100 text-red-700' :
+                          idx === 1 ? 'bg-orange-100 text-orange-700' :
+                          'bg-gray-200 text-gray-600'
+                        }`}>
+                          #{idx + 1}
+                        </span>
+                        <span className="text-xs text-gray-500">{page.site}</span>
+                      </div>
+                      <p className="text-xs text-gray-700 truncate" title={page.url}>
+                        {page.url}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className={`text-sm font-bold ${
+                        page.avgLoadTime < 2000 ? 'text-green-600' :
+                        page.avgLoadTime < 3000 ? 'text-yellow-600' :
+                        'text-red-600'
+                      }`}>
+                        {(page.avgLoadTime / 1000).toFixed(2)}s
+                      </p>
+                      <p className="text-xs text-gray-500">{page.count} loads</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-gray-500 text-center py-8">No performance data available</p>
+            )}
           </Card>
         </div>
       </div>
