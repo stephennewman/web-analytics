@@ -759,36 +759,61 @@
         };
       }
       
-      // Add Enter key handler for text input (glass-bar widget)
+      // Add handlers for text input (glass-bar widget)
       if (this.widgetStyle === 'glass-bar' && state === 'collapsed') {
         var self = this;
         setTimeout(function() {
           var input = document.getElementById('tb-glass-input');
+          var submitBtn = document.getElementById('tb-text-submit');
+          
           if (input) {
-            console.log('🐝 Glass Bar input found, attaching Enter handler');
+            console.log('🐝 Glass Bar input found, attaching handlers');
             
-            // Remove any existing listener
-            input.onkeydown = null;
+            // Function to submit text feedback
+            var submitText = function() {
+              var text = input.value;
+              console.log('🐝 Submit triggered, text:', text);
+              if (text && text.trim().length > 0) {
+                console.log('🐝 Submitting text feedback');
+                feedbackWidget.submitTextFeedback(text);
+              } else {
+                console.log('🐝 Empty text, ignoring');
+              }
+            };
             
-            // Add new listener
-            input.addEventListener('keydown', function(e) {
-              console.log('🐝 Key pressed:', e.key);
-              if (e.key === 'Enter') {
-                var text = input.value;
-                console.log('🐝 Enter pressed, text:', text);
-                if (text && text.trim().length > 0) {
-                  console.log('🐝 Submitting text feedback');
-                  feedbackWidget.submitTextFeedback(text);
-                  e.preventDefault();
+            // Show/hide Send button based on input
+            input.addEventListener('input', function() {
+              if (submitBtn) {
+                if (input.value.trim().length > 0) {
+                  submitBtn.style.display = 'block';
                 } else {
-                  console.log('🐝 Empty text, ignoring');
+                  submitBtn.style.display = 'none';
                 }
               }
             });
+            
+            // Enter key to submit
+            input.addEventListener('keydown', function(e) {
+              if (e.key === 'Enter') {
+                console.log('🐝 Enter pressed');
+                e.preventDefault();
+                submitText();
+              }
+            });
+            
+            // Click Send button to submit
+            if (submitBtn) {
+              submitBtn.addEventListener('click', function(e) {
+                console.log('🐝 Send button clicked');
+                e.preventDefault();
+                submitText();
+              });
+            }
+            
           } else {
             console.error('🐝 Glass Bar input not found');
           }
-        }, 150); // Small delay to ensure DOM is ready
+        }, 150);
       }
     },
     
@@ -982,7 +1007,7 @@
     getGlassBarHTML: function(state) {
       // Glass Bar - Centered bottom bar with text input OR voice recording (dual mode)
       if (state === 'collapsed') {
-        return '<div style="position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:9999;width:90%;max-width:600px;transition:all 0.3s ease;"><div style="position:relative;background:rgba(255,255,255,0.25);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.4);border-radius:50px;padding:12px 20px;box-shadow:0 8px 32px rgba(0,0,0,0.15);display:flex;align-items:center;gap:12px;"><input id="tb-glass-input" type="text" placeholder="Type feedback or share via voice..." style="flex:1;background:rgba(255,255,255,0.3);border:none;outline:none;color:#111;font-size:15px;font-weight:500;font-family:system-ui,-apple-system,sans-serif;padding:10px 16px;border-radius:24px;" /><div style="width:40px;height:40px;background:rgba(139,92,246,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background=\'rgba(139,92,246,0.3)\'" onmouseout="this.style.background=\'rgba(139,92,246,0.2)\'" data-action="expand"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8B5CF6" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></div><div style="width:32px;height:32px;background:rgba(0,0,0,0.1);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.2s;margin-left:4px;" onmouseover="this.style.background=\'rgba(0,0,0,0.15)\'" onmouseout="this.style.background=\'rgba(0,0,0,0.1)\'" data-action="hide-widget"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div></div></div><style>@media (max-width: 768px) { #tb-feedback-widget > div { width:calc(100% - 32px) !important; }}</style>';
+        return '<div style="position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:9999;width:90%;max-width:600px;transition:all 0.3s ease;"><div style="position:relative;background:rgba(255,255,255,0.25);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.4);border-radius:50px;padding:12px 20px;box-shadow:0 8px 32px rgba(0,0,0,0.15);display:flex;align-items:center;gap:12px;"><input id="tb-glass-input" type="text" placeholder="Type feedback or share via voice..." style="flex:1;background:rgba(255,255,255,0.3);border:none;outline:none;color:#111;font-size:15px;font-weight:500;font-family:system-ui,-apple-system,sans-serif;padding:10px 16px;border-radius:24px;" /><button id="tb-text-submit" style="display:none;padding:8px 16px;background:linear-gradient(135deg,#10B981,#059669);color:white;border:none;border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;white-space:nowrap;" onmouseover="this.style.transform=\'translateY(-2px)\'" onmouseout="this.style.transform=\'translateY(0)\'">Send</button><div style="width:40px;height:40px;background:rgba(139,92,246,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background=\'rgba(139,92,246,0.3)\'" onmouseout="this.style.background=\'rgba(139,92,246,0.2)\'" data-action="expand"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8B5CF6" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></div><div style="width:32px;height:32px;background:rgba(0,0,0,0.1);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.2s;margin-left:4px;" onmouseover="this.style.background=\'rgba(0,0,0,0.15)\'" onmouseout="this.style.background=\'rgba(0,0,0,0.1)\'" data-action="hide-widget"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div></div></div><style>@media (max-width: 768px) { #tb-feedback-widget > div { width:calc(100% - 32px) !important; }}</style>';
       }
       
       if (state === 'expanded') {
