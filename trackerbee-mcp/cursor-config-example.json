@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "trackerbee": {
+      "command": "node",
+      "args": ["/Users/stephennewman/web-analytics/trackerbee-mcp/build/index.js"],
+      "env": {
+        "SUPABASE_URL": "https://fkgdwihxexwqldrpifcq.supabase.co",
+        "SUPABASE_KEY": "YOUR_SUPABASE_ANON_KEY_HERE"
+      }
+    }
+  }
+}
+
