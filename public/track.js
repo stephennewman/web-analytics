@@ -1100,8 +1100,14 @@
         credentials: 'omit'
       })
       .then(function(res) {
+        console.log('🐝 API response status:', res.status);
         if (!res.ok) {
-          throw new Error('Failed to submit text feedback');
+          return res.json().then(function(errData) {
+            console.error('🐝 API error response:', errData);
+            throw new Error('API returned: ' + (errData.error || res.statusText));
+          }).catch(function() {
+            throw new Error('Failed to submit text feedback (status: ' + res.status + ')');
+          });
         }
         return res.json();
       })
