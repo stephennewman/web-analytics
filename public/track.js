@@ -801,8 +801,8 @@
         emit: function(event) {
           sessionRecorder.events.push(event);
           
-          // Send batch every 5 seconds or 50 events
-          if (sessionRecorder.events.length >= 50) {
+          // Send batch every 30 events (reduced from 50 to prevent large batches)
+          if (sessionRecorder.events.length >= 30) {
             sessionRecorder.sendBatch();
           }
         },
@@ -832,12 +832,12 @@
         collectFonts: false,
       });
       
-      // Send batch every 5 seconds
+      // Send batch every 10 seconds (reduced frequency to prevent timeouts)
       this.batchTimer = setInterval(function() {
         if (sessionRecorder.events.length > 0) {
           sessionRecorder.sendBatch();
         }
-      }, 5000);
+      }, 10000);
       
       console.log('Session recording started');
     },
@@ -904,7 +904,7 @@
         this.stopFn = window.rrweb.record({
           emit: function(event) {
             sessionRecorder.events.push(event);
-            if (sessionRecorder.events.length >= 50) {
+            if (sessionRecorder.events.length >= 30) {
               sessionRecorder.sendBatch();
             }
           },

@@ -74,13 +74,14 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   console.log('Sessions query error:', sessionsError);
   console.log('Sessions found:', sessions?.length || 0);
 
-  // Get all events for these sessions
+  // Get all events for these sessions (limit to recent 200 per session for performance)
   const sessionIds = sessions?.map(s => s.session_id) || [];
   let eventsQuery = supabase
     .from('events')
     .select('*')
     .in('session_id', sessionIds)
-    .order('timestamp', { ascending: false });
+    .order('timestamp', { ascending: false })
+    .limit(200);
 
   if (isAllSites) {
     // Get events from all user's clients

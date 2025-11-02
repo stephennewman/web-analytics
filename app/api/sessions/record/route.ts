@@ -36,6 +36,10 @@ export async function POST(request: Request) {
       );
     }
 
+    // Limit batch size to prevent timeouts (max 50 events per batch)
+    const MAX_EVENTS_PER_BATCH = 50;
+    const limitedEvents = events.slice(0, MAX_EVENTS_PER_BATCH);
+
     // Check if recording already exists (update) or create new
     const { data: existing } = await supabase
       .from('session_recordings')
@@ -46,7 +50,10 @@ export async function POST(request: Request) {
     if (existing) {
       // Append events to existing recording
       const existingEvents = existing.events as any[];
-      const mergedEvents = [...existingEvents, ...events];
+      
+      // Limit total events to 500 to prevent massive JSONB columns
+      const MAX_TOTAL_EVENTS = 500;
+      const mergedEvents = [...existingEvents, ...limitedEvents].slice(-MAX_TOTAL_EVENTS);
 
       await supabase
         .from('session_recordings')
