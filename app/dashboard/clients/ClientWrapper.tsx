@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Sidebar from './Sidebar';
 import SetupView from './SetupView';
 import AddSiteForm from './AddSiteForm';
@@ -18,6 +19,16 @@ export default function ClientWrapper({ email, client, clients, sessions, stats,
   const [activeView, setActiveView] = useState(initialView || 'dashboard');
   const [showAddSiteForm, setShowAddSiteForm] = useState(false);
   const [editingSiteId, setEditingSiteId] = useState<string | null>(null);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  
+  const handleViewChange = (view: string) => {
+    setActiveView(view);
+    // Update URL to preserve view on refresh
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('view', view);
+    router.push(`?${params.toString()}`, { scroll: false });
+  };
   const [editingName, setEditingName] = useState('');
   const [editingDomain, setEditingDomain] = useState('');
   const [editingFilters, setEditingFilters] = useState({ enabled: true, patterns: ['localhost', '127.0.0.1', 'test.', 'staging.'] });
@@ -86,7 +97,7 @@ export default function ClientWrapper({ email, client, clients, sessions, stats,
     <div className="min-h-screen bg-gray-50">
       {/* Sidebar */}
       <div className="hidden lg:block">
-        <Sidebar email={email} activeView={activeView} onViewChange={setActiveView} clientId={client.id} />
+        <Sidebar email={email} activeView={activeView} onViewChange={handleViewChange} clientId={client.id} />
       </div>
 
       {/* Main Content Area */}
@@ -163,7 +174,7 @@ export default function ClientWrapper({ email, client, clients, sessions, stats,
             sessions={sessions}
             stats={stats}
             activeView={activeView}
-            onViewChange={setActiveView}
+            onViewChange={handleViewChange}
           />
         </main>
       </div>

@@ -55,6 +55,29 @@ export default function Sidebar({ email, activeView, onViewChange, clientId }: S
       {/* Navigation */}
       <nav className="flex-1 px-3 py-6 space-y-2">
         <button
+          onClick={() => onViewChange('live')}
+          className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold transition-all cursor-pointer ${
+            activeView === 'live'
+              ? 'bg-yellow-50 text-yellow-900 border-2 border-yellow-400 shadow-[3px_3px_0px_rgba(234,179,8,0.3)] hover:-translate-y-0.5'
+              : 'text-gray-700 hover:bg-gray-100 border-2 border-transparent hover:border-gray-200'
+          }`}
+        >
+          <div className="relative">
+            <span className="text-lg">👁️</span>
+            {liveVisitorCount > 0 && (
+              <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+            )}
+          </div>
+          <span className="flex-1 text-left">Live</span>
+          <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+            liveVisitorCount > 0 
+              ? 'bg-red-100 text-red-700' 
+              : 'bg-gray-100 text-gray-500'
+          }`}>
+            {liveVisitorCount}
+          </span>
+        </button>
+        <button
           onClick={() => onViewChange('dashboard')}
           className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold transition-all cursor-pointer ${
             activeView === 'dashboard'
@@ -64,24 +87,6 @@ export default function Sidebar({ email, activeView, onViewChange, clientId }: S
         >
           <span className="text-lg">📊</span>
           Dashboard
-        </button>
-        <button
-          onClick={() => onViewChange('live')}
-          className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold transition-all cursor-pointer ${
-            activeView === 'live'
-              ? 'bg-yellow-50 text-yellow-900 border-2 border-yellow-400 shadow-[3px_3px_0px_rgba(234,179,8,0.3)] hover:-translate-y-0.5'
-              : 'text-gray-700 hover:bg-gray-100 border-2 border-transparent hover:border-gray-200'
-          }`}
-        >
-          <span className="text-lg">🔴</span>
-          <span className="flex-1 text-left">Live</span>
-          <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-            liveVisitorCount > 0 
-              ? 'bg-red-100 text-red-700' 
-              : 'bg-gray-100 text-gray-500'
-          }`}>
-            {liveVisitorCount}
-          </span>
         </button>
         <button
           onClick={() => onViewChange('visitors')}

@@ -38,10 +38,18 @@ export default function FeedbackView({ clientId }: { clientId: string }) {
   const [filter, setFilter] = useState<'all' | 'positive' | 'neutral' | 'negative'>('all');
   const [playingId, setPlayingId] = useState<string | null>(null);
   const [creatingTicket, setCreatingTicket] = useState<string | null>(null);
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   
   useEffect(() => {
     fetchFeedback();
   }, [clientId]);
+  
+  useEffect(() => {
+    if (toast) {
+      const timer = setTimeout(() => setToast(null), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
   
   const fetchFeedback = async () => {
     try {
@@ -65,14 +73,17 @@ export default function FeedbackView({ clientId }: { clientId: string }) {
       });
       const data = await response.json();
       if (response.ok) {
-        alert(`✅ Ticket ${data.action === 'created' ? 'created' : 'linked'}!`);
+        setToast({ 
+          message: `✅ Roadmap ticket ${data.action === 'created' ? 'created' : 'linked'} successfully!`, 
+          type: 'success' 
+        });
         fetchFeedback(); // Refresh to show updated ticket_id
       } else {
-        alert(`❌ Error: ${data.error}`);
+        setToast({ message: `❌ Error: ${data.error}`, type: 'error' });
       }
     } catch (error) {
       console.error('Error creating ticket:', error);
-      alert('❌ Failed to create ticket');
+      setToast({ message: '❌ Failed to create ticket', type: 'error' });
     } finally {
       setCreatingTicket(null);
     }
@@ -104,6 +115,24 @@ export default function FeedbackView({ clientId }: { clientId: string }) {
   
   return (
     <div className="space-y-6">
+      {/* Toast Notification */}
+      {toast && (
+        <div className={`fixed top-4 right-4 z-50 px-6 py-4 rounded-lg shadow-lg border-2 flex items-center gap-3 animate-slide-in ${
+          toast.type === 'success' 
+            ? 'bg-green-50 text-green-900 border-green-500' 
+            : 'bg-red-50 text-red-900 border-red-500'
+        }`}>
+          <span className="text-lg">{toast.type === 'success' ? '✓' : '✗'}</span>
+          <span className="font-medium">{toast.message}</span>
+          <button 
+            onClick={() => setToast(null)}
+            className="ml-2 text-gray-500 hover:text-gray-700"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+      
       {/* Header with filters */}
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-gray-900">Voice Feedback</h2>
