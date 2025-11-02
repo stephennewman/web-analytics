@@ -762,19 +762,31 @@
       // Add handlers for text input (glass-bar widget)
       if (this.widgetStyle === 'glass-bar' && state === 'collapsed') {
         var self = this;
-        setTimeout(function() {
+        
+        // Use a shorter timeout and retry if needed
+        var attemptCount = 0;
+        var maxAttempts = 5;
+        
+        var attachGlassBarHandlers = function() {
+          attemptCount++;
           var input = document.getElementById('tb-glass-input');
           var submitBtn = document.getElementById('tb-text-submit');
           
+          if (!input && attemptCount < maxAttempts) {
+            console.log('🐝 Glass Bar input not found yet, retrying...', attemptCount);
+            setTimeout(attachGlassBarHandlers, 50);
+            return;
+          }
+          
           if (input) {
-            console.log('🐝 Glass Bar input found, attaching handlers');
+            console.log('🐝 Glass Bar input FOUND! Attaching handlers now');
             
             // Function to submit text feedback
             var submitText = function() {
               var text = input.value;
               console.log('🐝 Submit triggered, text:', text);
               if (text && text.trim().length > 0) {
-                console.log('🐝 Submitting text feedback');
+                console.log('🐝 Calling submitTextFeedback...');
                 feedbackWidget.submitTextFeedback(text);
               } else {
                 console.log('🐝 Empty text, ignoring');
@@ -783,6 +795,7 @@
             
             // Show/hide Send button based on input
             input.addEventListener('input', function() {
+              console.log('🐝 Input event fired, value length:', input.value.length);
               if (submitBtn) {
                 if (input.value.trim().length > 0) {
                   submitBtn.style.display = 'block';
@@ -793,11 +806,23 @@
             });
             
             // Enter key to submit
-            input.addEventListener('keydown', function(e) {
-              if (e.key === 'Enter') {
-                console.log('🐝 Enter pressed');
+            input.addEventListener('keypress', function(e) {
+              console.log('🐝 Keypress event:', e.key, e.keyCode);
+              if (e.key === 'Enter' || e.keyCode === 13) {
+                console.log('🐝 ENTER KEY DETECTED!');
                 e.preventDefault();
                 submitText();
+                return false;
+              }
+            });
+            
+            // Also try keydown as backup
+            input.addEventListener('keydown', function(e) {
+              if (e.key === 'Enter' || e.keyCode === 13) {
+                console.log('🐝 Enter via keydown');
+                e.preventDefault();
+                submitText();
+                return false;
               }
             });
             
@@ -806,14 +831,21 @@
               submitBtn.addEventListener('click', function(e) {
                 console.log('🐝 Send button clicked');
                 e.preventDefault();
+                e.stopPropagation();
                 submitText();
+                return false;
               });
             }
             
+            console.log('🐝 All handlers attached successfully!');
+            
           } else {
-            console.error('🐝 Glass Bar input not found');
+            console.error('🐝 Glass Bar input not found after', maxAttempts, 'attempts');
           }
-        }, 150);
+        };
+        
+        // Start trying to attach handlers
+        attachGlassBarHandlers();
       }
     },
     
