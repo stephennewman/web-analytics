@@ -56,7 +56,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
     .from('sessions')
     .select('*')
     .order('updated_at', { ascending: false })
-    .limit(50);
+    .limit(5000);
 
   if (isAllSites) {
     // Get sessions from all user's clients

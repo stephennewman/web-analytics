@@ -111,6 +111,13 @@ export default function AllSitesDashboard({ sessions, clients, stats }: AllSites
 
   // Sort sites by different metrics
   const topBySessions = [...siteMetrics].sort((a, b) => b.sessions - a.sessions).slice(0, 5);
+  const topByEngagement = [...siteMetrics]
+    .map(site => ({
+      ...site,
+      avgPageviewsPerSession: site.sessions > 0 ? (site.pageviews / site.sessions).toFixed(1) : 0
+    }))
+    .sort((a, b) => parseFloat(b.avgPageviewsPerSession as string) - parseFloat(a.avgPageviewsPerSession as string))
+    .slice(0, 5);
 
   // Calculate device & location distribution across all sites
   const deviceDistribution = useMemo(() => {
@@ -271,6 +278,71 @@ export default function AllSitesDashboard({ sessions, clients, stats }: AllSites
         </div>
       </div>
 
+      {/* Top Performing Sites */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Top by Traffic */}
+        <Card className="shadow-[3px_3px_0px_rgba(0,0,0,0.15)] border-2 border-gray-200 hover:shadow-[5px_5px_0px_rgba(0,0,0,0.2)] transition-all">
+          <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+            <span>🔥</span> Top by Traffic
+          </h3>
+          <div className="space-y-3">
+            {topBySessions.map((site, idx) => (
+              <div key={site.id} className="flex items-center justify-between">
+                <div className="flex items-center gap-3 flex-1 min-w-0">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
+                    idx === 0 ? 'bg-yellow-100 text-yellow-700' :
+                    idx === 1 ? 'bg-gray-100 text-gray-600' :
+                    idx === 2 ? 'bg-orange-100 text-orange-600' :
+                    'bg-gray-50 text-gray-500'
+                  }`}>
+                    {idx + 1}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-gray-900 truncate">{site.name}</p>
+                    <p className="text-xs text-gray-500">{site.domain || 'No domain'}</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm font-bold text-purple-600">{site.sessions}</p>
+                  <p className="text-xs text-gray-500">sessions</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </Card>
+
+        {/* Top by Engagement */}
+        <Card className="shadow-[3px_3px_0px_rgba(0,0,0,0.15)] border-2 border-gray-200 hover:shadow-[5px_5px_0px_rgba(0,0,0,0.2)] transition-all">
+          <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+            <span>💎</span> Most Engaged
+          </h3>
+          <div className="space-y-3">
+            {topByEngagement.map((site, idx) => (
+              <div key={site.id} className="flex items-center justify-between">
+                <div className="flex items-center gap-3 flex-1 min-w-0">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
+                    idx === 0 ? 'bg-blue-100 text-blue-700' :
+                    idx === 1 ? 'bg-gray-100 text-gray-600' :
+                    idx === 2 ? 'bg-cyan-100 text-cyan-600' :
+                    'bg-gray-50 text-gray-500'
+                  }`}>
+                    {idx + 1}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-gray-900 truncate">{site.name}</p>
+                    <p className="text-xs text-gray-500">{site.domain || 'No domain'}</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm font-bold text-blue-600">{site.avgPageviewsPerSession}</p>
+                  <p className="text-xs text-gray-500">pages/session</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </Card>
+      </div>
+
       {/* Performance Metrics */}
       <div>
         <h2 className="text-xl font-bold text-gray-900 mb-4">⚡ Performance Insights</h2>
@@ -359,40 +431,6 @@ export default function AllSitesDashboard({ sessions, clients, stats }: AllSites
             )}
           </Card>
         </div>
-      </div>
-
-      {/* Top Performing Sites */}
-      <div className="grid grid-cols-1 gap-6">
-        {/* Top by Traffic */}
-        <Card className="shadow-[3px_3px_0px_rgba(0,0,0,0.15)] border-2 border-gray-200 hover:shadow-[5px_5px_0px_rgba(0,0,0,0.2)] transition-all">
-          <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-            <span>🔥</span> Top by Traffic
-          </h3>
-          <div className="space-y-3">
-            {topBySessions.map((site, idx) => (
-              <div key={site.id} className="flex items-center justify-between">
-                <div className="flex items-center gap-3 flex-1 min-w-0">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
-                    idx === 0 ? 'bg-yellow-100 text-yellow-700' :
-                    idx === 1 ? 'bg-gray-100 text-gray-600' :
-                    idx === 2 ? 'bg-orange-100 text-orange-600' :
-                    'bg-gray-50 text-gray-500'
-                  }`}>
-                    {idx + 1}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-gray-900 truncate">{site.name}</p>
-                    <p className="text-xs text-gray-500">{site.domain || 'No domain'}</p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p className="text-sm font-bold text-purple-600">{site.sessions}</p>
-                  <p className="text-xs text-gray-500">sessions</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </Card>
       </div>
 
       {/* Distribution Visualizations */}

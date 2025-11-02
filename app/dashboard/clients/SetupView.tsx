@@ -147,7 +147,7 @@ export default function SetupView({
         return (
           <>
             {/* Quick Stats Bar - Dashboard Only */}
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
               <Card 
                 decoration="top" 
                 decorationColor="gray"
@@ -163,22 +163,6 @@ export default function SetupView({
               >
                 <Metric className="text-gray-700">{stats.totalPageviews}</Metric>
                 <p className="text-sm text-gray-600 mt-1 font-semibold">Pageviews</p>
-              </Card>
-              <Card 
-                decoration="top" 
-                decorationColor="purple"
-                className="shadow-[4px_4px_0px_rgba(168,85,247,0.4)] border-2 border-purple-200 hover:shadow-[6px_6px_0px_rgba(168,85,247,0.5)] transition-all hover:-translate-y-1"
-              >
-                <Metric className="text-purple-600">{stats.conversionRate}%</Metric>
-                <p className="text-sm text-gray-600 mt-1 font-semibold">Conversion Rate</p>
-              </Card>
-              <Card 
-                decoration="top" 
-                decorationColor="green"
-                className="shadow-[4px_4px_0px_rgba(34,197,94,0.4)] border-2 border-green-200 hover:shadow-[6px_6px_0px_rgba(34,197,94,0.5)] transition-all hover:-translate-y-1"
-              >
-                <Metric className="text-green-600">{stats.sessionsWithIntent}</Metric>
-                <p className="text-sm text-gray-600 mt-1 font-semibold">High Intent</p>
               </Card>
               <Card 
                 decoration="top" 
