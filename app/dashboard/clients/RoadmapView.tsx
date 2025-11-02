@@ -463,12 +463,9 @@ export default function RoadmapView({ client }: RoadmapViewProps) {
                                 ref={provided.innerRef}
                                 {...provided.draggableProps}
                                 {...provided.dragHandleProps}
-                                style={{
-                                  ...provided.draggableProps.style,
-                                  animationDelay: `${index * 50}ms`
-                                }}
+                                style={provided.draggableProps.style}
                                 className={`bg-white rounded-lg p-4 shadow-sm border-2 hover:shadow-md relative cursor-move
-                                  ${reordering ? 'scale-105 shadow-lg border-purple-400 bg-purple-50 transition-all duration-300' : ''}
+                                  ${reordering ? 'scale-105 shadow-lg border-purple-400 bg-purple-50' : ''}
                                   ${snapshot.isDragging ? 'shadow-2xl border-purple-500 rotate-1' : 'border-gray-200 hover:border-purple-300'}
                                 `}
                               >
