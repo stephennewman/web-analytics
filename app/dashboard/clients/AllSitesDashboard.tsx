@@ -150,6 +150,32 @@ export default function AllSitesDashboard({ sessions, clients, stats }: AllSites
     })).sort((a, b) => b.count - a.count);
   }, [sessions]);
 
+  // Top referrals (actual domains)
+  const topReferrals = useMemo(() => {
+    const counts: Record<string, number> = {};
+    sessions.forEach(s => {
+      if (s.referrer && s.referrer !== 'direct') {
+        try {
+          // Extract domain from full URL
+          const url = new URL(s.referrer.startsWith('http') ? s.referrer : `https://${s.referrer}`);
+          const domain = url.hostname.replace('www.', '');
+          counts[domain] = (counts[domain] || 0) + 1;
+        } catch {
+          // If URL parsing fails, use the referrer as-is
+          counts[s.referrer] = (counts[s.referrer] || 0) + 1;
+        }
+      }
+    });
+    return Object.entries(counts)
+      .map(([referrer, count]) => ({
+        referrer,
+        count,
+        percentage: ((count / sessions.length) * 100).toFixed(1)
+      }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 10); // Top 10 referrers
+  }, [sessions]);
+
   return (
     <div className="space-y-6">
       {/* Portfolio Summary */}
@@ -221,7 +247,7 @@ export default function AllSitesDashboard({ sessions, clients, stats }: AllSites
       </div>
 
       {/* Distribution Visualizations */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-6">
         {/* Device Distribution */}
         <Card>
           <h3 className="text-lg font-bold text-gray-900 mb-4">📱 Device Distribution</h3>
@@ -279,6 +305,28 @@ export default function AllSitesDashboard({ sessions, clients, stats }: AllSites
               </div>
             ))}
           </div>
+        </Card>
+
+        {/* Top Referrals */}
+        <Card>
+          <h3 className="text-lg font-bold text-gray-900 mb-4">🔗 Top Referrals</h3>
+          {topReferrals.length > 0 ? (
+            <div className="space-y-2">
+              {topReferrals.map((item) => (
+                <div key={item.referrer} className="flex items-center justify-between">
+                  <span className="text-sm text-gray-700 truncate flex-1 mr-2" title={item.referrer}>
+                    {item.referrer}
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-gray-500">{item.count}</span>
+                    <span className="text-xs font-semibold text-purple-600">{item.percentage}%</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-gray-500 text-center py-8">No referral data yet</p>
+          )}
         </Card>
       </div>
     </div>
