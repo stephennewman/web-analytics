@@ -24,6 +24,7 @@ export async function POST(request: NextRequest) {
         client_id: clientId,
         session_id: sessionId,
         url: url,
+        audio_url: null, // No audio for text feedback
         transcript: content, // Store text as transcript
         cleaned_transcript: content,
         duration: 0, // No audio duration
@@ -34,9 +35,10 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (feedbackError) {
-      console.error('Error inserting feedback:', feedbackError);
+      console.error('Error inserting text feedback:', feedbackError);
+      console.error('Feedback error details:', JSON.stringify(feedbackError));
       return NextResponse.json(
-        { error: 'Failed to save feedback' },
+        { error: 'Failed to save feedback', details: feedbackError.message },
         { status: 500 }
       );
     }
