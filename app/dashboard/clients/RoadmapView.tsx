@@ -137,8 +137,22 @@ export default function RoadmapView({ client }: RoadmapViewProps) {
     }
   };
 
+  const handleDragStart = () => {
+    console.log('🎬 Drag started');
+    // Pause session recording during drag to prevent conflicts
+    if (typeof window !== 'undefined' && (window as any).rrwebStop) {
+      (window as any).rrwebStop();
+    }
+  };
+
   const handleDragEnd = async (result: DropResult) => {
     console.log('🎯 Drag ended:', result);
+    
+    // Resume session recording after drag
+    if (typeof window !== 'undefined' && (window as any).rrwebResume) {
+      (window as any).rrwebResume();
+    }
+    
     const { destination, source, draggableId } = result;
 
     // Dropped outside a valid droppable
@@ -430,7 +444,7 @@ export default function RoadmapView({ client }: RoadmapViewProps) {
       </div>
 
       {/* Kanban Board */}
-      <DragDropContext onDragEnd={handleDragEnd} onDragStart={(start) => console.log('🎬 Drag started:', start)}>
+      <DragDropContext onDragEnd={handleDragEnd} onDragStart={handleDragStart}>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {statusColumns.map((column) => {
             const columnTickets = tickets.filter(t => t.status === column.id);

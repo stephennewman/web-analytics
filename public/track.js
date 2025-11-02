@@ -881,8 +881,48 @@
       // Send final batch
       this.sendBatch();
       this.isRecording = false;
+    },
+    
+    pause: function() {
+      if (this.stopFn && this.isRecording) {
+        this.stopFn();
+        this.stopFn = null;
+        this.isRecording = false;
+        console.log('🎬 Recording paused');
+      }
+    },
+    
+    resume: function() {
+      if (!this.isRecording && window.rrweb && !this.stopFn) {
+        // Restart recording
+        this.stopFn = window.rrweb.record({
+          emit: function(event) {
+            sessionRecorder.events.push(event);
+            if (sessionRecorder.events.length >= 50) {
+              sessionRecorder.sendBatch();
+            }
+          },
+          maskAllInputs: true,
+          maskInputOptions: { password: true, email: true, tel: true, text: false },
+          maskTextSelector: '[data-sensitive], .sensitive',
+          blockClass: 'rr-block',
+          blockSelector: '[data-recording-ignore]',
+          ignoreClass: 'rr-ignore',
+          checkoutEveryNms: 5 * 60 * 1000,
+          checkoutEveryNth: 200,
+          mousemoveWait: 50,
+          recordCanvas: false,
+          collectFonts: false,
+        });
+        this.isRecording = true;
+        console.log('🎬 Recording resumed');
+      }
     }
   };
+  
+  // Expose pause/resume globally for drag and drop
+  window.rrwebStop = function() { sessionRecorder.pause(); };
+  window.rrwebResume = function() { sessionRecorder.resume(); };
   
   // Start recording on page load
   console.log('🎬 Initializing session recorder...');
