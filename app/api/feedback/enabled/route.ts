@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
   // Get client settings
   const { data: client } = await supabase
     .from('clients')
-    .select('feedback_enabled, feedback_widget_style')
+    .select('feedback_enabled, feedback_widget_style, feedback_excluded_paths')
     .eq('id', clientId)
     .single();
   
@@ -50,10 +50,30 @@ export async function GET(request: NextRequest) {
     .map(f => f.cleaned_transcript)
     .filter(t => t && t.length > 10); // Only quotes with substance
   
+  // Parse excluded paths (stored as JSON array or comma-separated string)
+  let excludedPaths: string[] = [];
+  if (client.feedback_excluded_paths) {
+    try {
+      if (typeof client.feedback_excluded_paths === 'string') {
+        // Try parsing as JSON first, fallback to comma-separated
+        try {
+          excludedPaths = JSON.parse(client.feedback_excluded_paths);
+        } catch {
+          excludedPaths = client.feedback_excluded_paths.split(',').map(p => p.trim()).filter(Boolean);
+        }
+      } else if (Array.isArray(client.feedback_excluded_paths)) {
+        excludedPaths = client.feedback_excluded_paths;
+      }
+    } catch (error) {
+      console.error('Error parsing excluded paths:', error);
+    }
+  }
+  
   return NextResponse.json({ 
     enabled: true,
     style: client.feedback_widget_style || 'glassmorphic',
-    recentQuotes: recentQuotes
+    recentQuotes: recentQuotes,
+    excludedPaths: excludedPaths
   }, {
     headers: {
       'Access-Control-Allow-Origin': '*',

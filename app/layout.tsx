@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
+import { GeistSans } from 'geist/font/sans';
+import { GeistMono } from 'geist/font/mono';
 import Script from "next/script";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Trackerbee 🐝 - Conversion Analytics",
+  title: "Trackerbeez 🐝 - Conversion Analytics",
   description: "Buzz through your conversion problems. See why visitors don't convert and what to fix.",
 };
 
@@ -13,8 +15,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body>
+    <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable} dark`}>
+      <body className="font-sans">
         {children}
         
         {/* Trackerbee Analytics - Dogfooding our own product! 🐝 */}

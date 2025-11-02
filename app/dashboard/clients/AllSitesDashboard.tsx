@@ -3,6 +3,7 @@
 import { useMemo } from 'react';
 import { Card, Metric, ProgressBar, BarList } from '@tremor/react';
 import { Badge } from '@/components/ui/badge';
+import RecentConversions from './RecentConversions';
 
 interface AllSitesDashboardProps {
   sessions: any[];
@@ -244,9 +245,9 @@ export default function AllSitesDashboard({ sessions, clients, stats }: AllSites
 
   return (
     <div className="space-y-6">
-      {/* Portfolio Summary */}
+      {/* All Sites Summary */}
       <div>
-        <h2 className="text-xl font-bold text-gray-900 mb-4">Portfolio Overview Last 30 Days</h2>
+        <h2 className="text-xl font-bold text-gray-900 mb-4">All Sites Overview - Last 30 Days</h2>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
           <Card 
             decoration="top" 
@@ -277,6 +278,9 @@ export default function AllSitesDashboard({ sessions, clients, stats }: AllSites
           </Card>
         </div>
       </div>
+
+      {/* Recent Conversions Across All Sites */}
+      <RecentConversions sessions={sessions} />
 
       {/* Top Performing Sites */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

@@ -36,6 +36,7 @@ export default function SessionsView({ client }: SessionsViewProps) {
   const [loading, setLoading] = useState(true);
   const [selectedRecording, setSelectedRecording] = useState<SessionRecording | null>(null);
   const [playerLoaded, setPlayerLoaded] = useState(false);
+  const [showFiltered, setShowFiltered] = useState(false);
   const playerContainerRef = useRef<HTMLDivElement>(null);
   const playerInstanceRef = useRef<any>(null);
 
@@ -72,16 +73,25 @@ export default function SessionsView({ client }: SessionsViewProps) {
         playerContainerRef.current.innerHTML = '';
       }
 
-      // Create new player
+      // Create new player with autoplay
       playerInstanceRef.current = new window.rrwebPlayer({
         target: playerContainerRef.current,
         props: {
           events: selectedRecording.events,
-          autoPlay: false,
+          autoPlay: true,
           showController: true,
           speed: 1,
+          width: 800,
+          height: 600,
         },
       });
+
+      // Ensure autoplay starts after a brief delay (helps with some browsers)
+      setTimeout(() => {
+        if (playerInstanceRef.current && playerInstanceRef.current.play) {
+          playerInstanceRef.current.play();
+        }
+      }, 100);
     }
   }, [playerLoaded, selectedRecording]);
 
@@ -107,6 +117,23 @@ export default function SessionsView({ client }: SessionsViewProps) {
   function formatDate(dateString: string) {
     return new Date(dateString).toLocaleString();
   }
+
+  // Filter out low-quality sessions
+  function isQualitySession(recording: SessionRecording) {
+    // Filter criteria for junk sessions:
+    // - Less than 15 seconds duration (was 5, but too many short useless recordings)
+    // - Less than 15 events
+    const MIN_DURATION_MS = 15000;
+    const MIN_EVENTS = 15;
+    
+    return recording.duration_ms >= MIN_DURATION_MS && recording.events_count >= MIN_EVENTS;
+  }
+
+  const qualityRecordings = showFiltered 
+    ? recordings 
+    : recordings.filter(isQualitySession);
+  
+  const filteredCount = recordings.length - qualityRecordings.length;
 
   if (client.id === 'all') {
     return (
@@ -141,24 +168,37 @@ export default function SessionsView({ client }: SessionsViewProps) {
     <div className="p-6 space-y-6">
       {/* Header */}
       <div className="bg-white rounded-lg border border-gray-200 p-6">
-        <h2 className="text-2xl font-bold mb-2">🎬 Session Recordings</h2>
-        <p className="text-gray-600">
+        <h2 className="text-2xl font-bold mb-2 text-gray-900">🎬 Session Recordings</h2>
+        <p className="text-gray-700">
           Watch how users interact with your site. All recordings are privacy-masked.
         </p>
-        <div className="mt-4 flex gap-4 text-sm">
+        <div className="mt-4 flex flex-wrap gap-4 text-sm items-center">
           <div className="bg-purple-50 px-3 py-1 rounded-full border border-purple-200">
-            <span className="font-semibold text-purple-700">{recordings.length}</span> Total Recordings
+            <span className="font-semibold text-purple-700">{qualityRecordings.length}</span> <span className="text-gray-800 font-medium">Quality Recordings</span>
           </div>
           <div className="bg-red-50 px-3 py-1 rounded-full border border-red-200">
             <span className="font-semibold text-red-700">
               {recordings.filter(r => r.has_rage_click).length}
-            </span> Rage Clicks Detected
+            </span> <span className="text-gray-800 font-medium">Rage Clicks Detected</span>
           </div>
           <div className="bg-orange-50 px-3 py-1 rounded-full border border-orange-200">
             <span className="font-semibold text-orange-700">
               {recordings.filter(r => r.has_error).length}
-            </span> With Errors
+            </span> <span className="text-gray-800 font-medium">With Errors</span>
           </div>
+          {filteredCount > 0 && (
+            <>
+              <div className="bg-gray-100 px-3 py-1 rounded-full border border-gray-300">
+                <span className="font-semibold text-gray-600">{filteredCount}</span> <span className="text-gray-700 font-medium">Filtered (low quality)</span>
+              </div>
+              <button
+                onClick={() => setShowFiltered(!showFiltered)}
+                className="px-3 py-1 text-xs bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-full font-medium transition-colors"
+              >
+                {showFiltered ? '✓ Showing All' : 'Show Filtered'}
+              </button>
+            </>
+          )}
         </div>
       </div>
 
@@ -175,9 +215,23 @@ export default function SessionsView({ client }: SessionsViewProps) {
             Recordings will appear here once visitors browse your site with the tracking script installed.
           </p>
         </div>
+      ) : qualityRecordings.length === 0 ? (
+        <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
+          <div className="text-6xl mb-4">🔍</div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">All recordings filtered</h3>
+          <p className="text-gray-600 mb-4">
+            All {recordings.length} recording(s) were filtered out (less than 15 seconds or 15 events).
+          </p>
+          <button
+            onClick={() => setShowFiltered(true)}
+            className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 font-medium transition-colors"
+          >
+            Show Filtered Recordings
+          </button>
+        </div>
       ) : (
         <div className="grid grid-cols-1 gap-4">
-          {recordings.map((recording) => (
+          {qualityRecordings.map((recording) => (
             <div
               key={recording.id}
               className="bg-white rounded-lg border-2 border-gray-200 hover:border-purple-300 p-6 cursor-pointer transition-all"
@@ -226,7 +280,7 @@ export default function SessionsView({ client }: SessionsViewProps) {
       {/* Replay Modal */}
       {selectedRecording && (
         <div
-          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+          className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4"
           onClick={() => {
             setSelectedRecording(null);
             if (playerInstanceRef.current) {
@@ -236,56 +290,55 @@ export default function SessionsView({ client }: SessionsViewProps) {
           }}
         >
           <div
-            className="bg-white rounded-xl max-w-7xl w-full max-h-[90vh] overflow-y-auto"
+            className="bg-white rounded-xl w-full max-w-6xl relative"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Modal Header */}
-            <div className="p-6 border-b border-gray-200">
-              <div className="flex items-start justify-between">
-                <div>
-                  <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                    {selectedRecording.page_title || 'Session Replay'}
-                  </h2>
-                  <p className="text-sm text-gray-600">{selectedRecording.url}</p>
-                  
-                  <div className="flex items-center gap-4 mt-3 text-sm text-gray-600">
-                    <span>⏱️ {formatDuration(selectedRecording.duration_ms)}</span>
-                    <span>📱 {selectedRecording.device_type}</span>
-                    <span>📐 {selectedRecording.viewport_width}×{selectedRecording.viewport_height}</span>
-                    <span>📅 {formatDate(selectedRecording.started_at)}</span>
-                  </div>
+            {/* Compact Header */}
+            <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+              <div className="flex-1 min-w-0 pr-4">
+                <h2 className="text-lg font-bold text-gray-900 truncate">
+                  {selectedRecording.page_title || 'Session Replay'}
+                </h2>
+                <div className="flex items-center gap-3 mt-1 text-xs text-gray-600">
+                  <span>⏱️ {formatDuration(selectedRecording.duration_ms)}</span>
+                  <span>📱 {selectedRecording.device_type}</span>
+                  <span>📐 {selectedRecording.viewport_width}×{selectedRecording.viewport_height}</span>
                 </div>
-                
-                <button
-                  onClick={() => {
-                    setSelectedRecording(null);
-                    if (playerInstanceRef.current) {
-                      playerContainerRef.current!.innerHTML = '';
-                      playerInstanceRef.current = null;
-                    }
-                  }}
-                  className="text-gray-400 hover:text-gray-600 text-2xl"
-                >
-                  ✕
-                </button>
               </div>
             </div>
 
-            {/* Player Container */}
-            <div className="p-6">
-              {!playerLoaded ? (
-                <div className="flex items-center justify-center py-12">
-                  <div className="text-gray-400">Loading player...</div>
-                </div>
-              ) : (
-                <div ref={playerContainerRef} className="bg-gray-100 rounded-lg overflow-hidden" />
-              )}
+            {/* Player Container with Close Button Overlay */}
+            <div className="relative">
+              {/* Floating Close Button - Always visible on top right */}
+              <button
+                onClick={() => {
+                  setSelectedRecording(null);
+                  if (playerInstanceRef.current) {
+                    playerContainerRef.current!.innerHTML = '';
+                    playerInstanceRef.current = null;
+                  }
+                }}
+                className="absolute top-4 right-4 z-10 w-10 h-10 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center text-xl font-bold shadow-lg transition-colors"
+                title="Close replay"
+              >
+                ✕
+              </button>
+
+              <div className="p-6">
+                {!playerLoaded ? (
+                  <div className="flex items-center justify-center py-12">
+                    <div className="text-gray-400">Loading player...</div>
+                  </div>
+                ) : (
+                  <div ref={playerContainerRef} className="bg-gray-100 rounded-lg overflow-hidden" />
+                )}
+              </div>
             </div>
 
-            {/* Privacy Notice */}
-            <div className="px-6 pb-6">
-              <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-sm text-green-800">
-                🔒 <strong>Privacy Protected:</strong> All sensitive data (passwords, emails, phone numbers) is automatically masked in this recording.
+            {/* Compact Privacy Notice */}
+            <div className="px-6 pb-4">
+              <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-xs text-green-800">
+                🔒 <strong>Privacy Protected:</strong> Sensitive data is automatically masked in this recording.
               </div>
             </div>
           </div>

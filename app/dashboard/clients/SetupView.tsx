@@ -16,6 +16,8 @@ import FeedbackView from './FeedbackView';
 import RoadmapView from './RoadmapView';
 import SessionsView from './SessionsView';
 import AllSitesDashboard from './AllSitesDashboard';
+import BenchmarkCard from './BenchmarkCard';
+import RecentConversions from './RecentConversions';
 
 interface Client {
   id: string;
@@ -23,6 +25,7 @@ interface Client {
   domain: string;
   feedback_enabled?: boolean;
   feedback_widget_style?: string;
+  feedback_excluded_paths?: string;
   session_recording_enabled?: boolean;
 }
 
@@ -174,6 +177,23 @@ export default function SetupView({
               </Card>
             </div>
 
+            {/* Historical Benchmarks */}
+            <div className="mb-6">
+              <BenchmarkCard 
+                client={client}
+                currentStats={{
+                  conversions: stats.convertedSessions,
+                  sessions: stats.totalSessions,
+                  uniqueVisitors: new Set(sessions.map(s => s.visitor_id)).size
+                }}
+              />
+            </div>
+
+            {/* Recent Conversions Timeline */}
+            <div className="mb-6">
+              <RecentConversions sessions={sessions} />
+            </div>
+
             <div className="mb-6">
               <h2 className="text-xl font-semibold text-gray-900 mb-4">AI Insights</h2>
               <InsightsPanel sessions={sessions} />
@@ -283,9 +303,9 @@ export default function SetupView({
                 <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <span className="text-3xl">💡</span>
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">Select a Specific Client</h3>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Select a Specific Site</h3>
                 <p className="text-gray-600">
-                  Insights are available for individual sites. Please select a specific client from the dropdown above to view detailed insights.
+                  Insights are available for individual sites. Please select a specific site from the dropdown above to view detailed insights.
                 </p>
               </div>
             </div>
@@ -319,9 +339,9 @@ export default function SetupView({
                 <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <span className="text-3xl">🎙️</span>
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">Select a Specific Client</h3>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Select a Specific Site</h3>
                 <p className="text-gray-600">
-                  Feedback is available for individual sites. Please select a specific client from the dropdown above to view feedback.
+                  Feedback is available for individual sites. Please select a specific site from the dropdown above to view feedback.
                 </p>
               </div>
             </div>
@@ -341,9 +361,9 @@ export default function SetupView({
                 <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <span className="text-3xl">🚀</span>
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">Select a Specific Client</h3>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Select a Specific Site</h3>
                 <p className="text-gray-600">
-                  Roadmap is available for individual sites. Please select a specific client from the dropdown above to view the roadmap.
+                  Roadmap is available for individual sites. Please select a specific site from the dropdown above to view the roadmap.
                 </p>
               </div>
             </div>
@@ -363,9 +383,9 @@ export default function SetupView({
                 <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <span className="text-3xl">🎬</span>
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">Select a Specific Client</h3>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Select a Specific Site</h3>
                 <p className="text-gray-600">
-                  Session recordings are available for individual sites. Please select a specific client from the dropdown above to view sessions.
+                  Session recordings are available for individual sites. Please select a specific site from the dropdown above to view sessions.
                 </p>
               </div>
             </div>
@@ -385,9 +405,9 @@ export default function SetupView({
                 <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <span className="text-3xl">⚙️</span>
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">Select a Specific Client</h3>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Select a Specific Site</h3>
                 <p className="text-gray-600">
-                  Settings are available for individual sites. Please select a specific client from the dropdown above to view settings.
+                  Settings are available for individual sites. Please select a specific site from the dropdown above to view settings.
                 </p>
               </div>
             </div>
@@ -413,10 +433,10 @@ export default function SetupView({
                     </div>
                   )}
                 </div>
-                <p className="text-sm text-gray-600 mb-4">
+                <p className="text-sm text-gray-800 mb-4">
                   Install this script on your website to start tracking visitor behavior.
                 </p>
-                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 font-mono text-sm break-all mb-3">
+                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 font-mono text-sm break-all mb-3 text-gray-900">
                   {trackingScript}
                 </div>
                 <button
@@ -586,6 +606,112 @@ export default function SetupView({
                             Fast-scrolling product feedback + AI-powered ticket consolidation
                           </p>
                         </div>
+
+                        {/* Honey-Bee Widget */}
+                        <div
+                          onClick={async () => {
+                            const response = await fetch(`/api/clients/${client.id}`, {
+                              method: 'PATCH',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ feedback_widget_style: 'honey-bee' })
+                            });
+                            if (response.ok) {
+                              window.location.reload();
+                            }
+                          }}
+                          className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                            client.feedback_widget_style === 'honey-bee'
+                              ? 'border-yellow-500 bg-yellow-50'
+                              : 'border-gray-200 hover:border-gray-300'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between mb-3">
+                            <h5 className="font-semibold text-gray-900">🐝 Honey-Bee (Gamified)</h5>
+                            {client.feedback_widget_style === 'honey-bee' && (
+                              <span className="text-yellow-600 text-sm">✓ Active</span>
+                            )}
+                          </div>
+                          <div className="relative bg-gradient-to-br from-yellow-50 via-amber-50 to-orange-50 h-32 rounded-lg overflow-hidden flex items-center justify-center">
+                            <div className="relative">
+                              <div className="w-16 h-16 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-2xl flex items-center justify-center shadow-lg border-2 border-orange-600 animate-bounce">
+                                <span className="text-3xl">🐝</span>
+                              </div>
+                              <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 bg-yellow-100 text-amber-900 px-3 py-1 rounded-full text-xs font-bold border-2 border-yellow-300 whitespace-nowrap">
+                                Share Buzz!
+                              </div>
+                            </div>
+                          </div>
+                          <p className="text-xs text-gray-600 mt-3">
+                            ✨ Highly engaging with animations, bee theme, and gamification
+                          </p>
+                        </div>
+
+                        {/* Glass Bar Widget */}
+                        <div
+                          onClick={async () => {
+                            const response = await fetch(`/api/clients/${client.id}`, {
+                              method: 'PATCH',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ feedback_widget_style: 'glass-bar' })
+                            });
+                            if (response.ok) {
+                              window.location.reload();
+                            }
+                          }}
+                          className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                            client.feedback_widget_style === 'glass-bar'
+                              ? 'border-yellow-500 bg-yellow-50'
+                              : 'border-gray-200 hover:border-gray-300'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between mb-3">
+                            <h5 className="font-semibold text-gray-900">Glass Bar (Centered)</h5>
+                            {client.feedback_widget_style === 'glass-bar' && (
+                              <span className="text-yellow-600 text-sm">✓ Active</span>
+                            )}
+                          </div>
+                          <div className="relative bg-gradient-to-br from-gray-50 to-slate-100 h-32 rounded-lg overflow-hidden flex items-end justify-center p-3">
+                            <div className="w-full max-w-xs h-12 bg-white/20 backdrop-blur-lg border border-white/30 rounded-full shadow-lg flex items-center px-4 gap-2">
+                              <span className="text-xs text-gray-700 flex-1">Type or via tekbt</span>
+                              <div className="w-8 h-8 bg-purple-500/20 rounded-full flex items-center justify-center">
+                                <span className="text-sm">🎤</span>
+                              </div>
+                              <div className="w-6 h-6 bg-black/10 rounded-full flex items-center justify-center">
+                                <span className="text-xs">✕</span>
+                              </div>
+                            </div>
+                          </div>
+                          <p className="text-xs text-gray-600 mt-3">
+                            🪟 Centered glass bar at bottom with text input and microphone
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Excluded Pages Configuration */}
+                      <div className="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                        <h4 className="font-semibold text-gray-900 mb-2">🚫 Exclude Pages</h4>
+                        <p className="text-xs text-gray-600 mb-3">
+                          Prevent the feedback widget from showing on specific pages. Enter one path per line.
+                          <br />
+                          <span className="text-gray-500">Examples: /checkout, /admin/*, /login</span>
+                        </p>
+                        <textarea
+                          placeholder="/checkout&#10;/admin/*&#10;/login"
+                          defaultValue={client.feedback_excluded_paths || ''}
+                          onBlur={async (e) => {
+                            const paths = e.target.value;
+                            const response = await fetch(`/api/clients/${client.id}`, {
+                              method: 'PATCH',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ feedback_excluded_paths: paths })
+                            });
+                            if (response.ok) {
+                              console.log('Excluded paths updated');
+                            }
+                          }}
+                          rows={4}
+                          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent font-mono"
+                        />
                       </div>
                     </div>
                   </>

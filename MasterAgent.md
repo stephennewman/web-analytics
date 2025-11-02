@@ -405,3 +405,124 @@ Unlike Hotjar/FullStory: focus on conversion killers only, AI-suggested fixes, v
 **Deploy Method:** Git push → Vercel auto-deploy
 **Status:** 🚀 Deployed - Migration pending
 
+### 2025-11-02 - Session Replay Enhancements ✅
+**Changes:** 1 file changed, 35 insertions(+), 15 deletions(-)
+**Modified files:**
+- `app/dashboard/clients/SessionsView.tsx` - Session replay improvements
+**Features:**
+- ✅ **Autoplay on open** - Videos start automatically when "Watch Replay" clicked
+- ✅ **Quality filtering** - Auto-hide sessions < 5s or < 10 events (bot traffic)
+- ✅ **Filter toggle** - Show/hide filtered sessions with badge count
+- ✅ **Quality metrics** - Dashboard shows "Quality Recordings" count
+- ✅ **Empty state** - Clean UI when all recordings filtered
+**Filters:**
+- Minimum duration: 5 seconds
+- Minimum events: 10 interactions
+- Preserves rage clicks and error sessions in badges
+**Build:** ✅ No linter errors
+**Status:** Ready for deploy
+
+### 2025-11-02 - Historical Benchmarks Feature ✅
+**Changes:** 3 files created/modified
+**New files:**
+- `app/dashboard/clients/BenchmarkCard.tsx` - Historical benchmark comparison component
+- `supabase_migration_client_benchmarks.sql` - Database migration for benchmark fields
+- `check_recent_pupperazi_conversions.sql` - SQL query tool for checking recent activity
+**Modified files:**
+- `app/dashboard/clients/SetupView.tsx` - Integrated benchmark card into dashboard
+**Database Changes:**
+- ⚠️ **MIGRATION REQUIRED:** Add benchmark columns to `clients` table
+- Fields: `benchmark_monthly_conversions`, `benchmark_monthly_sessions`, `benchmark_monthly_visitors`
+- Fields: `benchmark_period`, `benchmark_updated_at`
+**Features:**
+- ✅ **Historical benchmarks card** - Shows 12-month averages vs current performance
+- ✅ **Percentage comparison** - Green/red indicators for above/below average
+- ✅ **Three metrics:** Conversions, Sessions, Unique Visitors
+- ✅ **Pupperazi preset** - 31 conversions, 255 sessions, 177 visitors avg
+- ✅ **Auto-display** - Only shows when benchmarks configured
+- ✅ **Responsive grid** - 3-column layout (1 column on mobile)
+**Pupperazi Benchmarks (12-month avg):**
+- Conversions: 31/month
+- Sessions: 255/month
+- Unique Visitors: 177/month
+**Build:** ✅ No linter errors
+**Status:** Ready for migration + deploy
+
+### 2025-11-02 - Recent Conversions Timeline Widget ✅
+**Changes:** 3 files created/modified
+**New files:**
+- `app/dashboard/clients/RecentConversions.tsx` - Conversion timeline visualization component
+**Modified files:**
+- `app/dashboard/clients/SetupView.tsx` - Added widget to single-site dashboard
+- `app/dashboard/clients/AllSitesDashboard.tsx` - Added widget to All Sites dashboard
+**Features:**
+- ✅ **Visual timeline** - Shows last 10 conversions with full details
+- ✅ **Today/This Week badges** - Quick stats showing last 24h and 7d conversions
+- ✅ **Real-time indicators** - Green pulse dot for conversions in last 24h
+- ✅ **Detailed metrics** - Location, time, clicks, pages, time spent, device
+- ✅ **Landing page tracking** - Shows entry point for each conversion
+- ✅ **Conversion details** - Button text, conversion value if available
+- ✅ **Multi-site support** - Shows site name badges in All Sites view
+- ✅ **Time formatting** - "Xm ago", "Xh ago", "Xd ago" for easy scanning
+- ✅ **Empty state** - Clean UI when no conversions yet
+- ✅ **Scrollable list** - Max height with overflow for many conversions
+- ✅ **Responsive design** - Wraps cleanly on mobile
+**Visual Design:**
+- Green theme for conversions (matches success/conversion state)
+- Recent conversions (24h) highlighted with green background
+- Older conversions use gray theme
+- Number badges (1, 2, 3...) for easy reference
+- Card-based layout with hover states
+**Build:** ✅ No linter errors
+**Status:** Ready for deploy
+
+### 2025-11-02 - Session Replay UX Improvements ✅
+**Changes:** 1 file modified
+**Modified files:**
+- `app/dashboard/clients/SessionsView.tsx` - Major replay UX improvements
+**Fixes:**
+- ✅ **Issue 1 - Autoplay not working:** Added explicit play() call with 100ms delay after player initialization
+- ✅ **Issue 2 - Short useless replays:** Increased filter from 5s to 15s minimum duration and 10 to 15 events
+- ✅ **Issue 3 - Close button requires scrolling:** Added floating close button overlay on top-right of video
+**Improvements:**
+- ✅ **Compact modal header** - Reduced header size by 50% to show player immediately
+- ✅ **Centered modal** - Removed max-height scroll, modal now fits viewport
+- ✅ **Floating close button** - Red circular button (10x10) always visible on top-right of video area
+- ✅ **Better autoplay** - Player width/height set explicitly (800x600), immediate play() call
+- ✅ **Quality filter update** - Now requires 15s+ duration AND 15+ events (was 5s/10 events)
+- ✅ **Darker backdrop** - Changed from 50% to 70% opacity for better focus
+- ✅ **Compact privacy notice** - Reduced from 4 lines to 1 line, smaller text
+**Visual Changes:**
+- Close button: Red (#EF4444) with hover (#DC2626), bold white X
+- Header: Single line title + compact stats (no URL in header)
+- Modal: No scrolling needed, fits in viewport
+- Button position: Absolute top-4 right-4 with z-10
+**Build:** ✅ No linter errors
+**Status:** Ready for deploy
+
+### 2025-11-02 - New "Glass Bar" Feedback Widget Style ✅
+**Changes:** 2 files modified
+**Modified files:**
+- `public/track.js` - Added getGlassBarHTML() function with all 6 states
+- `app/dashboard/clients/SetupView.tsx` - Added Glass Bar option to widget selector
+**Features:**
+- ✅ **Centered bottom bar** - Positioned at bottom center (not corner)
+- ✅ **Glassmorphism effect** - Semi-transparent with backdrop blur (20px)
+- ✅ **Text input placeholder** - "Type or via tekbt" (readonly in collapsed state)
+- ✅ **Microphone icon** - Purple circular button (40px) to expand
+- ✅ **Close button** - X icon (32px) to hide widget
+- ✅ **Responsive design** - Scales to 90% width on mobile (max 600px)
+- ✅ **All 6 states** - collapsed, expanded, recording, review, submitting, thankyou
+**Design Details:**
+- Background: rgba(255,255,255,0.15) collapsed, rgba(255,255,255,0.95) expanded
+- Border: 1px solid rgba(255,255,255,0.3) with backdrop-filter
+- Border radius: 50px (pill shape) for collapsed bar
+- Microphone button: Purple accent (#8B5CF6) with hover effect
+- Text: #333 color, 15px font size
+**Widget Selector:**
+- Added 5th option card with preview showing the glass bar design
+- Preview shows: centered bar with text, mic icon, and close button
+- Description: "🪟 Centered glass bar at bottom with text input and microphone"
+**Build:** ✅ No linter errors
+**Status:** Ready for deploy
+

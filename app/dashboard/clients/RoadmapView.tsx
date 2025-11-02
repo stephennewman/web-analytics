@@ -376,7 +376,7 @@ export default function RoadmapView({ client }: RoadmapViewProps) {
   if (client.id === 'all') {
     return (
       <div className="text-center py-12">
-        <p className="text-gray-500">Select a specific client to view their product roadmap</p>
+        <p className="text-gray-500">Select a specific site to view its product roadmap</p>
       </div>
     );
   }
@@ -396,13 +396,13 @@ export default function RoadmapView({ client }: RoadmapViewProps) {
       <div className="bg-white rounded-lg border border-gray-200 p-4">
         <div className="flex items-center justify-between flex-wrap gap-4">
           <div className="flex-1">
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
+            <label className="block text-sm font-semibold text-gray-900 mb-2">
               Prioritization Framework:
             </label>
             <select
               value={framework}
               onChange={(e) => setFramework(e.target.value as Framework)}
-              className="w-full md:w-auto px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium focus:outline-none focus:ring-2 focus:ring-purple-500"
+              className="w-full md:w-auto px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900"
             >
               {frameworks.map(f => (
                 <option key={f.id} value={f.id}>
@@ -410,7 +410,7 @@ export default function RoadmapView({ client }: RoadmapViewProps) {
                 </option>
               ))}
             </select>
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-gray-700 mt-1">
               {frameworks.find(f => f.id === framework)?.description}
             </p>
           </div>
@@ -453,8 +453,8 @@ export default function RoadmapView({ client }: RoadmapViewProps) {
             return (
               <div key={column.id} className={`rounded-lg border-2 p-4 min-h-[500px] transition-all duration-200 ${column.color}`}>
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-bold text-lg">{column.label}</h3>
-                  <span className="bg-white px-2 py-1 rounded-full text-xs font-semibold">
+                  <h3 className="font-bold text-lg text-gray-900">{column.label}</h3>
+                  <span className="bg-white px-2 py-1 rounded-full text-xs font-semibold text-gray-900">
                     {columnTickets.length}
                   </span>
                 </div>
@@ -600,7 +600,7 @@ export default function RoadmapView({ client }: RoadmapViewProps) {
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <h2 className="text-2xl font-bold text-gray-900 mb-2">{selectedTicket.title}</h2>
-                  <p className="text-gray-600">{selectedTicket.description}</p>
+                  <p className="text-gray-800">{selectedTicket.description}</p>
                   
                   {/* AI Generation Info */}
                   {selectedTicket.ai_generated && selectedTicket.generation_source && (
@@ -633,14 +633,14 @@ export default function RoadmapView({ client }: RoadmapViewProps) {
               <div className="flex items-center gap-4 mt-4">
                 {/* Status Selector */}
                 <div>
-                  <label className="text-xs text-gray-500 mb-1 block">Status</label>
+                  <label className="text-xs text-gray-700 mb-1 block font-semibold">Status</label>
                   <select
                     value={selectedTicket.status}
                     onChange={(e) => {
                       updateTicketStatus(selectedTicket.id, e.target.value);
                       setSelectedTicket({ ...selectedTicket, status: e.target.value as any });
                     }}
-                    className="px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium"
+                    className="px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-900"
                   >
                     {statusColumns.map(col => (
                       <option key={col.id} value={col.id}>{col.label}</option>
@@ -650,14 +650,14 @@ export default function RoadmapView({ client }: RoadmapViewProps) {
 
                 {/* Priority Selector */}
                 <div>
-                  <label className="text-xs text-gray-500 mb-1 block">Priority</label>
+                  <label className="text-xs text-gray-700 mb-1 block font-semibold">Priority</label>
                   <select
                     value={selectedTicket.priority || ''}
                     onChange={(e) => {
                       updateTicketPriority(selectedTicket.id, e.target.value);
                       setSelectedTicket({ ...selectedTicket, priority: e.target.value });
                     }}
-                    className="px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium"
+                    className="px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-900"
                   >
                     <option value="">None</option>
                     <option value="low">Low</option>
@@ -684,19 +684,19 @@ export default function RoadmapView({ client }: RoadmapViewProps) {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="bg-purple-50 rounded-lg p-4 border border-purple-200">
                   <div className="text-2xl font-bold text-purple-700">{selectedTicket.feedback_count || 0}</div>
-                  <div className="text-xs text-gray-600 mt-1">Total Feedback</div>
+                  <div className="text-xs text-gray-800 mt-1 font-semibold">Total Feedback</div>
                 </div>
                 <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
                   <div className="text-2xl font-bold text-blue-700">{selectedTicket.unique_user_count || 0}</div>
-                  <div className="text-xs text-gray-600 mt-1">Unique Users 👤</div>
+                  <div className="text-xs text-gray-800 mt-1 font-semibold">Unique Users 👤</div>
                 </div>
                 <div className="bg-yellow-50 rounded-lg p-4 border border-yellow-200">
                   <div className="text-2xl font-bold text-yellow-700">{selectedTicket.power_user_count || 0}</div>
-                  <div className="text-xs text-gray-600 mt-1">Power Users ⭐</div>
+                  <div className="text-xs text-gray-800 mt-1 font-semibold">Power Users ⭐</div>
                 </div>
                 <div className="bg-green-50 rounded-lg p-4 border border-green-200">
                   <div className="text-2xl font-bold text-green-700">{selectedTicket.user_quality_score?.toFixed(1) || '0.0'}</div>
-                  <div className="text-xs text-gray-600 mt-1">Quality Score</div>
+                  <div className="text-xs text-gray-800 mt-1 font-semibold">Quality Score</div>
                 </div>
               </div>
               <p className="text-xs text-gray-500 mt-3">

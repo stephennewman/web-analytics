@@ -2,7 +2,7 @@
 
 ## Overview
 
-Trackerbee uses a **hybrid design system** combining:
+Trackerbeez uses a **hybrid design system** combining:
 - **Tremor** - Analytics-focused components (charts, KPIs, metrics)
 - **shadcn/ui** - General-purpose components (buttons, modals, forms)
 - **Custom Design Config** - Adjustable "boldness" levels

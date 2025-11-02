@@ -126,7 +126,7 @@ export default function ClientWrapper({ email, client, clients, sessions, stats,
                           }
                         }
                       }}
-                      className="px-3 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                      className="px-3 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900 font-medium"
                     >
                       {clients.length > 1 && (
                         <option value="all">🌐 All Sites</option>

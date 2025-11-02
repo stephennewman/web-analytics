@@ -1,23 +1,31 @@
 import Link from 'next/link';
+import { getButtonClass } from '@/lib/design-system';
+import { BeeSwarm } from '@/components/BeeSwarm';
 
 export default function Home() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-gray-100">
-      <div className="text-center space-y-8 px-4">
-        <h1 className="text-5xl font-bold text-gray-900">Web Analytics</h1>
-        <p className="text-xl text-gray-600 max-w-2xl">
-          Conversion-focused analytics that tells you why visitors don't convert
+    <div className="min-h-screen flex items-center justify-center bg-black">
+      <div className="text-center space-y-8 px-4 max-w-4xl">
+        <div className="flex items-center justify-center gap-3 mb-6">
+          <BeeSwarm size="lg" count={3} />
+        </div>
+        <h1 className="text-6xl font-bold text-gradient-gold mb-4">
+          Trackerbeez
+        </h1>
+        <p className="text-2xl text-zinc-300 max-w-2xl mx-auto font-medium">
+          Buzz through your conversion problems. 
+          <span className="text-yellow-500"> See why visitors don't convert</span> and what to fix.
         </p>
-        <div className="flex gap-4 justify-center">
+        <div className="flex gap-4 justify-center mt-12">
           <Link
             href="/signup"
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
+            className={getButtonClass('primary')}
           >
             Get Started
           </Link>
           <Link
             href="/login"
-            className="px-6 py-3 bg-white text-gray-700 rounded-lg hover:bg-gray-50 font-medium border border-gray-300"
+            className={getButtonClass('secondary')}
           >
             Sign In
           </Link>
