@@ -158,8 +158,8 @@ export default function AllSitesDashboard({ sessions, clients, stats }: AllSites
     <div className="space-y-6">
       {/* Portfolio Summary */}
       <div>
-        <h2 className="text-xl font-bold text-gray-900 mb-4">Portfolio Overview</h2>
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+        <h2 className="text-xl font-bold text-gray-900 mb-4">Portfolio Overview Last 30 Days</h2>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
           <Card 
             decoration="top" 
             decorationColor="purple"
@@ -177,24 +177,6 @@ export default function AllSitesDashboard({ sessions, clients, stats }: AllSites
             <Metric className="text-blue-600">{stats.totalSessions}</Metric>
             <p className="text-sm text-gray-600 mt-1 font-semibold">Total Sessions</p>
             <p className="text-xs text-gray-500 mt-1">Last 30 days</p>
-          </Card>
-          <Card 
-            decoration="top" 
-            decorationColor="green"
-            className="shadow-[4px_4px_0px_rgba(34,197,94,0.4)] border-2 border-green-200 hover:shadow-[6px_6px_0px_rgba(34,197,94,0.5)] transition-all hover:-translate-y-1"
-          >
-            <Metric className="text-green-600">{stats.conversionRate}%</Metric>
-            <p className="text-sm text-gray-600 mt-1 font-semibold">Avg Conversion</p>
-            <p className="text-xs text-gray-500 mt-1">{stats.convertedSessions} converted</p>
-          </Card>
-          <Card 
-            decoration="top" 
-            decorationColor="yellow"
-            className="shadow-[4px_4px_0px_rgba(234,179,8,0.4)] border-2 border-yellow-200 hover:shadow-[6px_6px_0px_rgba(234,179,8,0.5)] transition-all hover:-translate-y-1"
-          >
-            <Metric className="text-yellow-600">{stats.sessionsWithIntent}</Metric>
-            <p className="text-sm text-gray-600 mt-1 font-semibold">High Intent</p>
-            <p className="text-xs text-gray-500 mt-1">Hot leads</p>
           </Card>
           <Card 
             decoration="top" 
@@ -229,11 +211,12 @@ export default function AllSitesDashboard({ sessions, clients, stats }: AllSites
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold text-gray-900 truncate">{site.name}</p>
-                    <p className="text-xs text-gray-500">{site.sessions} sessions</p>
+                    <p className="text-xs text-gray-500">{site.domain || 'No domain'}</p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm font-bold text-purple-600">{site.conversionRate}%</p>
+                  <p className="text-sm font-bold text-purple-600">{site.sessions}</p>
+                  <p className="text-xs text-gray-500">sessions</p>
                 </div>
               </div>
             ))}
@@ -273,54 +256,6 @@ export default function AllSitesDashboard({ sessions, clients, stats }: AllSites
           )}
         </Card>
       </div>
-
-      {/* All Sites Performance Table */}
-      <Card className="overflow-hidden p-0 shadow-[3px_3px_0px_rgba(0,0,0,0.15)] border-2 border-gray-200">
-        <div className="p-6 border-b border-gray-200">
-          <h3 className="text-lg font-bold text-gray-900">All Sites Performance</h3>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Site</th>
-                <th className="px-6 py-3 text-right text-xs font-semibold text-gray-600 uppercase">Sessions</th>
-                <th className="px-6 py-3 text-right text-xs font-semibold text-gray-600 uppercase">Conv. Rate</th>
-                <th className="px-6 py-3 text-right text-xs font-semibold text-gray-600 uppercase">High Intent</th>
-                <th className="px-6 py-3 text-right text-xs font-semibold text-gray-600 uppercase">Pageviews</th>
-                <th className="px-6 py-3 text-right text-xs font-semibold text-gray-600 uppercase">Avg Time</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {siteMetrics.map((site) => (
-                <tr key={site.id} className="hover:bg-gray-50 transition">
-                  <td className="px-6 py-4">
-                    <div>
-                      <p className="text-sm font-semibold text-gray-900">{site.name}</p>
-                      {site.domain && <p className="text-xs text-gray-500">{site.domain}</p>}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 text-right text-sm text-gray-900">{site.sessions}</td>
-                  <td className="px-6 py-4 text-right">
-                    <span className={`text-sm font-semibold ${
-                      site.conversionRate >= 10 ? 'text-green-600' :
-                      site.conversionRate >= 5 ? 'text-yellow-600' :
-                      'text-gray-600'
-                    }`}>
-                      {site.conversionRate}%
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-right text-sm text-gray-900">{site.intent}</td>
-                  <td className="px-6 py-4 text-right text-sm text-gray-900">{site.pageviews}</td>
-                  <td className="px-6 py-4 text-right text-sm text-gray-500">
-                    {Math.floor(site.avgTime / 60)}m {site.avgTime % 60}s
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </Card>
 
       {/* Distribution Visualizations */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -372,7 +307,12 @@ export default function AllSitesDashboard({ sessions, clients, stats }: AllSites
                   <span className="text-sm font-medium text-gray-700">{item.source}</span>
                   <span className="text-sm text-gray-500">{item.percentage}%</span>
                 </div>
-                <ProgressBar value={Number(item.percentage)} color="blue" className="mt-2" />
+                <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
+                  <div 
+                    className="bg-blue-500 h-2 rounded-full transition-all" 
+                    style={{ width: `${item.percentage}%` }}
+                  />
+                </div>
               </div>
             ))}
           </div>

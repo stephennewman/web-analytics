@@ -12,7 +12,6 @@ import TimeOfDayHeatmap from './TimeOfDayHeatmap';
 import ExitAnalysis from './ExitAnalysis';
 import ScrollEngagement from './ScrollEngagement';
 import SessionDetailPanel from './SessionDetailPanel';
-import SlackSettings from './SlackSettings';
 import FeedbackView from './FeedbackView';
 import RoadmapView from './RoadmapView';
 import SessionsView from './SessionsView';
@@ -293,26 +292,59 @@ export default function SetupView({
         );
 
       case 'insights':
+        // Show "select a client" message for All Sites view
+        if (client.id === 'all') {
+          return (
+            <div className="bg-white rounded-lg border border-gray-200 p-8">
+              <div className="max-w-2xl mx-auto text-center">
+                <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="text-3xl">💡</span>
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Select a Specific Client</h3>
+                <p className="text-gray-600">
+                  Insights are available for individual sites. Please select a specific client from the dropdown above to view detailed insights.
+                </p>
+              </div>
+            </div>
+          );
+        }
+        
         return (
           <>
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-6">
-              <BestPath sessions={sessions} />
               <NavigationFlow sessions={sessions} />
+              <DeviceLocationInsights sessions={sessions} />
             </div>
             
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-6">
-              <DeviceLocationInsights sessions={sessions} />
               <TimeOfDayHeatmap sessions={sessions} />
+              <ScrollEngagement sessions={sessions} />
             </div>
             
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-              <ScrollEngagement sessions={sessions} />
               <ExitAnalysis sessions={sessions} />
             </div>
           </>
         );
 
       case 'feedback':
+        // Show "select a client" message for All Sites view
+        if (client.id === 'all') {
+          return (
+            <div className="bg-white rounded-lg border border-gray-200 p-8">
+              <div className="max-w-2xl mx-auto text-center">
+                <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="text-3xl">🎙️</span>
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Select a Specific Client</h3>
+                <p className="text-gray-600">
+                  Feedback is available for individual sites. Please select a specific client from the dropdown above to view feedback.
+                </p>
+              </div>
+            </div>
+          );
+        }
+        
         return (
           <FeedbackView clientId={client.id} />
         );
@@ -328,6 +360,23 @@ export default function SetupView({
         );
 
       case 'settings':
+        // Show "select a client" message for All Sites view
+        if (client.id === 'all') {
+          return (
+            <div className="bg-white rounded-lg border border-gray-200 p-8">
+              <div className="max-w-2xl mx-auto text-center">
+                <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="text-3xl">⚙️</span>
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Select a Specific Client</h3>
+                <p className="text-gray-600">
+                  Settings are available for individual sites. Please select a specific client from the dropdown above to view settings.
+                </p>
+              </div>
+            </div>
+          );
+        }
+        
         return (
           <div className="max-w-4xl space-y-6">
             {/* Tracking Script Section */}
@@ -492,7 +541,7 @@ export default function SetupView({
                           <div className="relative bg-gradient-to-br from-blue-50 to-purple-50 h-32 rounded-lg overflow-hidden flex items-end">
                             <div className="w-full h-12 bg-gradient-to-r from-indigo-500 via-purple-500 to-purple-600 border-t-2 border-indigo-400 flex items-center justify-between px-3">
                               <span className="text-xs text-white/90 truncate">💬 "Need dark mode" 💬 "API docs please"</span>
-                              <span className="text-base ml-2 font-bold text-white text-xs">🎤 VOICE FEEDBACK</span>
+                              <span className="text-xs ml-2 font-bold text-white">🎤 VOICE FEEDBACK</span>
                             </div>
                           </div>
                           <p className="text-xs text-gray-600 mt-3">
@@ -550,9 +599,6 @@ export default function SetupView({
                 </div>
               </div>
             )}
-
-            {/* Slack Integration */}
-            <SlackSettings />
           </div>
         );
 

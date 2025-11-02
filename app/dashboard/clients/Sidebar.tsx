@@ -63,7 +63,7 @@ export default function Sidebar({ email, activeView, onViewChange, clientId }: S
           }`}
         >
           <div className="relative">
-            <span className="text-lg">👁️</span>
+            <span className="text-lg">📡</span>
             {liveVisitorCount > 0 && (
               <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
             )}
@@ -159,14 +159,6 @@ export default function Sidebar({ email, activeView, onViewChange, clientId }: S
 
       {/* User info */}
       <div className="p-4 border-t border-gray-200">
-        <div className="flex items-center gap-3 mb-3">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-yellow-400 to-amber-500 flex items-center justify-center text-black text-sm font-medium">
-            {email[0].toUpperCase()}
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-gray-700 truncate">{email}</p>
-          </div>
-        </div>
         <form action="/api/auth/signout" method="post">
           <button className="w-full text-sm text-gray-600 hover:text-gray-900 py-2 px-3 rounded-lg hover:bg-gray-50 transition-colors text-left cursor-pointer">
             Sign out
