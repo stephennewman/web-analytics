@@ -104,10 +104,6 @@ export default function AllSitesDashboard({ sessions, clients, stats }: AllSites
 
   // Sort sites by different metrics
   const topBySessions = [...siteMetrics].sort((a, b) => b.sessions - a.sessions).slice(0, 5);
-  const topByConversion = [...siteMetrics]
-    .filter(m => m.conversionRate > 0) // Only show sites with actual conversions
-    .sort((a, b) => b.conversionRate - a.conversionRate)
-    .slice(0, 5);
 
   // Calculate device & location distribution across all sites
   const deviceDistribution = useMemo(() => {
@@ -191,7 +187,7 @@ export default function AllSitesDashboard({ sessions, clients, stats }: AllSites
       </div>
 
       {/* Top Performing Sites */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-6">
         {/* Top by Traffic */}
         <Card className="shadow-[3px_3px_0px_rgba(0,0,0,0.15)] border-2 border-gray-200 hover:shadow-[5px_5px_0px_rgba(0,0,0,0.2)] transition-all">
           <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
@@ -221,39 +217,6 @@ export default function AllSitesDashboard({ sessions, clients, stats }: AllSites
               </div>
             ))}
           </div>
-        </Card>
-
-        {/* Top by Conversion */}
-        <Card className="shadow-[3px_3px_0px_rgba(0,0,0,0.15)] border-2 border-gray-200 hover:shadow-[5px_5px_0px_rgba(0,0,0,0.2)] transition-all">
-          <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-            <span>💰</span> Top by Conversion
-          </h3>
-          {topByConversion.length > 0 ? (
-            <div className="space-y-3">
-              {topByConversion.map((site, idx) => (
-                <div key={site.id} className="flex items-center justify-between">
-                  <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
-                      idx === 0 ? 'bg-green-100 text-green-700' :
-                      idx === 1 ? 'bg-green-50 text-green-600' :
-                      'bg-gray-50 text-gray-500'
-                    }`}>
-                      {idx + 1}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-gray-900 truncate">{site.name}</p>
-                      <p className="text-xs text-gray-500">{site.converted} converted</p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm font-bold text-green-600">{site.conversionRate}%</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-sm text-gray-500 text-center py-8">No conversions yet</p>
-          )}
         </Card>
       </div>
 

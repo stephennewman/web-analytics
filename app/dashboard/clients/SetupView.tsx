@@ -350,11 +350,45 @@ export default function SetupView({
         );
 
       case 'roadmap':
+        // Show "select a client" message for All Sites view
+        if (client.id === 'all') {
+          return (
+            <div className="bg-white rounded-lg border border-gray-200 p-8">
+              <div className="max-w-2xl mx-auto text-center">
+                <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="text-3xl">🚀</span>
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Select a Specific Client</h3>
+                <p className="text-gray-600">
+                  Roadmap is available for individual sites. Please select a specific client from the dropdown above to view the roadmap.
+                </p>
+              </div>
+            </div>
+          );
+        }
+        
         return (
           <RoadmapView client={client} />
         );
 
       case 'sessions':
+        // Show "select a client" message for All Sites view
+        if (client.id === 'all') {
+          return (
+            <div className="bg-white rounded-lg border border-gray-200 p-8">
+              <div className="max-w-2xl mx-auto text-center">
+                <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="text-3xl">🎬</span>
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Select a Specific Client</h3>
+                <p className="text-gray-600">
+                  Session recordings are available for individual sites. Please select a specific client from the dropdown above to view sessions.
+                </p>
+              </div>
+            </div>
+          );
+        }
+        
         return (
           <SessionsView client={client} />
         );
