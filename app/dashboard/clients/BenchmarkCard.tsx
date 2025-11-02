@@ -18,7 +18,7 @@ export default function BenchmarkCard({ client, currentStats }: BenchmarkCardPro
   }
 
   const calculatePercentageChange = (current: number, benchmark: number) => {
-    if (!benchmark || benchmark === 0) return 0;
+    if (!benchmark || benchmark === 0) return '0';
     return ((current / benchmark) * 100 - 100).toFixed(0);
   };
 
@@ -71,7 +71,7 @@ export default function BenchmarkCard({ client, currentStats }: BenchmarkCardPro
               </div>
               {conversionsChange !== null && (
                 <div className={`text-xs font-semibold mt-1 ${getChangeColor(parseFloat(conversionsChange))}`}>
-                  {getChangeIcon(parseFloat(conversionsChange))} {conversionsChange > 0 ? '+' : ''}{conversionsChange}% vs avg
+                  {getChangeIcon(parseFloat(conversionsChange))} {parseFloat(conversionsChange) > 0 ? '+' : ''}{conversionsChange}% vs avg
                 </div>
               )}
             </div>
@@ -87,7 +87,7 @@ export default function BenchmarkCard({ client, currentStats }: BenchmarkCardPro
               </div>
               {sessionsChange !== null && (
                 <div className={`text-xs font-semibold mt-1 ${getChangeColor(parseFloat(sessionsChange))}`}>
-                  {getChangeIcon(parseFloat(sessionsChange))} {sessionsChange > 0 ? '+' : ''}{sessionsChange}% vs avg
+                  {getChangeIcon(parseFloat(sessionsChange))} {parseFloat(sessionsChange) > 0 ? '+' : ''}{sessionsChange}% vs avg
                 </div>
               )}
             </div>
@@ -103,7 +103,7 @@ export default function BenchmarkCard({ client, currentStats }: BenchmarkCardPro
               </div>
               {visitorsChange !== null && (
                 <div className={`text-xs font-semibold mt-1 ${getChangeColor(parseFloat(visitorsChange))}`}>
-                  {getChangeIcon(parseFloat(visitorsChange))} {visitorsChange > 0 ? '+' : ''}{visitorsChange}% vs avg
+                  {getChangeIcon(parseFloat(visitorsChange))} {parseFloat(visitorsChange) > 0 ? '+' : ''}{visitorsChange}% vs avg
                 </div>
               )}
             </div>
