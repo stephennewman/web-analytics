@@ -195,7 +195,6 @@ export default function SetupView({
             <div className="bg-white rounded-lg border border-gray-200 p-4 mb-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
                   <span className="text-lg font-semibold text-gray-900">
                     {liveSessions.length} {liveSessions.length === 1 ? 'Visitor' : 'Visitors'} Online
                   </span>
