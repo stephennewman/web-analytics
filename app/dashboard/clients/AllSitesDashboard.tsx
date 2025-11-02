@@ -10,6 +10,69 @@ interface AllSitesDashboardProps {
   stats: any;
 }
 
+// Pie chart colors
+const PIE_COLORS = [
+  '#8b5cf6', // purple
+  '#3b82f6', // blue
+  '#f59e0b', // amber
+  '#10b981', // green
+  '#ef4444', // red
+  '#6366f1', // indigo
+];
+
+// Simple Pie Chart Component
+function PieChart({ data }: { data: Array<{ device: string; count: number; percentage: string }> }) {
+  const total = data.reduce((sum, item) => sum + item.count, 0);
+  if (total === 0) return <p className="text-sm text-gray-500">No data</p>;
+  
+  let currentAngle = 0;
+  const segments = data.map((item, idx) => {
+    const percentage = item.count / total;
+    const angle = percentage * 360;
+    const startAngle = currentAngle;
+    currentAngle += angle;
+    
+    return {
+      ...item,
+      startAngle,
+      angle,
+      color: PIE_COLORS[idx % PIE_COLORS.length]
+    };
+  });
+
+  return (
+    <svg width="200" height="200" viewBox="-100 -100 200 200" className="transform -rotate-90">
+      {segments.map((segment, idx) => {
+        const largeArcFlag = segment.angle > 180 ? 1 : 0;
+        const startRad = (segment.startAngle * Math.PI) / 180;
+        const endRad = ((segment.startAngle + segment.angle) * Math.PI) / 180;
+        
+        const x1 = Math.cos(startRad) * 90;
+        const y1 = Math.sin(startRad) * 90;
+        const x2 = Math.cos(endRad) * 90;
+        const y2 = Math.sin(endRad) * 90;
+        
+        const pathData = [
+          `M 0 0`,
+          `L ${x1} ${y1}`,
+          `A 90 90 0 ${largeArcFlag} 1 ${x2} ${y2}`,
+          `Z`
+        ].join(' ');
+        
+        return (
+          <path
+            key={idx}
+            d={pathData}
+            fill={segment.color}
+            stroke="white"
+            strokeWidth="2"
+          />
+        );
+      })}
+    </svg>
+  );
+}
+
 export default function AllSitesDashboard({ sessions, clients, stats }: AllSitesDashboardProps) {
   // Calculate per-site metrics
   const siteMetrics = useMemo(() => {
@@ -41,8 +104,10 @@ export default function AllSitesDashboard({ sessions, clients, stats }: AllSites
 
   // Sort sites by different metrics
   const topBySessions = [...siteMetrics].sort((a, b) => b.sessions - a.sessions).slice(0, 5);
-  const topByConversion = [...siteMetrics].sort((a, b) => b.conversionRate - a.conversionRate).slice(0, 5);
-  const topByHealth = [...siteMetrics].sort((a, b) => b.health - a.health).slice(0, 5);
+  const topByConversion = [...siteMetrics]
+    .filter(m => m.conversionRate > 0) // Only show sites with actual conversions
+    .sort((a, b) => b.conversionRate - a.conversionRate)
+    .slice(0, 5);
 
   // Calculate device & location distribution across all sites
   const deviceDistribution = useMemo(() => {
@@ -111,7 +176,7 @@ export default function AllSitesDashboard({ sessions, clients, stats }: AllSites
           >
             <Metric className="text-blue-600">{stats.totalSessions}</Metric>
             <p className="text-sm text-gray-600 mt-1 font-semibold">Total Sessions</p>
-            <p className="text-xs text-gray-500 mt-1">All sites</p>
+            <p className="text-xs text-gray-500 mt-1">Last 30 days</p>
           </Card>
           <Card 
             decoration="top" 
@@ -144,7 +209,7 @@ export default function AllSitesDashboard({ sessions, clients, stats }: AllSites
       </div>
 
       {/* Top Performing Sites */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Top by Traffic */}
         <Card className="shadow-[3px_3px_0px_rgba(0,0,0,0.15)] border-2 border-gray-200 hover:shadow-[5px_5px_0px_rgba(0,0,0,0.2)] transition-all">
           <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
@@ -180,64 +245,32 @@ export default function AllSitesDashboard({ sessions, clients, stats }: AllSites
           <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
             <span>💰</span> Top by Conversion
           </h3>
-          <div className="space-y-3">
-            {topByConversion.map((site, idx) => (
-              <div key={site.id} className="flex items-center justify-between">
-                <div className="flex items-center gap-3 flex-1 min-w-0">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
-                    idx === 0 ? 'bg-green-100 text-green-700' :
-                    idx === 1 ? 'bg-green-50 text-green-600' :
-                    'bg-gray-50 text-gray-500'
-                  }`}>
-                    {idx + 1}
+          {topByConversion.length > 0 ? (
+            <div className="space-y-3">
+              {topByConversion.map((site, idx) => (
+                <div key={site.id} className="flex items-center justify-between">
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
+                      idx === 0 ? 'bg-green-100 text-green-700' :
+                      idx === 1 ? 'bg-green-50 text-green-600' :
+                      'bg-gray-50 text-gray-500'
+                    }`}>
+                      {idx + 1}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-gray-900 truncate">{site.name}</p>
+                      <p className="text-xs text-gray-500">{site.converted} converted</p>
+                    </div>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-gray-900 truncate">{site.name}</p>
-                    <p className="text-xs text-gray-500">{site.converted} converted</p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p className="text-sm font-bold text-green-600">{site.conversionRate}%</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </Card>
-
-        {/* Top by Health */}
-        <Card className="shadow-[3px_3px_0px_rgba(0,0,0,0.15)] border-2 border-gray-200 hover:shadow-[5px_5px_0px_rgba(0,0,0,0.2)] transition-all">
-          <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-            <span>❤️</span> Healthiest Sites
-          </h3>
-          <div className="space-y-3">
-            {topByHealth.map((site, idx) => (
-              <div key={site.id} className="flex items-center justify-between">
-                <div className="flex items-center gap-3 flex-1 min-w-0">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
-                    site.health >= 80 ? 'bg-green-100 text-green-700' :
-                    site.health >= 60 ? 'bg-yellow-100 text-yellow-700' :
-                    'bg-red-100 text-red-700'
-                  }`}>
-                    {idx + 1}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-gray-900 truncate">{site.name}</p>
-                    <p className="text-xs text-gray-500">{site.sessions} sessions</p>
+                  <div className="text-right">
+                    <p className="text-sm font-bold text-green-600">{site.conversionRate}%</p>
                   </div>
                 </div>
-                <div className="text-right">
-                  <p className={`text-sm font-bold ${
-                    site.health >= 80 ? 'text-green-600' :
-                    site.health >= 60 ? 'text-yellow-600' :
-                    'text-red-600'
-                  }`}>{site.health}/100</p>
-                </div>
-              </div>
-            ))}
-          </div>
-          <p className="text-xs text-gray-500 mt-4">
-            Health = Traffic × Conversion × Engagement
-          </p>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-gray-500 text-center py-8">No conversions yet</p>
+          )}
         </Card>
       </div>
 
@@ -256,7 +289,6 @@ export default function AllSitesDashboard({ sessions, clients, stats }: AllSites
                 <th className="px-6 py-3 text-right text-xs font-semibold text-gray-600 uppercase">High Intent</th>
                 <th className="px-6 py-3 text-right text-xs font-semibold text-gray-600 uppercase">Pageviews</th>
                 <th className="px-6 py-3 text-right text-xs font-semibold text-gray-600 uppercase">Avg Time</th>
-                <th className="px-6 py-3 text-right text-xs font-semibold text-gray-600 uppercase">Health</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
@@ -283,21 +315,6 @@ export default function AllSitesDashboard({ sessions, clients, stats }: AllSites
                   <td className="px-6 py-4 text-right text-sm text-gray-500">
                     {Math.floor(site.avgTime / 60)}m {site.avgTime % 60}s
                   </td>
-                  <td className="px-6 py-4 text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      <div className="w-16 h-2 bg-gray-200 rounded-full overflow-hidden">
-                        <div 
-                          className={`h-full ${
-                            site.health >= 80 ? 'bg-green-500' :
-                            site.health >= 60 ? 'bg-yellow-500' :
-                            'bg-red-500'
-                          }`}
-                          style={{ width: `${site.health}%` }}
-                        />
-                      </div>
-                      <span className="text-xs text-gray-600 w-8">{site.health}</span>
-                    </div>
-                  </td>
                 </tr>
               ))}
             </tbody>
@@ -310,16 +327,22 @@ export default function AllSitesDashboard({ sessions, clients, stats }: AllSites
         {/* Device Distribution */}
         <Card>
           <h3 className="text-lg font-bold text-gray-900 mb-4">📱 Device Distribution</h3>
-          <div className="space-y-3">
-            {deviceDistribution.map((item) => (
-              <div key={item.device}>
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-sm font-medium text-gray-700 capitalize">{item.device}</span>
-                  <span className="text-sm text-gray-500">{item.percentage}%</span>
+          <div className="flex flex-col items-center">
+            <PieChart data={deviceDistribution} />
+            <div className="mt-4 space-y-2 w-full">
+              {deviceDistribution.map((item, idx) => (
+                <div key={item.device} className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div 
+                      className="w-3 h-3 rounded-full" 
+                      style={{ backgroundColor: PIE_COLORS[idx % PIE_COLORS.length] }}
+                    />
+                    <span className="text-sm text-gray-700 capitalize">{item.device}</span>
+                  </div>
+                  <span className="text-sm font-semibold text-gray-900">{item.percentage}%</span>
                 </div>
-                <ProgressBar value={Number(item.percentage)} color="purple" className="mt-2" />
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </Card>
 
