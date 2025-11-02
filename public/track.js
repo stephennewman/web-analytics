@@ -691,9 +691,35 @@
       var widget = document.getElementById('tb-feedback-widget');
       if (widget) widget.remove();
       
+      // Get icon based on widget style
+      var iconContent = '';
+      var bgColor = 'rgba(0,0,0,0.6)';
+      
+      switch(this.widgetStyle) {
+        case 'honey-bee':
+          iconContent = '<span style="font-size:20px;">🐝</span>';
+          bgColor = 'linear-gradient(135deg,#FCD34D,#F59E0B)';
+          break;
+        case 'glass-bar':
+          iconContent = '<span style="font-size:18px;">💬</span>';
+          bgColor = 'rgba(139,92,246,0.8)';
+          break;
+        case 'ticker':
+          iconContent = '<span style="font-size:18px;">🎤</span>';
+          bgColor = 'linear-gradient(135deg,#EC4899,#8B5CF6)';
+          break;
+        case 'b2b-saas':
+          iconContent = '<span style="font-size:18px;">💡</span>';
+          bgColor = 'rgba(100,116,139,0.9)';
+          break;
+        default: // glassmorphic
+          iconContent = '<svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>';
+          bgColor = 'rgba(139,92,246,0.8)';
+      }
+      
       var minBtn = document.createElement('div');
       minBtn.id = 'tb-feedback-widget-minimized';
-      minBtn.innerHTML = '<div style="position:fixed;bottom:10px;right:10px;width:36px;height:36px;background:rgba(0,0,0,0.6);border-radius:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,0.3);backdrop-filter:blur(10px);transition:all 0.2s;" onmouseover="this.style.transform=\'scale(1.1)\'" onmouseout="this.style.transform=\'scale(1)\'" data-action="show-widget"><svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg></div>';
+      minBtn.innerHTML = '<div style="position:fixed;bottom:10px;right:10px;width:40px;height:40px;background:' + bgColor + ';border-radius:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,0.3);backdrop-filter:blur(10px);transition:all 0.2s;" onmouseover="this.style.transform=\'scale(1.1)\'" onmouseout="this.style.transform=\'scale(1)\'" data-action="show-widget">' + iconContent + '</div>';
       document.body.appendChild(minBtn);
       
       minBtn.onclick = function() {
