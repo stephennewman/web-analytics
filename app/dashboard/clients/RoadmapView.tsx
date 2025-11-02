@@ -374,25 +374,6 @@ export default function RoadmapView({ client }: RoadmapViewProps) {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-indigo-500 via-purple-500 to-purple-600 rounded-lg p-6 text-white">
-        <h2 className="text-2xl font-bold mb-2">🚀 Product Roadmap</h2>
-        <p className="text-indigo-100">
-          Voice feedback automatically organized into tickets by AI. Drag cards to update status.
-        </p>
-        <div className="mt-4 flex gap-4 text-sm">
-          <div className="bg-white/20 px-3 py-1 rounded-full">
-            {tickets.length} Total Tickets
-          </div>
-          <div className="bg-white/20 px-3 py-1 rounded-full">
-            {tickets.filter(t => t.status === 'shipped').length} Shipped
-          </div>
-          <div className="bg-white/20 px-3 py-1 rounded-full">
-            {tickets.reduce((sum, t) => sum + t.feedback_count, 0)} Voice Submissions
-          </div>
-        </div>
-      </div>
-
       {/* Framework Selector & Actions */}
       <div className="bg-white rounded-lg border border-gray-200 p-4">
         <div className="flex items-center justify-between flex-wrap gap-4">

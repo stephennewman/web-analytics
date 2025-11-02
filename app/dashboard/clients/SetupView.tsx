@@ -24,7 +24,6 @@ interface Client {
   feedback_enabled?: boolean;
   feedback_widget_style?: string;
   session_recording_enabled?: boolean;
-  google_search_console_connected?: boolean;
 }
 
 interface Stats {
@@ -417,7 +416,20 @@ export default function SetupView({
             {/* Tracking Script Section */}
             {client.id !== 'all' && (
               <div className="bg-white rounded-lg border border-gray-200 p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Tracking Script</h3>
+                <div className="flex items-start justify-between mb-2">
+                  <h3 className="text-lg font-semibold text-gray-900">Tracking Script</h3>
+                  {stats.totalSessions > 0 ? (
+                    <div className="flex items-center gap-2 px-3 py-1 bg-green-50 rounded-full border border-green-200">
+                      <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                      <span className="text-xs font-semibold text-green-700">Script Active</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2 px-3 py-1 bg-gray-50 rounded-full border border-gray-200">
+                      <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+                      <span className="text-xs font-semibold text-gray-600">Not Installed</span>
+                    </div>
+                  )}
+                </div>
                 <p className="text-sm text-gray-600 mb-4">
                   Install this script on your website to start tracking visitor behavior.
                 </p>
@@ -430,11 +442,19 @@ export default function SetupView({
                 >
                   {copied ? '✓ Copied!' : 'Copy Script'}
                 </button>
-                <div className="mt-4 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
-                  <p className="text-sm text-gray-700">
-                    <strong className="text-yellow-900">💡 Installation:</strong> Add this script to the <code className="bg-yellow-100 px-1 rounded">&lt;head&gt;</code> section of your website. Data will appear within 60 seconds.
-                  </p>
-                </div>
+                {stats.totalSessions > 0 ? (
+                  <div className="mt-4 p-3 bg-green-50 rounded-lg border border-green-200">
+                    <p className="text-sm text-green-800">
+                      <strong>✅ Tracking Active:</strong> Received {stats.totalSessions} session{stats.totalSessions !== 1 ? 's' : ''} with {stats.totalEvents} event{stats.totalEvents !== 1 ? 's' : ''} total.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="mt-4 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+                    <p className="text-sm text-gray-700">
+                      <strong className="text-yellow-900">💡 Installation:</strong> Add this script to the <code className="bg-yellow-100 px-1 rounded">&lt;head&gt;</code> section of your website. Data will appear within 60 seconds.
+                    </p>
+                  </div>
+                )}
               </div>
             )}
 
@@ -586,83 +606,6 @@ export default function SetupView({
                       </div>
                     </div>
                   </>
-                )}
-              </div>
-            )}
-
-            {/* Google Search Console Integration */}
-            {client.id !== 'all' && (
-              <div className="bg-white rounded-lg border border-gray-200 p-6">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">🔍 Google Search Console</h3>
-                    <p className="text-sm text-gray-600 mb-4">
-                      Connect Google Search Console to see search queries, impressions, clicks, and rankings directly in your dashboard.
-                    </p>
-                  </div>
-                </div>
-                
-                {client.google_search_console_connected ? (
-                  <div className="space-y-3">
-                    <div className="p-3 bg-green-50 rounded-lg border border-green-200">
-                      <p className="text-sm text-green-800 flex items-center gap-2">
-                        <span>✅</span> Connected to Google Search Console
-                      </p>
-                    </div>
-                    <div className="flex gap-3">
-                      <button
-                        onClick={async () => {
-                          // Refresh GSC data
-                          const response = await fetch(`/api/gsc/sync?clientId=${client.id}`, {
-                            method: 'POST'
-                          });
-                          if (response.ok) {
-                            alert('✅ Search Console data synced successfully!');
-                          } else {
-                            alert('❌ Failed to sync data');
-                          }
-                        }}
-                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
-                      >
-                        🔄 Sync Data
-                      </button>
-                      <button
-                        onClick={async () => {
-                          if (confirm('Are you sure you want to disconnect Google Search Console?')) {
-                            const response = await fetch(`/api/gsc/disconnect?clientId=${client.id}`, {
-                              method: 'POST'
-                            });
-                            if (response.ok) {
-                              window.location.reload();
-                            }
-                          }
-                        }}
-                        className="px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors text-sm font-medium"
-                      >
-                        Disconnect
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    <button
-                      onClick={() => {
-                        // Redirect to Google OAuth
-                        window.location.href = `/api/gsc/connect?clientId=${client.id}`;
-                      }}
-                      className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:shadow-lg font-medium transition-all flex items-center gap-2"
-                    >
-                      <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"/>
-                      </svg>
-                      Connect Google Search Console
-                    </button>
-                    <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
-                      <p className="text-sm text-blue-800">
-                        <strong>📊 What you'll get:</strong> Search queries, impressions, clicks, CTR, and average positions for your site.
-                      </p>
-                    </div>
-                  </div>
                 )}
               </div>
             )}

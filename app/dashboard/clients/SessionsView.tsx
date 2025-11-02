@@ -116,6 +116,57 @@ export default function SessionsView({ client }: SessionsViewProps) {
     );
   }
 
+  // Check if session recording is disabled
+  if (!client.session_recording_enabled) {
+    return (
+      <div className="p-6 space-y-6">
+        <div className="bg-white rounded-lg border-2 border-purple-200 p-12 text-center">
+          <div className="text-6xl mb-4">🎬</div>
+          <h3 className="text-2xl font-bold text-gray-900 mb-3">Session Recording Not Enabled</h3>
+          <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
+            Session recording lets you watch real user sessions to understand behavior, identify UX issues, and spot frustration points. 
+            All sensitive data is automatically masked for privacy.
+          </p>
+          
+          <div className="bg-purple-50 rounded-lg border-2 border-purple-200 p-6 mb-6 max-w-2xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+              <div className="text-center">
+                <div className="text-2xl mb-2">🖱️</div>
+                <p className="font-semibold text-gray-900">Mouse Movements</p>
+                <p className="text-gray-600">See exactly where users click</p>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl mb-2">📜</div>
+                <p className="font-semibold text-gray-900">Scroll Behavior</p>
+                <p className="text-gray-600">Track engagement depth</p>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl mb-2">🔥</div>
+                <p className="font-semibold text-gray-900">Rage Clicks</p>
+                <p className="text-gray-600">Detect frustration points</p>
+              </div>
+            </div>
+          </div>
+
+          <button
+            onClick={() => window.location.href = `/dashboard/clients?site=${client.id}&view=settings`}
+            className="px-8 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg hover:shadow-lg font-semibold text-lg transition-all inline-flex items-center gap-2"
+          >
+            <span>⚙️</span>
+            Enable Session Recording in Settings
+          </button>
+
+          <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200 max-w-2xl mx-auto">
+            <p className="text-sm text-blue-800">
+              <strong>🔒 Privacy First:</strong> Passwords, emails, credit cards, and phone numbers are automatically masked. 
+              Sessions auto-delete after 30 days.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
