@@ -1,6 +1,6 @@
 {
   "mcpServers": {
-    "trackerbee": {
+    "trackerbeez": {
       "command": "node",
       "args": ["/Users/stephennewman/web-analytics/trackerbee-mcp/build/index.js"],
       "env": {

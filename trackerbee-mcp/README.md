@@ -1,10 +1,10 @@
-# 🐝 Trackerbee MCP Server for Cursor
+# 🐝🐝🐝 Trackerbeez MCP Server for Cursor
 
-Connect your Trackerbee roadmap directly to Cursor! Build features based on real user feedback with AI assistance.
+Connect your Trackerbeez roadmap directly to Cursor! Build features based on real user feedback with AI assistance.
 
 ## 🎯 What It Does
 
-Use `@trackerbee` in Cursor to:
+Use `@trackerbeez` in Cursor to:
 - See what's currently being built
 - Get ticket details with voice feedback transcripts
 - Find the next highest priority feature
@@ -28,7 +28,7 @@ Add to your Cursor settings (`~/.cursor/config.json` or via Settings UI):
 ```json
 {
   "mcpServers": {
-    "trackerbee": {
+    "trackerbeez": {
       "command": "node",
       "args": ["/Users/stephennewman/web-analytics/trackerbee-mcp/build/index.js"],
       "env": {
@@ -52,7 +52,7 @@ Quit and reopen Cursor to load the MCP server.
 
 In Cursor Composer:
 ```
-@trackerbee get_building_tickets
+@trackerbeez get_building_tickets
 ```
 
 ## 🛠️ Available Tools
@@ -62,12 +62,12 @@ Get all tickets currently in "Building" status.
 
 **Usage:**
 ```
-@trackerbee get_building_tickets
+@trackerbeez get_building_tickets
 ```
 
 **With client filter:**
 ```
-@trackerbee get_building_tickets {"client_id": "82c08676-46d2-4c60-aa70-7256e80e7a28"}
+@trackerbeez get_building_tickets {"client_id": "82c08676-46d2-4c60-aa70-7256e80e7a28"}
 ```
 
 ### `get_ticket_details`
@@ -75,7 +75,7 @@ Get full details including voice feedback transcripts.
 
 **Usage:**
 ```
-@trackerbee get_ticket_details {"ticket_id": "abc-123"}
+@trackerbeez get_ticket_details {"ticket_id": "abc-123"}
 ```
 
 ### `get_next_priority`
@@ -83,12 +83,12 @@ Get the highest priority ticket based on AI scoring.
 
 **Usage:**
 ```
-@trackerbee get_next_priority
+@trackerbeez get_next_priority
 ```
 
 **With framework:**
 ```
-@trackerbee get_next_priority {"framework": "quick_win"}
+@trackerbeez get_next_priority {"framework": "quick_win"}
 ```
 
 **Frameworks:**
@@ -104,7 +104,7 @@ List all tickets by status.
 
 **Usage:**
 ```
-@trackerbee list_tickets {"status": "planned"}
+@trackerbeez list_tickets {"status": "planned"}
 ```
 
 **Statuses:** `new`, `planned`, `building`, `shipped`
@@ -114,7 +114,7 @@ Search tickets by keyword.
 
 **Usage:**
 ```
-@trackerbee search_tickets {"keyword": "mobile"}
+@trackerbeez search_tickets {"keyword": "mobile"}
 ```
 
 ### `get_recent_tickets`
@@ -122,18 +122,18 @@ Get tickets created within the last X hours. Perfect for checking what's new!
 
 **Usage:**
 ```
-@trackerbee get_recent_tickets
+@trackerbeez get_recent_tickets
 ```
 
 **With custom time range:**
 ```
-@trackerbee get_recent_tickets {"hours_ago": 1}  // Last hour
-@trackerbee get_recent_tickets {"hours_ago": 168}  // Last week
+@trackerbeez get_recent_tickets {"hours_ago": 1}  // Last hour
+@trackerbeez get_recent_tickets {"hours_ago": 168}  // Last week
 ```
 
 **Pro Tip:** Ask Cursor to check for you regularly:
 ```
-You: @trackerbee what tickets were created in the last hour?
+You: @trackerbeez what tickets were created in the last hour?
 (internally calls get_recent_tickets with hours_ago: 1)
 ```
 
@@ -141,10 +141,10 @@ You: @trackerbee what tickets were created in the last hour?
 
 ### Morning Planning
 ```
-You: @trackerbee what should I build today?
+You: @trackerbeez what should I build today?
 (internally calls get_next_priority)
 
-You: @trackerbee get ticket details for [id from above]
+You: @trackerbeez get ticket details for [id from above]
 (shows full context + voice feedback)
 
 You: @cursor implement this feature using the feedback above
@@ -152,22 +152,22 @@ You: @cursor implement this feature using the feedback above
 
 ### Check Progress
 ```
-You: @trackerbee what's in building?
+You: @trackerbeez what's in building?
 (shows all active tickets)
 ```
 
 ### Check What's New
 ```
-You: @trackerbee what's new since yesterday?
+You: @trackerbeez what's new since yesterday?
 (internally calls get_recent_tickets with hours_ago: 24)
 
-You: @trackerbee any new tickets in the last hour?
+You: @trackerbeez any new tickets in the last hour?
 (shows tickets created in last hour)
 ```
 
 ### Find Related Work
 ```
-You: @trackerbee search for "authentication" tickets
+You: @trackerbeez search for "authentication" tickets
 (finds all auth-related tickets)
 ```
 
@@ -235,5 +235,5 @@ npm run build
 
 ## 📝 License
 
-MIT - Part of Trackerbee web analytics project
+MIT - Part of Trackerbeez web analytics project
 

@@ -54,7 +54,7 @@ interface Feedback {
 // Server setup
 const server = new Server(
   {
-    name: 'trackerbee',
+    name: 'trackerbeez',
     version: '1.0.0',
   },
   {
@@ -509,7 +509,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  console.error('Trackerbee MCP server running on stdio');
+  console.error('Trackerbeez MCP server running on stdio');
 }
 
 main().catch((error) => {

@@ -596,10 +596,12 @@ export default function SetupView({
                               <span className="text-yellow-600 text-sm">✓ Active</span>
                             )}
                           </div>
-                          <div className="relative bg-gradient-to-br from-blue-50 to-purple-50 h-32 rounded-lg overflow-hidden flex items-end">
-                            <div className="w-full h-12 bg-gradient-to-r from-indigo-500 via-purple-500 to-purple-600 border-t-2 border-indigo-400 flex items-center justify-between px-3">
-                              <span className="text-xs text-white/90 truncate">💬 "Need dark mode" 💬 "API docs please"</span>
-                              <span className="text-xs ml-2 font-bold text-white">🎤 VOICE FEEDBACK</span>
+                          <div className="relative bg-gradient-to-br from-slate-50 to-slate-100 h-32 rounded-lg overflow-hidden flex items-end">
+                            <div className="w-full h-12 bg-slate-800 border-t-2 border-slate-700 flex items-center justify-between px-3">
+                              <span className="text-xs text-slate-200 font-medium truncate">💬 "Great SSO integration!" 💬 "API docs excellent"</span>
+                              <div className="flex-shrink-0 ml-2 w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center">
+                                <span className="text-sm">🎤</span>
+                              </div>
                             </div>
                           </div>
                           <p className="text-xs text-gray-600 mt-3">

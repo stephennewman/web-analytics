@@ -758,6 +758,24 @@
           feedbackWidget.toggleVisibility(); 
         };
       }
+      
+      // Add Enter key handler for text input (glass-bar widget)
+      if (this.widgetStyle === 'glass-bar' && state === 'collapsed') {
+        setTimeout(function() {
+          var input = document.getElementById('tb-glass-input');
+          if (input) {
+            input.onkeydown = function(e) {
+              if (e.key === 'Enter') {
+                var text = input.value;
+                if (text && text.trim().length > 0) {
+                  feedbackWidget.submitTextFeedback(text);
+                  e.preventDefault();
+                }
+              }
+            };
+          }
+        }, 100); // Small delay to ensure DOM is ready
+      }
     },
     
     getHTML: function(state) {
@@ -948,9 +966,9 @@
     },
     
     getGlassBarHTML: function(state) {
-      // Glass Bar - Centered bottom bar with glassmorphism effect
+      // Glass Bar - Centered bottom bar with text input OR voice recording (dual mode)
       if (state === 'collapsed') {
-        return '<div style="position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:9999;width:90%;max-width:600px;transition:all 0.3s ease;"><div style="position:relative;background:rgba(255,255,255,0.15);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.3);border-radius:50px;padding:12px 20px;box-shadow:0 8px 32px rgba(0,0,0,0.1);display:flex;align-items:center;gap:12px;"><input type="text" placeholder="Type or via tekbt" style="flex:1;background:transparent;border:none;outline:none;color:#333;font-size:15px;font-weight:500;font-family:system-ui,-apple-system,sans-serif;padding:8px 12px;" readonly data-action="expand" /><div style="width:40px;height:40px;background:rgba(139,92,246,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background=\'rgba(139,92,246,0.3)\'" onmouseout="this.style.background=\'rgba(139,92,246,0.2)\'" data-action="expand"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8B5CF6" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></div><div style="width:32px;height:32px;background:rgba(0,0,0,0.1);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.2s;margin-left:4px;" onmouseover="this.style.background=\'rgba(0,0,0,0.15)\'" onmouseout="this.style.background=\'rgba(0,0,0,0.1)\'" data-action="hide-widget"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div></div></div><style>@media (max-width: 768px) { #tb-feedback-widget > div { width:calc(100% - 32px) !important; }}</style>';
+        return '<div style="position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:9999;width:90%;max-width:600px;transition:all 0.3s ease;"><div style="position:relative;background:rgba(255,255,255,0.15);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.3);border-radius:50px;padding:12px 20px;box-shadow:0 8px 32px rgba(0,0,0,0.1);display:flex;align-items:center;gap:12px;"><input id="tb-glass-input" type="text" placeholder="Type feedback or share via voice..." style="flex:1;background:transparent;border:none;outline:none;color:#333;font-size:15px;font-weight:500;font-family:system-ui,-apple-system,sans-serif;padding:8px 12px;" /><div style="width:40px;height:40px;background:rgba(139,92,246,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background=\'rgba(139,92,246,0.3)\'" onmouseout="this.style.background=\'rgba(139,92,246,0.2)\'" data-action="expand"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8B5CF6" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></div><div style="width:32px;height:32px;background:rgba(0,0,0,0.1);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.2s;margin-left:4px;" onmouseover="this.style.background=\'rgba(0,0,0,0.15)\'" onmouseout="this.style.background=\'rgba(0,0,0,0.1)\'" data-action="hide-widget"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div></div></div><style>@media (max-width: 768px) { #tb-feedback-widget > div { width:calc(100% - 32px) !important; }}</style>';
       }
       
       if (state === 'expanded') {
@@ -982,6 +1000,55 @@
     
     collapse: function() {
       this.updateState('collapsed');
+    },
+    
+    submitTextFeedback: function(text) {
+      if (!text || text.trim().length === 0) {
+        console.log('🐝 Empty text feedback, ignoring');
+        return;
+      }
+      
+      console.log('🐝 Submitting text feedback:', text);
+      this.updateState('submitting');
+      
+      // Create a text feedback submission (no audio)
+      var payload = {
+        clientId: clientId,
+        sessionId: sessionId,
+        type: 'text',
+        content: text.trim(),
+        url: window.location.href,
+        timestamp: new Date().toISOString()
+      };
+      
+      fetch(apiEndpoint.replace('/track', '/feedback/text'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+        mode: 'cors',
+        credentials: 'omit'
+      })
+      .then(function(res) {
+        if (!res.ok) {
+          throw new Error('Failed to submit text feedback');
+        }
+        return res.json();
+      })
+      .then(function(data) {
+        console.log('🐝 Text feedback submitted successfully:', data);
+        feedbackWidget.updateState('thankyou');
+        setTimeout(function() {
+          feedbackWidget.updateState('collapsed');
+          // Clear the input
+          var input = document.getElementById('tb-glass-input');
+          if (input) input.value = '';
+        }, 2000);
+      })
+      .catch(function(err) {
+        console.error('🐝 Error submitting text feedback:', err);
+        feedbackWidget.updateState('collapsed');
+        alert('Failed to submit feedback. Please try again.');
+      });
     },
     
     startRecording: function() {

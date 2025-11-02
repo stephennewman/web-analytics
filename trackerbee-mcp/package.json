@@ -1,7 +1,7 @@
 {
-  "name": "trackerbee-mcp",
+  "name": "trackerbeez-mcp",
   "version": "1.0.0",
-  "description": "MCP server for Trackerbee roadmap integration with Cursor",
+  "description": "MCP server for Trackerbeez roadmap integration with Cursor",
   "type": "module",
   "main": "build/index.js",
   "scripts": {
