@@ -606,8 +606,26 @@
     isHidden: false,
     excludedPaths: [],
     
-    init: function() {
-      console.log('🐝 Feedback widget initializing...');
+    init: function(options) {
+      console.log('🐝 Feedback widget initializing...', options);
+      
+      // Allow custom options for demo pages
+      if (options) {
+        if (options.clientId) {
+          clientId = options.clientId;
+          console.log('🐝 Using custom clientId:', clientId);
+        }
+        if (options.widgetStyle) {
+          this.widgetStyle = options.widgetStyle;
+          console.log('🐝 Using custom widgetStyle:', options.widgetStyle);
+          // For demo pages, skip the API check and create widget immediately
+          if (options.clientId && options.clientId.startsWith('demo-')) {
+            console.log('🐝 Demo mode detected, creating widget immediately');
+            this.createWidget();
+            return;
+          }
+        }
+      }
       
       // Check if widget was manually hidden by user
       var hiddenPref = localStorage.getItem('tb_widget_hidden');
@@ -1260,6 +1278,9 @@
       }
     }
   };
+
+  // Expose widget globally for demo pages and custom initialization
+  window.feedbackWidget = feedbackWidget;
 
   // Initialize widget check after page load
   if (document.readyState === 'loading') {
