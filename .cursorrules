@@ -1,0 +1,10 @@
+# Trackerbee Auto-Check
+When starting a new conversation, automatically check for new Trackerbee tickets:
+- Call @trackerbee get_recent_tickets {"hours_ago": 4}
+- If new tickets exist, summarize them briefly
+- Highlight any high-priority tickets
+
+# Workflow Integration
+- Before implementing features, suggest checking @trackerbee for related feedback
+- After shipping features, remind to move tickets to "shipped" status
+

@@ -5,7 +5,10 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "notifier": "node trackerbee-notifier.js",
+    "notifier:bg": "node trackerbee-notifier.js > /dev/null 2>&1 &",
+    "notifier:stop": "pkill -f trackerbee-notifier"
   },
   "dependencies": {
     "@hello-pangea/dnd": "^18.0.1",
