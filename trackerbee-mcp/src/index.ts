@@ -166,6 +166,41 @@ async function searchTickets(keyword: string, clientId?: string) {
   return data as Ticket[];
 }
 
+// Tool: Update ticket status
+async function updateTicketStatus(ticketId: string, status: string) {
+  const { data, error } = await supabase
+    .from('tickets')
+    .update({ 
+      status, 
+      updated_at: new Date().toISOString() 
+    })
+    .eq('id', ticketId)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+// Tool: Mark ticket as shipped
+async function markShipped(ticketId: string, notes?: string) {
+  const updates: any = {
+    status: 'shipped',
+    updated_at: new Date().toISOString()
+  };
+
+  // Could add a notes field in future
+  const { data, error } = await supabase
+    .from('tickets')
+    .update(updates)
+    .eq('id', ticketId)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
 // Register tools
 server.setRequestHandler(ListToolsRequestSchema, async () => ({
   tools: [
@@ -251,6 +286,43 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
         },
         required: ['keyword']
       }
+    },
+    {
+      name: 'update_ticket_status',
+      description: 'Update a ticket\'s status (move between columns: new, planned, building, shipped).',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          ticket_id: {
+            type: 'string',
+            description: 'The ID of the ticket to update'
+          },
+          status: {
+            type: 'string',
+            enum: ['new', 'planned', 'building', 'shipped'],
+            description: 'New status for the ticket'
+          }
+        },
+        required: ['ticket_id', 'status']
+      }
+    },
+    {
+      name: 'mark_shipped',
+      description: 'Mark a ticket as shipped (moves to Shipped column). Use this when a feature is deployed.',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          ticket_id: {
+            type: 'string',
+            description: 'The ID of the ticket to mark as shipped'
+          },
+          notes: {
+            type: 'string',
+            description: 'Optional: Deployment notes or release info'
+          }
+        },
+        required: ['ticket_id']
+      }
     }
   ]
 }));
@@ -331,6 +403,39 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             {
               type: 'text',
               text: JSON.stringify(tickets, null, 2)
+            }
+          ]
+        };
+      }
+
+      case 'update_ticket_status': {
+        const ticketId = args?.ticket_id as string;
+        const status = args?.status as string;
+        if (!ticketId || !status) {
+          throw new McpError(ErrorCode.InvalidParams, 'ticket_id and status are required');
+        }
+        const ticket = await updateTicketStatus(ticketId, status);
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `✅ Ticket updated!\n\n${JSON.stringify(ticket, null, 2)}`
+            }
+          ]
+        };
+      }
+
+      case 'mark_shipped': {
+        const ticketId = args?.ticket_id as string;
+        if (!ticketId) {
+          throw new McpError(ErrorCode.InvalidParams, 'ticket_id is required');
+        }
+        const ticket = await markShipped(ticketId, args?.notes as string);
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `🚀 Ticket marked as shipped!\n\n${JSON.stringify(ticket, null, 2)}`
             }
           ]
         };
