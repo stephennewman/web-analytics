@@ -166,6 +166,26 @@ async function searchTickets(keyword: string, clientId?: string) {
   return data as Ticket[];
 }
 
+// Tool: Get recent tickets (created in last X hours)
+async function getRecentTickets(hoursAgo: number = 24, clientId?: string) {
+  const since = new Date();
+  since.setHours(since.getHours() - hoursAgo);
+  
+  let query = supabase
+    .from('tickets')
+    .select('*')
+    .gte('created_at', since.toISOString())
+    .order('created_at', { ascending: false });
+
+  if (clientId) {
+    query = query.eq('client_id', clientId);
+  }
+
+  const { data, error } = await query;
+  if (error) throw error;
+  return data as Ticket[];
+}
+
 // Tool: Update ticket status
 async function updateTicketStatus(ticketId: string, status: string) {
   const { data, error } = await supabase
@@ -288,6 +308,24 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
       }
     },
     {
+      name: 'get_recent_tickets',
+      description: 'Get tickets created within the last X hours. Perfect for checking "what\'s new" since you last checked.',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          hours_ago: {
+            type: 'number',
+            description: 'How many hours back to look (default: 24). E.g., 1 = last hour, 24 = last day, 168 = last week',
+            default: 24
+          },
+          client_id: {
+            type: 'string',
+            description: 'Optional: Filter by specific client/site ID'
+          }
+        }
+      }
+    },
+    {
       name: 'update_ticket_status',
       description: 'Update a ticket\'s status (move between columns: new, planned, building, shipped).',
       inputSchema: {
@@ -403,6 +441,20 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             {
               type: 'text',
               text: JSON.stringify(tickets, null, 2)
+            }
+          ]
+        };
+      }
+
+      case 'get_recent_tickets': {
+        const hoursAgo = (args?.hours_ago as number) || 24;
+        const tickets = await getRecentTickets(hoursAgo, args?.client_id as string);
+        const summary = `Found ${tickets.length} ticket(s) created in the last ${hoursAgo} hour(s)`;
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `${summary}\n\n${JSON.stringify(tickets, null, 2)}`
             }
           ]
         };

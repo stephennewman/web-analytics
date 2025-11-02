@@ -117,6 +117,26 @@ Search tickets by keyword.
 @trackerbee search_tickets {"keyword": "mobile"}
 ```
 
+### `get_recent_tickets`
+Get tickets created within the last X hours. Perfect for checking what's new!
+
+**Usage:**
+```
+@trackerbee get_recent_tickets
+```
+
+**With custom time range:**
+```
+@trackerbee get_recent_tickets {"hours_ago": 1}  // Last hour
+@trackerbee get_recent_tickets {"hours_ago": 168}  // Last week
+```
+
+**Pro Tip:** Ask Cursor to check for you regularly:
+```
+You: @trackerbee what tickets were created in the last hour?
+(internally calls get_recent_tickets with hours_ago: 1)
+```
+
 ## 💡 Example Workflows
 
 ### Morning Planning
@@ -134,6 +154,15 @@ You: @cursor implement this feature using the feedback above
 ```
 You: @trackerbee what's in building?
 (shows all active tickets)
+```
+
+### Check What's New
+```
+You: @trackerbee what's new since yesterday?
+(internally calls get_recent_tickets with hours_ago: 24)
+
+You: @trackerbee any new tickets in the last hour?
+(shows tickets created in last hour)
 ```
 
 ### Find Related Work
