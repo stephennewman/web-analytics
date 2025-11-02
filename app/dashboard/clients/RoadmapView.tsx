@@ -138,10 +138,14 @@ export default function RoadmapView({ client }: RoadmapViewProps) {
   };
 
   const handleDragEnd = async (result: DropResult) => {
+    console.log('🎯 Drag ended:', result);
     const { destination, source, draggableId } = result;
 
     // Dropped outside a valid droppable
-    if (!destination) return;
+    if (!destination) {
+      console.log('❌ No destination');
+      return;
+    }
 
     // Dropped in same position
     if (destination.droppableId === source.droppableId && destination.index === source.index) {
@@ -426,7 +430,7 @@ export default function RoadmapView({ client }: RoadmapViewProps) {
       </div>
 
       {/* Kanban Board */}
-      <DragDropContext onDragEnd={handleDragEnd}>
+      <DragDropContext onDragEnd={handleDragEnd} onDragStart={(start) => console.log('🎬 Drag started:', start)}>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {statusColumns.map((column) => {
             const columnTickets = tickets.filter(t => t.status === column.id);
@@ -490,7 +494,11 @@ export default function RoadmapView({ client }: RoadmapViewProps) {
                                 
                                 <div 
                                   className="flex items-start justify-between mb-2 pl-4"
-                                  onClick={() => viewTicketDetails(ticket.id)}
+                                  onClick={(e) => {
+                                    if (!snapshot.isDragging) {
+                                      viewTicketDetails(ticket.id);
+                                    }
+                                  }}
                                 >
                                   <h4 className="font-semibold text-sm text-gray-900 flex-1">
                                     {ticket.title}
@@ -523,7 +531,11 @@ export default function RoadmapView({ client }: RoadmapViewProps) {
                                 {ticket.description && (
                                   <p 
                                     className="text-xs text-gray-600 mb-3 line-clamp-2 pl-4"
-                                    onClick={() => viewTicketDetails(ticket.id)}
+                                    onClick={(e) => {
+                                      if (!snapshot.isDragging) {
+                                        viewTicketDetails(ticket.id);
+                                      }
+                                    }}
                                   >
                                     {ticket.description}
                                   </p>
