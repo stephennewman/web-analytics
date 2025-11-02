@@ -737,5 +737,169 @@
   } else {
     feedbackWidget.init();
   }
+
+  // ========================
+  // SESSION RECORDING (rrweb)
+  // ========================
+  var sessionRecorder = {
+    stopFn: null,
+    events: [],
+    recordingSessionId: null,
+    recordingStarted: null,
+    batchTimer: null,
+    isRecording: false,
+    
+    init: function() {
+      console.log('🎬 Session recorder init called');
+      
+      // Check if session recording is enabled for this client
+      fetch(apiEndpoint.replace('/track', '/sessions/enabled?clientId=' + clientId))
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+          if (!data.enabled) {
+            console.log('🎬 Session recording is disabled for this site');
+            return;
+          }
+          
+          console.log('🎬 Session recording is enabled - loading rrweb');
+          
+          // Load rrweb from CDN
+          var script = document.createElement('script');
+          script.src = 'https://cdn.jsdelivr.net/npm/rrweb@latest/dist/rrweb.min.js';
+          console.log('🎬 Loading rrweb from CDN:', script.src);
+          script.onload = function() {
+            console.log('🎬 rrweb loaded successfully');
+            sessionRecorder.startRecording();
+          };
+          script.onerror = function(err) {
+            console.error('🎬 Session recording unavailable - rrweb failed to load:', err);
+          };
+          document.head.appendChild(script);
+        })
+        .catch(function(err) {
+          console.log('🎬 Session recording check failed:', err);
+        });
+    },
+    
+    startRecording: function() {
+      if (!window.rrweb || this.isRecording) return;
+      
+      // Use the same session ID for continuity across page loads
+      this.recordingSessionId = sessionId;
+      this.recordingStarted = Date.now();
+      this.events = [];
+      this.isRecording = true;
+      
+      // Start recording with privacy controls
+      this.stopFn = window.rrweb.record({
+        emit: function(event) {
+          sessionRecorder.events.push(event);
+          
+          // Send batch every 5 seconds or 50 events
+          if (sessionRecorder.events.length >= 50) {
+            sessionRecorder.sendBatch();
+          }
+        },
+        
+        // Privacy settings - auto-mask sensitive data
+        maskAllInputs: true,
+        maskInputOptions: {
+          password: true,
+          email: true,
+          tel: true,
+          text: false,
+        },
+        maskTextSelector: '[data-sensitive], .sensitive',
+        blockClass: 'rr-block',
+        blockSelector: '[data-recording-ignore]',
+        ignoreClass: 'rr-ignore',
+        
+        // Capture settings
+        checkoutEveryNms: 5 * 60 * 1000, // Full snapshot every 5 mins
+        checkoutEveryNth: 200,
+        
+        // Sampling
+        mousemoveWait: 50,
+        
+        // Privacy: don't record on sensitive pages
+        recordCanvas: false,
+        collectFonts: false,
+      });
+      
+      // Send batch every 5 seconds
+      this.batchTimer = setInterval(function() {
+        if (sessionRecorder.events.length > 0) {
+          sessionRecorder.sendBatch();
+        }
+      }, 5000);
+      
+      console.log('Session recording started');
+    },
+    
+    sendBatch: function() {
+      if (this.events.length === 0) return;
+      
+      var batch = this.events.splice(0, this.events.length);
+      var duration = Date.now() - this.recordingStarted;
+      
+      fetch(apiEndpoint.replace('/track', '/sessions/record'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          clientId: clientId,
+          sessionId: this.recordingSessionId,
+          visitorId: sessionId,
+          url: window.location.href,
+          pageTitle: document.title,
+          events: batch,
+          durationMs: duration,
+          viewport: {
+            width: window.innerWidth,
+            height: window.innerHeight
+          },
+          deviceType: window.innerWidth < 768 ? 'mobile' : window.innerWidth < 1024 ? 'tablet' : 'desktop',
+        }),
+        mode: 'cors',
+        credentials: 'omit'
+      }).then(function(res) {
+        if (!res.ok) {
+          console.log('Session recording batch failed:', res.status);
+        }
+      }).catch(function(err) {
+        console.log('Session recording error:', err);
+      });
+    },
+    
+    stop: function() {
+      if (this.stopFn) {
+        this.stopFn();
+        this.stopFn = null;
+      }
+      if (this.batchTimer) {
+        clearInterval(this.batchTimer);
+      }
+      // Send final batch
+      this.sendBatch();
+      this.isRecording = false;
+    }
+  };
+  
+  // Start recording on page load
+  console.log('🎬 Initializing session recorder...');
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() { 
+      console.log('🎬 DOMContentLoaded - starting recorder');
+      sessionRecorder.init(); 
+    });
+  } else {
+    console.log('🎬 Document ready - starting recorder immediately');
+    sessionRecorder.init();
+  }
+  
+  // Stop recording and send final batch on page exit
+  window.addEventListener('beforeunload', function() {
+    sessionRecorder.stop();
+  });
+  
 })();
 

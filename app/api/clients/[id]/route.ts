@@ -17,7 +17,7 @@ export async function PATCH(
     }
 
     const body = await request.json();
-    const { name, domain, url_filters, feedback_enabled, feedback_widget_style } = body;
+    const { name, domain, url_filters, feedback_enabled, feedback_widget_style, session_recording_enabled } = body;
 
     if (!name && name !== undefined) {
       return NextResponse.json({ error: 'Site name is required' }, { status: 400 });
@@ -51,6 +51,10 @@ export async function PATCH(
     
     if (feedback_widget_style !== undefined) {
       updateData.feedback_widget_style = feedback_widget_style;
+    }
+    
+    if (session_recording_enabled !== undefined) {
+      updateData.session_recording_enabled = session_recording_enabled;
     }
 
     const { data: updatedClient, error } = await supabase

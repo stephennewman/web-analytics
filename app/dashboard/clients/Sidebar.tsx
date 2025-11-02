@@ -129,6 +129,17 @@ export default function Sidebar({ email, activeView, onViewChange, clientId }: S
           Roadmap
         </button>
         <button
+          onClick={() => onViewChange('sessions')}
+          className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold transition-all cursor-pointer ${
+            activeView === 'sessions'
+              ? 'bg-yellow-50 text-yellow-900 border-2 border-yellow-400 shadow-[3px_3px_0px_rgba(234,179,8,0.3)] hover:-translate-y-0.5'
+              : 'text-gray-700 hover:bg-gray-100 border-2 border-transparent hover:border-gray-200'
+          }`}
+        >
+          <span className="text-lg">🎬</span>
+          Sessions
+        </button>
+        <button
           onClick={() => onViewChange('settings')}
           className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold transition-all cursor-pointer ${
             activeView === 'settings'

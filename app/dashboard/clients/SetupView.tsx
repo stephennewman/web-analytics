@@ -15,6 +15,7 @@ import SessionDetailPanel from './SessionDetailPanel';
 import SlackSettings from './SlackSettings';
 import FeedbackView from './FeedbackView';
 import RoadmapView from './RoadmapView';
+import SessionsView from './SessionsView';
 import AllSitesDashboard from './AllSitesDashboard';
 
 interface Client {
@@ -23,6 +24,7 @@ interface Client {
   domain: string;
   feedback_enabled?: boolean;
   feedback_widget_style?: string;
+  session_recording_enabled?: boolean;
 }
 
 interface Stats {
@@ -320,6 +322,11 @@ export default function SetupView({
           <RoadmapView client={client} />
         );
 
+      case 'sessions':
+        return (
+          <SessionsView client={client} />
+        );
+
       case 'settings':
         return (
           <div className="max-w-4xl space-y-6">
@@ -496,6 +503,51 @@ export default function SetupView({
                     </div>
                   </>
                 )}
+              </div>
+            )}
+
+            {/* Session Recording Toggle */}
+            {client.id !== 'all' && (
+              <div className="bg-white rounded-lg border border-gray-200 p-6">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">🎬 Session Recording</h3>
+                    <p className="text-sm text-gray-600 mb-4">
+                      Record visitor sessions to replay mouse movements, clicks, and scrolls. Helps you understand user behavior and identify UX issues. All sensitive inputs are automatically masked.
+                    </p>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer ml-4">
+                    <input
+                      type="checkbox"
+                      checked={client.session_recording_enabled || false}
+                      onChange={async (e) => {
+                        const enabled = e.target.checked;
+                        const response = await fetch(`/api/clients/${client.id}`, {
+                          method: 'PATCH',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ session_recording_enabled: enabled })
+                        });
+                        if (response.ok) {
+                          window.location.reload();
+                        }
+                      }}
+                      className="sr-only peer"
+                    />
+                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                  </label>
+                </div>
+                {client.session_recording_enabled && (
+                  <div className="mt-4 p-3 bg-purple-50 rounded-lg border border-purple-200">
+                    <p className="text-sm text-purple-800">
+                      ✅ Session recording is active. Visitor sessions are being recorded and can be replayed in the Sessions tab.
+                    </p>
+                  </div>
+                )}
+                <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                  <p className="text-sm text-blue-800">
+                    <strong>🔒 Privacy:</strong> Passwords, emails, and credit card fields are automatically masked. Sessions auto-delete after 30 days.
+                  </p>
+                </div>
               </div>
             )}
 

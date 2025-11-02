@@ -19,7 +19,10 @@ export default function RootLayout({
         
         {/* Trackerbee Analytics - Dogfooding our own product! 🐝 */}
         <Script 
-          src="https://web-analytics-flax.vercel.app/track.js?id=82c08676-46d2-4c60-aa70-7256e80e7a28"
+          src={process.env.NODE_ENV === 'development' 
+            ? `/track.js?id=82c08676-46d2-4c60-aa70-7256e80e7a28`
+            : `https://web-analytics-flax.vercel.app/track.js?id=82c08676-46d2-4c60-aa70-7256e80e7a28`
+          }
           strategy="afterInteractive"
         />
       </body>
