@@ -760,7 +760,7 @@
       }
       
       // Add handlers for text input (glass-bar widget)
-      if (this.widgetStyle === 'glass-bar' && state === 'collapsed') {
+      if (this.widgetStyle === 'glass-bar' && this.state === 'collapsed') {
         var self = this;
         
         // Use a shorter timeout and retry if needed
