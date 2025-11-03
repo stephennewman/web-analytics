@@ -605,15 +605,22 @@
     recentQuotes: [],
     isHidden: false,
     excludedPaths: [],
+    feedbackClientId: null, // Separate from main analytics clientId
     
     init: function(options) {
       console.log('🐝 Feedback widget initializing...', options);
       
+      // Use global clientId as default for widget
+      if (!this.feedbackClientId) {
+        this.feedbackClientId = clientId;
+      }
+      
       // Allow custom options for demo pages
       if (options) {
         if (options.clientId) {
-          clientId = options.clientId;
-          console.log('🐝 Using custom clientId:', clientId);
+          // Store in widget-specific property, don't override global clientId
+          this.feedbackClientId = options.clientId;
+          console.log('🐝 Using custom feedbackClientId:', this.feedbackClientId);
         }
         if (options.widgetStyle) {
           this.widgetStyle = options.widgetStyle;
@@ -634,7 +641,7 @@
         feedbackWidget.isHidden = true;
       }
       
-      var feedbackUrl = apiEndpoint.replace('/track', '/feedback/enabled?clientId=' + clientId);
+      var feedbackUrl = apiEndpoint.replace('/track', '/feedback/enabled?clientId=' + this.feedbackClientId);
       console.log('🐝 Checking feedback status:', feedbackUrl);
       
       // Check if enabled for this client and get style + recent quotes + excluded paths
@@ -1128,7 +1135,7 @@
       
       // Create a text feedback submission (no audio)
       var payload = {
-        clientId: clientId,
+        clientId: this.feedbackClientId,
         sessionId: sessionId,
         type: 'text',
         content: text.trim(),
@@ -1240,7 +1247,7 @@
       
       var formData = new FormData();
       formData.append('audio', this.currentBlob, 'feedback.webm');
-      formData.append('clientId', clientId);
+      formData.append('clientId', this.feedbackClientId);
       formData.append('sessionId', sessionId);
       formData.append('url', window.location.href);
       formData.append('duration', Math.floor((Date.now() - this.recordingStartTime) / 1000).toString());
