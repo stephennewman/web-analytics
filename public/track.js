@@ -628,17 +628,20 @@
           // For demo pages, skip the API check and create widget immediately
           if (options.clientId && options.clientId.startsWith('demo-')) {
             console.log('🐝 Demo mode detected, creating widget immediately');
+            this.isHidden = false; // Force show for demo pages
             this.createWidget();
             return;
           }
         }
       }
       
-      // Check if widget was manually hidden by user
-      var hiddenPref = localStorage.getItem('tb_widget_hidden');
-      if (hiddenPref === 'true') {
-        console.log('🐝 Widget was hidden by user preference');
-        feedbackWidget.isHidden = true;
+      // Check if widget was manually hidden by user (but not for demo pages)
+      if (!options || !options.clientId || !options.clientId.startsWith('demo-')) {
+        var hiddenPref = localStorage.getItem('tb_widget_hidden');
+        if (hiddenPref === 'true') {
+          console.log('🐝 Widget was hidden by user preference');
+          feedbackWidget.isHidden = true;
+        }
       }
       
       var feedbackUrl = apiEndpoint.replace('/track', '/feedback/enabled?clientId=' + this.feedbackClientId);
@@ -1293,20 +1296,24 @@
   // Check if there's a pre-configured setup (for demo pages)
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', function() { 
+      console.log('🐝 Checking for pre-configured settings...', window.feedbackWidgetConfig);
       // Check for window.feedbackWidgetConfig set by demo pages
       if (window.feedbackWidgetConfig) {
         console.log('🐝 Using pre-configured widget settings:', window.feedbackWidgetConfig);
         feedbackWidget.init(window.feedbackWidgetConfig);
       } else {
+        console.log('🐝 No pre-config found, using default init');
         feedbackWidget.init(); 
       }
     });
   } else {
+    console.log('🐝 Checking for pre-configured settings (doc ready)...', window.feedbackWidgetConfig);
     // Check for window.feedbackWidgetConfig set by demo pages
     if (window.feedbackWidgetConfig) {
       console.log('🐝 Using pre-configured widget settings:', window.feedbackWidgetConfig);
       feedbackWidget.init(window.feedbackWidgetConfig);
     } else {
+      console.log('🐝 No pre-config found, using default init');
       feedbackWidget.init();
     }
   }
