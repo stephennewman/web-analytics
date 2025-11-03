@@ -6,19 +6,19 @@ import Link from 'next/link';
 export default function HoneyBeeDemo() {
   return (
     <>
+      <script
+        dangerouslySetInnerHTML={{
+          __html: `
+            window.feedbackWidgetConfig = {
+              clientId: 'demo-honeybee',
+              widgetStyle: 'honey-bee'
+            };
+          `
+        }}
+      />
       <Script
         src="/track.js"
         strategy="afterInteractive"
-        onLoad={() => {
-          // @ts-ignore
-          if (window.feedbackWidget) {
-            // @ts-ignore
-            window.feedbackWidget.init({
-              clientId: 'demo-honeybee',
-              widgetStyle: 'honey-bee'
-            });
-          }
-        }}
       />
 
       <div className="min-h-screen bg-amber-50">

@@ -6,19 +6,19 @@ import Link from 'next/link';
 export default function B2BDemo() {
   return (
     <>
+      <script
+        dangerouslySetInnerHTML={{
+          __html: `
+            window.feedbackWidgetConfig = {
+              clientId: 'demo-b2b',
+              widgetStyle: 'b2b-saas'
+            };
+          `
+        }}
+      />
       <Script
         src="/track.js"
         strategy="afterInteractive"
-        onLoad={() => {
-          // @ts-ignore
-          if (window.feedbackWidget) {
-            // @ts-ignore
-            window.feedbackWidget.init({
-              clientId: 'demo-b2b',
-              widgetStyle: 'b2b-saas'
-            });
-          }
-        }}
       />
 
       <div className="min-h-screen bg-slate-50">

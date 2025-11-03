@@ -6,19 +6,19 @@ import Link from 'next/link';
 export default function GlassBarDemo() {
   return (
     <>
+      <script
+        dangerouslySetInnerHTML={{
+          __html: `
+            window.feedbackWidgetConfig = {
+              clientId: 'demo-glassbar',
+              widgetStyle: 'glass-bar'
+            };
+          `
+        }}
+      />
       <Script
         src="/track.js"
         strategy="afterInteractive"
-        onLoad={() => {
-          // @ts-ignore
-          if (window.feedbackWidget) {
-            // @ts-ignore
-            window.feedbackWidget.init({
-              clientId: 'demo-glassbar',
-              widgetStyle: 'glass-bar'
-            });
-          }
-        }}
       />
 
       <div className="min-h-screen bg-white">

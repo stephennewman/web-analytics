@@ -6,19 +6,19 @@ import Link from 'next/link';
 export default function TickerDemo() {
   return (
     <>
+      <script
+        dangerouslySetInnerHTML={{
+          __html: `
+            window.feedbackWidgetConfig = {
+              clientId: 'demo-ticker',
+              widgetStyle: 'ticker'
+            };
+          `
+        }}
+      />
       <Script
         src="/track.js"
         strategy="afterInteractive"
-        onLoad={() => {
-          // @ts-ignore
-          if (window.feedbackWidget) {
-            // @ts-ignore
-            window.feedbackWidget.init({
-              clientId: 'demo-ticker',
-              widgetStyle: 'ticker'
-            });
-          }
-        }}
       />
 
       <div className="min-h-screen bg-white">

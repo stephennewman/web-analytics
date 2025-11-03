@@ -7,19 +7,19 @@ import { BeeSwarm } from '@/components/BeeSwarm';
 export default function GlasmorphicDemo() {
   return (
     <>
+      <script
+        dangerouslySetInnerHTML={{
+          __html: `
+            window.feedbackWidgetConfig = {
+              clientId: 'demo-glassmorphic',
+              widgetStyle: 'glassmorphic'
+            };
+          `
+        }}
+      />
       <Script
         src="/track.js"
         strategy="afterInteractive"
-        onLoad={() => {
-          // @ts-ignore
-          if (window.feedbackWidget) {
-            // @ts-ignore
-            window.feedbackWidget.init({
-              clientId: 'demo-glassmorphic',
-              widgetStyle: 'glassmorphic'
-            });
-          }
-        }}
       />
 
       <div className="min-h-screen bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500">

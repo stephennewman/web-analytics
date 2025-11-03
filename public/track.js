@@ -1283,10 +1283,25 @@
   window.feedbackWidget = feedbackWidget;
 
   // Initialize widget check after page load
+  // Check if there's a pre-configured setup (for demo pages)
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function() { feedbackWidget.init(); });
+    document.addEventListener('DOMContentLoaded', function() { 
+      // Check for window.feedbackWidgetConfig set by demo pages
+      if (window.feedbackWidgetConfig) {
+        console.log('🐝 Using pre-configured widget settings:', window.feedbackWidgetConfig);
+        feedbackWidget.init(window.feedbackWidgetConfig);
+      } else {
+        feedbackWidget.init(); 
+      }
+    });
   } else {
-    feedbackWidget.init();
+    // Check for window.feedbackWidgetConfig set by demo pages
+    if (window.feedbackWidgetConfig) {
+      console.log('🐝 Using pre-configured widget settings:', window.feedbackWidgetConfig);
+      feedbackWidget.init(window.feedbackWidgetConfig);
+    } else {
+      feedbackWidget.init();
+    }
   }
 
   // ========================
