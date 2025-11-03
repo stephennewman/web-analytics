@@ -1,3 +1,5 @@
+'use client';
+
 import Link from 'next/link';
 import { getButtonClass } from '@/lib/design-system';
 import { BeeSwarm } from '@/components/BeeSwarm';
