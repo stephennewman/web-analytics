@@ -4,15 +4,44 @@ import { BeeSwarm } from '@/components/BeeSwarm';
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-black text-white overflow-hidden">
+    <div className="min-h-screen bg-black text-white overflow-hidden relative">
+      {/* Animated gradient background */}
+      <div className="fixed inset-0 pointer-events-none">
+        <div className="absolute top-0 left-0 w-[800px] h-[800px] bg-gradient-to-br from-amber-900/20 via-yellow-900/10 to-transparent rounded-full blur-3xl animate-float"></div>
+        <div className="absolute top-1/4 right-0 w-[600px] h-[600px] bg-gradient-to-bl from-orange-900/15 via-amber-800/10 to-transparent rounded-full blur-3xl animate-float-delayed"></div>
+        <div className="absolute bottom-0 left-1/3 w-[700px] h-[700px] bg-gradient-to-tr from-yellow-900/20 via-amber-900/10 to-transparent rounded-full blur-3xl animate-float-slow"></div>
+      </div>
+
       {/* Hero Section */}
       <div className="relative">
-        {/* Animated honey drip background */}
-        <div className="absolute inset-0 opacity-10 pointer-events-none">
-          <div className="absolute top-0 left-1/4 w-32 h-32 bg-yellow-500 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute top-20 right-1/4 w-40 h-40 bg-amber-500 rounded-full blur-3xl animate-pulse" style={{animationDelay: '1s'}}></div>
-          <div className="absolute top-60 left-1/2 w-36 h-36 bg-yellow-400 rounded-full blur-3xl animate-pulse" style={{animationDelay: '2s'}}></div>
-        </div>
+        <style jsx>{`
+          @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            25% { transform: translate(50px, -30px) scale(1.05); }
+            50% { transform: translate(-30px, 50px) scale(0.95); }
+            75% { transform: translate(40px, 20px) scale(1.02); }
+          }
+          @keyframes float-delayed {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            25% { transform: translate(-40px, 40px) scale(1.05); }
+            50% { transform: translate(50px, -20px) scale(0.95); }
+            75% { transform: translate(-30px, -40px) scale(1.02); }
+          }
+          @keyframes float-slow {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(-50px, -40px) scale(1.08); }
+            66% { transform: translate(40px, 30px) scale(0.92); }
+          }
+          .animate-float {
+            animation: float 20s ease-in-out infinite;
+          }
+          .animate-float-delayed {
+            animation: float-delayed 25s ease-in-out infinite;
+          }
+          .animate-float-slow {
+            animation: float-slow 30s ease-in-out infinite;
+          }
+        `}</style>
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-20">
           {/* Nav Bar */}
@@ -140,7 +169,10 @@ export default function Home() {
       </div>
 
       {/* How It Works */}
-      <div className="py-20 bg-gradient-to-b from-black to-zinc-950">
+      <div className="py-20 relative bg-gradient-to-b from-black via-zinc-950 to-black overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-20 right-10 w-[500px] h-[500px] bg-gradient-to-br from-amber-950/30 via-yellow-950/15 to-transparent rounded-full blur-3xl"></div>
+        </div>
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl sm:text-5xl font-bold mb-6">
@@ -243,7 +275,10 @@ export default function Home() {
       </div>
 
       {/* Pricing Teaser */}
-      <div className="py-20 bg-gradient-to-b from-black to-zinc-950">
+      <div className="py-20 relative bg-gradient-to-b from-zinc-950 via-black to-zinc-950 overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute bottom-0 left-20 w-[600px] h-[600px] bg-gradient-to-tr from-amber-950/25 via-yellow-950/10 to-transparent rounded-full blur-3xl"></div>
+        </div>
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-4xl sm:text-5xl font-bold mb-6">
             Pricing That Doesn't Sting 🐝
